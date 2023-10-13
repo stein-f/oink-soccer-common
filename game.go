@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	MinGameMinute = 1
-	MaxGameMinute = 110
+	MinGameMinute            = 1
+	MaxGameMinute            = 110
+	OutOfPositionScaleFactor = 0.85
 )
 
 type SelectedPlayer struct {
@@ -20,6 +21,27 @@ type SelectedPlayer struct {
 
 func (p SelectedPlayer) IsOutOfPosition() bool {
 	return p.SelectedPosition != p.Attributes.Position
+}
+
+func (p SelectedPlayer) GetControlScore() int {
+	if p.IsOutOfPosition() {
+		return int(float64(p.Attributes.GetControlScore()) * OutOfPositionScaleFactor)
+	}
+	return p.Attributes.GetControlScore()
+}
+
+func (p SelectedPlayer) GetAttackScore() int {
+	if p.IsOutOfPosition() {
+		return int(float64(p.Attributes.GetAttackScore()) * OutOfPositionScaleFactor)
+	}
+	return p.Attributes.GetAttackScore()
+}
+
+func (p SelectedPlayer) GetDefenseScore() int {
+	if p.IsOutOfPosition() {
+		return int(float64(p.Attributes.GetDefenseScore()) * OutOfPositionScaleFactor)
+	}
+	return p.Attributes.GetDefenseScore()
 }
 
 type GameLineup struct {
@@ -91,7 +113,7 @@ func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTe
 	}
 
 	scaledDefenseScore := ScalingFunction(CalculateTeamDefenseScore(defensiveTeamLineup.Players))
-	scaledAttackScore := ScalingFunction(attackPlayer.Attributes.GetAttackScore())
+	scaledAttackScore := ScalingFunction(attackPlayer.GetAttackScore())
 
 	goalChanceChoices := []weightedrand.Choice{
 		{Item: true, Weight: uint(scaledAttackScore)},

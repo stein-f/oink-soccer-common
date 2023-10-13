@@ -14,6 +14,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 		"low control midfielders has larger overall impact on team control": {
 			gotPlayers: []soccer.SelectedPlayer{
 				{
+					SelectedPosition: soccer.PlayerPositionGoalkeeper,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionGoalkeeper,
 						ControlRating: 80,
@@ -21,6 +22,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionDefense,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionDefense,
 						ControlRating: 80,
@@ -28,6 +30,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionMidfield,
 						ControlRating: 80,
@@ -35,6 +38,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionMidfield,
 						ControlRating: 50,
@@ -42,6 +46,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionAttack,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionAttack,
 						ControlRating: 80,
@@ -49,11 +54,12 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamControlScore: 60,
+			wantOverallTeamControlScore: 70,
 		},
 		"low control attackers has smaller overall impact on team control": {
 			gotPlayers: []soccer.SelectedPlayer{
 				{
+					SelectedPosition: soccer.PlayerPositionGoalkeeper,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionGoalkeeper,
 						ControlRating: 80,
@@ -61,6 +67,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionDefense,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionDefense,
 						ControlRating: 80,
@@ -68,6 +75,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionMidfield,
 						ControlRating: 80,
@@ -75,6 +83,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionMidfield,
 						ControlRating: 80,
@@ -82,6 +91,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionAttack,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionAttack,
 						ControlRating: 50,
@@ -94,6 +104,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 		"with max score": {
 			gotPlayers: []soccer.SelectedPlayer{
 				{
+					SelectedPosition: soccer.PlayerPositionGoalkeeper,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionGoalkeeper,
 						ControlRating: 100,
@@ -101,6 +112,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionDefense,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionDefense,
 						ControlRating: 100,
@@ -108,6 +120,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionMidfield,
 						ControlRating: 100,
@@ -115,6 +128,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionMidfield,
 						ControlRating: 100,
@@ -122,6 +136,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionAttack,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionAttack,
 						ControlRating: 100,
@@ -149,6 +164,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 		"high scoring defenders has larger overall impact on team defense": {
 			gotPlayers: []soccer.SelectedPlayer{
 				{
+					SelectedPosition: soccer.PlayerPositionGoalkeeper,
 					Attributes: soccer.PlayerAttributes{
 						Position:         soccer.PlayerPositionGoalkeeper,
 						GoalkeeperRating: 80,
@@ -156,6 +172,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionDefense,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionDefense,
 						DefenseRating: 100,
@@ -163,6 +180,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionMidfield,
 						DefenseRating: 80,
@@ -170,6 +188,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionMidfield,
 						DefenseRating: 80,
@@ -177,6 +196,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionAttack,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionAttack,
 						DefenseRating: 50,
@@ -189,6 +209,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 		"low scoring defenders has smaller overall impact on team defense": {
 			gotPlayers: []soccer.SelectedPlayer{
 				{
+					SelectedPosition: soccer.PlayerPositionGoalkeeper,
 					Attributes: soccer.PlayerAttributes{
 						Position:         soccer.PlayerPositionGoalkeeper,
 						GoalkeeperRating: 80,
@@ -196,6 +217,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionDefense,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionDefense,
 						DefenseRating: 50,
@@ -203,6 +225,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionMidfield,
 						DefenseRating: 80,
@@ -210,6 +233,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionMidfield,
 						DefenseRating: 80,
@@ -217,6 +241,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionAttack,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionAttack,
 						DefenseRating: 100,
@@ -229,6 +254,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 		"with max score": {
 			gotPlayers: []soccer.SelectedPlayer{
 				{
+					SelectedPosition: soccer.PlayerPositionGoalkeeper,
 					Attributes: soccer.PlayerAttributes{
 						Position:         soccer.PlayerPositionGoalkeeper,
 						GoalkeeperRating: 100,
@@ -236,6 +262,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionDefense,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionDefense,
 						DefenseRating: 100,
@@ -243,6 +270,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionMidfield,
 						DefenseRating: 100,
@@ -250,6 +278,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionMidfield,
 						DefenseRating: 100,
@@ -257,6 +286,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 				{
+					SelectedPosition: soccer.PlayerPositionAttack,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionAttack,
 						DefenseRating: 100,
