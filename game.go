@@ -8,8 +8,6 @@ import (
 )
 
 const (
-	MinEvents     = 4
-	MaxEvents     = 12
 	MinGameMinute = 1
 	MaxGameMinute = 110
 )
@@ -167,7 +165,10 @@ func DetermineTeamChances(
 	homeTeamPlayers []SelectedPlayer,
 	awayTeamPlayers []SelectedPlayer,
 ) ([]TeamType, error) {
-	eventCount := getEventCount()
+	eventCount, err := getEventCount()
+	if err != nil {
+		return nil, err
+	}
 
 	homeTeamControlScore := ScalingFunction(CalculateTeamControlScore(homeTeamPlayers))
 	awayTeamControlScore := ScalingFunction(CalculateTeamControlScore(awayTeamPlayers))
@@ -190,8 +191,12 @@ func DetermineTeamChances(
 	return teamChances, nil
 }
 
-func getEventCount() int {
-	return MinEvents + rand.Intn(MaxEvents-MinEvents)
+func getEventCount() (int, error) {
+	chooser, err := weightedrand.NewChooser(eventCountWeights...)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create event count chooser. %w", err)
+	}
+	return chooser.Pick().(int), nil
 }
 
 func getRandomMinutes(count int) []int {
@@ -234,4 +239,19 @@ func CreateGameStats(events []GameEvent) GameStats {
 		HomeTeamStats: homeTeamStats,
 		AwayTeamStats: awayTeamStats,
 	}
+}
+
+var eventCountWeights = []weightedrand.Choice{
+	{Item: 1, Weight: 1},
+	{Item: 2, Weight: 1},
+	{Item: 3, Weight: 2},
+	{Item: 4, Weight: 3},
+	{Item: 5, Weight: 5},
+	{Item: 6, Weight: 8},
+	{Item: 7, Weight: 8},
+	{Item: 8, Weight: 5},
+	{Item: 9, Weight: 3},
+	{Item: 10, Weight: 2},
+	{Item: 11, Weight: 1},
+	{Item: 12, Weight: 1},
 }

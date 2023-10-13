@@ -4,7 +4,7 @@ The purpose of this repository is to publish the algorithm used to determine the
 
 ## algorithm
 
-1. Choose the number of events (goal|miss) in the game. It is a random number between 4 and 12. In future this number might be determined using team attributes.
+1. Choose the number of events (goal|miss) in the game. It is a weighted random number between 1 and 12.
 2. Determine which team is the attacking and defensive team. It is a weighted random choice based on the team's `control score`.
 3. Determine which attacking player will have the team chance. It is a weighted random choice based on the player's position and control score. Attackers are more likely to get the chance than midfielders, who are more likely to get the chance than defenders.
 4. Determine the event outcome. It is a weighted random choice based on the player's `attack score`. The higher the attack score, the more likely the player is to score a goal. This is offset by the teams overall `defense score`.
