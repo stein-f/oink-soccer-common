@@ -156,6 +156,38 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 	}
 }
 
+func TestCalculateTeamControlScore_OutOfPositionPenalty(t *testing.T) {
+	constRating := 80
+	score := soccer.CalculateTeamControlScore([]soccer.SelectedPlayer{
+		createPlayer(constRating, constRating, soccer.PlayerPositionGoalkeeper, soccer.PlayerPositionGoalkeeper),
+		createPlayer(constRating, constRating, soccer.PlayerPositionDefense, soccer.PlayerPositionDefense),
+		createPlayer(constRating, constRating, soccer.PlayerPositionDefense, soccer.PlayerPositionDefense),
+		createPlayer(constRating, constRating, soccer.PlayerPositionMidfield, soccer.PlayerPositionMidfield),
+		createPlayer(constRating, constRating, soccer.PlayerPositionAttack, soccer.PlayerPositionAttack),
+	})
+	assert.Equal(t, constRating, score)
+
+	scoreWithOutOfPositionMidfielder := soccer.CalculateTeamControlScore([]soccer.SelectedPlayer{
+		createPlayer(constRating, constRating, soccer.PlayerPositionGoalkeeper, soccer.PlayerPositionGoalkeeper),
+		createPlayer(constRating, constRating, soccer.PlayerPositionDefense, soccer.PlayerPositionDefense),
+		createPlayer(constRating, constRating, soccer.PlayerPositionDefense, soccer.PlayerPositionDefense),
+		createPlayer(constRating, constRating, soccer.PlayerPositionMidfield, soccer.PlayerPositionAttack),
+		createPlayer(constRating, constRating, soccer.PlayerPositionAttack, soccer.PlayerPositionAttack),
+	})
+	assert.Equal(t, 72, scoreWithOutOfPositionMidfielder)
+}
+
+func createPlayer(control, speed int, position soccer.PlayerPosition, selectedPosition soccer.PlayerPosition) soccer.SelectedPlayer {
+	return soccer.SelectedPlayer{
+		SelectedPosition: selectedPosition,
+		Attributes: soccer.PlayerAttributes{
+			Position:      position,
+			ControlRating: control,
+			SpeedRating:   speed,
+		},
+	}
+}
+
 func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 	tests := map[string]struct {
 		gotPlayers                  []soccer.SelectedPlayer

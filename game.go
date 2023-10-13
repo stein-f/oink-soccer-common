@@ -96,10 +96,17 @@ func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, error) {
 
 func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTeamLineup GameLineup, minuteOfEvent int) (GameEvent, error) {
 	attackingTeamLineup := homeTeamLineup
+	attackBoost := getAttackBoost(homeTeamLineup)
+
 	defensiveTeamLineup := awayTeamLineup
+	defenseBoost := getDefenseBoost(awayTeamLineup)
+
 	if attackingTeamType == TeamTypeAway {
 		attackingTeamLineup = awayTeamLineup
+		attackBoost = getAttackBoost(awayTeamLineup)
+
 		defensiveTeamLineup = homeTeamLineup
+		defenseBoost = getDefenseBoost(homeTeamLineup)
 	}
 
 	positionOfAttackPlayer, err := determinePositionOfAttackingTeamChance(attackingTeamLineup)
@@ -112,8 +119,8 @@ func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTe
 		return GameEvent{}, err
 	}
 
-	scaledDefenseScore := ScalingFunction(CalculateTeamDefenseScore(defensiveTeamLineup.Players))
-	scaledAttackScore := ScalingFunction(attackPlayer.GetAttackScore())
+	scaledDefenseScore := ScalingFunction(applyBoost(defenseBoost, CalculateTeamDefenseScore(defensiveTeamLineup.Players)))
+	scaledAttackScore := ScalingFunction(applyBoost(attackBoost, attackPlayer.GetAttackScore()))
 
 	goalChanceChoices := []weightedrand.Choice{
 		{Item: true, Weight: uint(scaledAttackScore)},
@@ -144,6 +151,31 @@ func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTe
 		},
 		Minute: minuteOfEvent,
 	}, nil
+}
+
+func getAttackBoost(lineup GameLineup) float64 {
+	formationConfig := getFormationConfig(lineup.Team.Formation)
+	return formationConfig.AttackModifier
+}
+
+func getDefenseBoost(lineup GameLineup) float64 {
+	formationConfig := getFormationConfig(lineup.Team.Formation)
+	return formationConfig.DefenseModifier
+}
+
+func applyBoost(boost float64, score int) int {
+	return int(float64(score) * boost)
+}
+
+func getFormationConfig(formationType FormationType) FormationConfig {
+	switch formationType {
+	case FormationTypePyramid:
+		return ThePyramidFormation
+	case FormationTypeY:
+		return TheYFormation
+	default:
+		return TheDiamondFormation
+	}
 }
 
 // determines the position of the player that will have the chance to score a goal.

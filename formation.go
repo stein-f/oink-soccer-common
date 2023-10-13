@@ -4,7 +4,6 @@ type FormationConfig struct {
 	FormationType   FormationType
 	Slots           map[uint64]PlayerPosition
 	DefenseModifier float64
-	ControlModifier float64
 	AttackModifier  float64
 }
 
@@ -25,14 +24,13 @@ var TheYFormation = FormationConfig{
 		4: PlayerPositionAttack,
 		5: PlayerPositionAttack,
 	},
-	DefenseModifier: 0.8,
-	ControlModifier: 1,
-	AttackModifier:  1.2,
+	DefenseModifier: 0.9,
+	AttackModifier:  1.1,
 }
 
 // ThePyramidFormation (2-1-1) is a defensive formation
-// 20% defense boost
-// 20% attack penalty
+// 10% defense boost
+// 10% attack penalty
 //
 //	     5
 //		 4
@@ -47,15 +45,12 @@ var ThePyramidFormation = FormationConfig{
 		4: PlayerPositionMidfield,
 		5: PlayerPositionAttack,
 	},
-	DefenseModifier: 1.2,
-	ControlModifier: 1,
-	AttackModifier:  0.8,
+	DefenseModifier: 1.1,
+	AttackModifier:  0.9,
 }
 
 // TheDiamondFormation (2-1-1) is a defensive formation
-// 10% defense penalty
-// 20% control boost
-// 10% attack penalty
+// no modifiers
 //
 //	     5
 //		3 4
@@ -70,7 +65,6 @@ var TheDiamondFormation = FormationConfig{
 		4: PlayerPositionMidfield,
 		5: PlayerPositionAttack,
 	},
-	DefenseModifier: 0.9,
-	ControlModifier: 1.2,
-	AttackModifier:  0.9,
+	DefenseModifier: 1,
+	AttackModifier:  1,
 }
