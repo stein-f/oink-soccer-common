@@ -7,8 +7,10 @@ import (
 )
 
 func main() {
-	var homeWins, awayWins, draws int
-	for i := 0; i <= 200; i++ {
+	var homeWins, awayWins, draws, goals int
+	games := 500
+
+	for i := 0; i < games; i++ {
 		homeLineup := soccer.GameLineup{
 			Team: soccer.Team{
 				ID:         "1",
@@ -23,7 +25,7 @@ func main() {
 				CustomName: "Aston Villa",
 				Formation:  soccer.FormationTypeDiamond,
 			},
-			Players: testdata.StrongTeamPlayers,
+			Players: testdata.WeakTeamPlayers,
 		}
 
 		gameOutcome, err := soccer.RunGame(homeLineup, awayLineup)
@@ -41,8 +43,13 @@ func main() {
 		} else {
 			draws++
 		}
+		goals += gameStats.HomeTeamStats.Goals + gameStats.AwayTeamStats.Goals
 	}
+
+	goalsPerGame := float64(goals) / float64(games)
+
 	fmt.Printf("\nCoventry City wins: %d\n", homeWins)
 	fmt.Printf("Aston Villa wins: %d\n", awayWins)
 	fmt.Printf("Draws: %d\n", draws)
+	fmt.Printf("Goals/game: %f\n", goalsPerGame)
 }

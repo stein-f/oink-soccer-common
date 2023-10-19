@@ -49,6 +49,15 @@ type GameLineup struct {
 	Players []SelectedPlayer `json:"players"`
 }
 
+func (l GameLineup) FindPlayer(id string) (SelectedPlayer, bool) {
+	for _, player := range l.Players {
+		if player.ID == id {
+			return player, true
+		}
+	}
+	return SelectedPlayer{}, false
+}
+
 type GameEvent struct {
 	Type   GameEventType `json:"type"`
 	Event  any           `json:"event"` // GoalEvent, MissEvent
