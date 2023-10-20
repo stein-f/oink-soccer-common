@@ -15,6 +15,7 @@ const (
 
 type SelectedPlayer struct {
 	ID               string           `json:"id"`
+	Name             string           `json:"name"`
 	Attributes       PlayerAttributes `json:"attributes"`
 	SelectedPosition PlayerPosition   `json:"position"`
 }
