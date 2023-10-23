@@ -17,7 +17,7 @@ func main() {
 				CustomName: "Coventry City",
 				Formation:  soccer.FormationTypeDiamond,
 			},
-			Players: testdata.StrongTeamPlayers,
+			Players: testdata.WeakTeamPlayers,
 		}
 		awayLineup := soccer.GameLineup{
 			Team: soccer.Team{
@@ -25,7 +25,7 @@ func main() {
 				CustomName: "Aston Villa",
 				Formation:  soccer.FormationTypeDiamond,
 			},
-			Players: testdata.WeakTeamPlayers,
+			Players: testdata.StrongTeamPlayers,
 		}
 
 		gameOutcome, err := soccer.RunGame(homeLineup, awayLineup)
@@ -43,6 +43,10 @@ func main() {
 		} else {
 			draws++
 		}
+
+		fmt.Println(fmt.Sprintf("Coventry City scored %d goals from %d chances", gameStats.HomeTeamStats.Goals, gameStats.HomeTeamStats.Shots))
+		fmt.Println(fmt.Sprintf("Aston Villa scored %d goals from %d chances", gameStats.AwayTeamStats.Goals, gameStats.AwayTeamStats.Shots))
+
 		goals += gameStats.HomeTeamStats.Goals + gameStats.AwayTeamStats.Goals
 	}
 
