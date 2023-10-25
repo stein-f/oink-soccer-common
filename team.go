@@ -50,15 +50,15 @@ func getAverageControlScore(players []SelectedPlayer) int {
 //	midfield: 20%
 //	attack: 5%
 func CalculateTeamDefenseScore(players []SelectedPlayer) int {
-	scalingFactor := 1.8
+	scalingFactor := 1.5
 	// group players by position
 	var playersByPosition = make(map[PlayerPosition][]SelectedPlayer)
 	for _, player := range players {
-		playersByPosition[player.Attributes.Position] = append(playersByPosition[player.SelectedPosition], player)
+		playersByPosition[player.SelectedPosition] = append(playersByPosition[player.SelectedPosition], player)
 	}
 
 	// calculate the average control score for each position
-	var averageControlScoresByPosition = make(map[PlayerPosition]int)
+	averageControlScoresByPosition := make(map[PlayerPosition]int)
 	for position, players := range playersByPosition {
 		averageControlScoresByPosition[position] = getAverageDefenseScore(players)
 	}

@@ -21,6 +21,9 @@ type SelectedPlayer struct {
 }
 
 func (p SelectedPlayer) IsOutOfPosition() bool {
+	if p.Attributes.Position == PlayerPositionAny {
+		return false
+	}
 	return p.SelectedPosition != p.Attributes.Position
 }
 

@@ -236,7 +236,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 154,
+			wantOverallTeamDefenseScore: 129,
 		},
 		"low scoring defenders has smaller overall impact on team defense": {
 			gotPlayers: []soccer.SelectedPlayer{
@@ -281,7 +281,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 124,
+			wantOverallTeamDefenseScore: 103,
 		},
 		"with max score": {
 			gotPlayers: []soccer.SelectedPlayer{
@@ -326,7 +326,52 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 180,
+			wantOverallTeamDefenseScore: 150,
+		},
+		"handles free agents": {
+			gotPlayers: []soccer.SelectedPlayer{
+				{
+					SelectedPosition: soccer.PlayerPositionGoalkeeper,
+					Attributes: soccer.PlayerAttributes{
+						Position:         soccer.PlayerPositionAny,
+						GoalkeeperRating: 40,
+						SpeedRating:      40,
+					},
+				},
+				{
+					SelectedPosition: soccer.PlayerPositionDefense,
+					Attributes: soccer.PlayerAttributes{
+						Position:      soccer.PlayerPositionAny,
+						DefenseRating: 140,
+						SpeedRating:   140,
+					},
+				},
+				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
+					Attributes: soccer.PlayerAttributes{
+						Position:      soccer.PlayerPositionAny,
+						DefenseRating: 40,
+						SpeedRating:   40,
+					},
+				},
+				{
+					SelectedPosition: soccer.PlayerPositionMidfield,
+					Attributes: soccer.PlayerAttributes{
+						Position:      soccer.PlayerPositionAny,
+						DefenseRating: 40,
+						SpeedRating:   40,
+					},
+				},
+				{
+					SelectedPosition: soccer.PlayerPositionAttack,
+					Attributes: soccer.PlayerAttributes{
+						Position:      soccer.PlayerPositionAny,
+						DefenseRating: 40,
+						SpeedRating:   40,
+					},
+				},
+			},
+			wantOverallTeamDefenseScore: 103,
 		},
 	}
 	for name, test := range tests {
