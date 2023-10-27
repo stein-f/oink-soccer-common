@@ -68,6 +68,25 @@ type GameEvent struct {
 	Minute int           `json:"minute"`
 }
 
+func (g GameEvent) GetTypeType() TeamType {
+	if g.IsGoal() {
+		return g.GetGoalEvent().TeamType
+	}
+	return g.GetMissEvent().TeamType
+}
+
+func (g GameEvent) IsGoal() bool {
+	return g.Type == GameEventTypeGoal
+}
+
+func (g GameEvent) GetGoalEvent() GoalEvent {
+	return g.Event.(GoalEvent)
+}
+
+func (g GameEvent) GetMissEvent() MissEvent {
+	return g.Event.(MissEvent)
+}
+
 type GoalEvent struct {
 	PlayerID string   `json:"player_id"`
 	TeamType TeamType `json:"team_type"`
