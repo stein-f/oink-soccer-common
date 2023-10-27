@@ -19,10 +19,10 @@ playerControlScore = (controlRating * 3 + speedRating) / 4
 
 The team control score is the sum of the player control scores, weighted by position as follows:
 
-Goalkeeper: 5%
-Defense: 15%
-Midfield: 65%
-Attack: 15%
+- Goalkeeper: 5%
+- Defense: 15%
+- Midfield: 65%
+- Attack: 15%
 
 The average score is taken for a position where there are multiple players in that position.
 
