@@ -30,10 +30,10 @@ The average score is taken for a position where there are multiple players in th
 
 The team defense score is the sum of the player defense scores, weighted by position as follows:
 
-Goalkeeper: 35%
-Defense: 40%
-Midfield: 20%
-Attack: 5%
+- Goalkeeper: 35%
+- Defense: 40%
+- Midfield: 20%
+- Attack: 5%
 
 The average score is taken for a position where there are multiple players in that position.
 
@@ -55,8 +55,8 @@ Formations apply boosts and penalties to the team's attack and defense scores as
 
 Defensive formation
 
-10% defense boost
-10% attack penalty
+- 10% defense boost
+- 10% attack penalty
 
 ```
   5
@@ -69,7 +69,7 @@ Defensive formation
 
 Balanced formation
 
-no boosts/penalties
+- no boosts/penalties
 
 ```
   5
@@ -82,8 +82,8 @@ no boosts/penalties
 
 Attacking formation
 
-10% defense penalty
-10% attack boost
+- 10% defense penalty
+- 10% attack boost
 
 ```
 4   5
