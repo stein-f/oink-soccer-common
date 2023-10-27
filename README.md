@@ -35,7 +35,11 @@ The team defense score is the sum of the player defense scores, weighted by posi
 - Midfield: 20%
 - Attack: 5%
 
-The average score is taken for a position where there are multiple players in that position.
+The average score is taken for a position where there are multiple players in that position. The individual defense score of a player is a function of the defense and speed attributes as follows:
+
+```text
+playerDefenseScore = (defenseRating * 3 + speedRating) / 4
+```
 
 ## Attack Score
 
