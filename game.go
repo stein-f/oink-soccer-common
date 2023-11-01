@@ -8,8 +8,6 @@ import (
 )
 
 const (
-	MinGameMinute            = 1
-	MaxGameMinute            = 98
 	OutOfPositionScaleFactor = 0.85
 )
 
@@ -114,7 +112,12 @@ func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, error) {
 	if err != nil {
 		return nil, err
 	}
-	eventMinutes := getRandomMinutes(len(teamChances))
+
+	eventMinutes, err := GetRandomMinutes(len(teamChances))
+	if err != nil {
+		return nil, err
+	}
+
 	for i, teamChance := range teamChances {
 		minuteOfEvent := eventMinutes[i]
 		event, err := runTeamChance(teamChance, homeTeam, awayTeam, minuteOfEvent)
@@ -285,15 +288,19 @@ func getEventCount() (int, error) {
 	return chooser.Pick().(int), nil
 }
 
-func getRandomMinutes(count int) []int {
+func GetRandomMinutes(count int) ([]int, error) {
 	var minutes []int
 	for i := 0; i < count; i++ {
-		minutes = append(minutes, rand.Intn(MaxGameMinute-MinGameMinute+1)+MinGameMinute)
+		minute, err := getEventMinute()
+		if err != nil {
+			return nil, err
+		}
+		minutes = append(minutes, minute)
 	}
 	sort.Slice(minutes, func(i, j int) bool {
 		return minutes[i] < minutes[j]
 	})
-	return minutes
+	return minutes, nil
 }
 
 func CreateGameStats(events []GameEvent) GameStats {
@@ -338,4 +345,27 @@ var eventCountWeights = []weightedrand.Choice{
 	{Item: 10, Weight: 2},
 	{Item: 11, Weight: 1},
 	{Item: 12, Weight: 1},
+}
+
+type eventMinuteRange struct {
+	MinMinute int
+	MaxMinute int
+}
+
+var eventMinuteWeights = []weightedrand.Choice{
+	{Item: eventMinuteRange{MinMinute: 1, MaxMinute: 15}, Weight: 99},
+	{Item: eventMinuteRange{MinMinute: 16, MaxMinute: 30}, Weight: 158},
+	{Item: eventMinuteRange{MinMinute: 31, MaxMinute: 45}, Weight: 142},
+	{Item: eventMinuteRange{MinMinute: 46, MaxMinute: 60}, Weight: 178},
+	{Item: eventMinuteRange{MinMinute: 61, MaxMinute: 75}, Weight: 168},
+	{Item: eventMinuteRange{MinMinute: 76, MaxMinute: 98}, Weight: 254},
+}
+
+func getEventMinute() (int, error) {
+	chooser, err := weightedrand.NewChooser(eventMinuteWeights...)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create event count chooser. %w", err)
+	}
+	eventRange := chooser.Pick().(eventMinuteRange)
+	return rand.Intn(eventRange.MaxMinute-eventRange.MinMinute+1) + eventRange.MinMinute, nil
 }

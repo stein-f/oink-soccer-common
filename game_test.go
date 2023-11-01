@@ -15,3 +15,17 @@ func TestDetermineTeamChances_ChancesWithinMinMaxRange(t *testing.T) {
 		assert.GreaterOrEqual(t, len(chances), 1)
 	}
 }
+
+func TestGetRandomMinutes(t *testing.T) {
+	for i := 0; i < 100; i++ {
+		minutes, err := soccer.GetRandomMinutes(10)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, m := range minutes {
+			assert.GreaterOrEqual(t, m, 1)
+			assert.LessOrEqual(t, m, 98)
+		}
+		assert.Len(t, minutes, 10)
+	}
+}
