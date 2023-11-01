@@ -9,7 +9,7 @@ import (
 
 const (
 	MinGameMinute            = 1
-	MaxGameMinute            = 110
+	MaxGameMinute            = 98
 	OutOfPositionScaleFactor = 0.85
 )
 
