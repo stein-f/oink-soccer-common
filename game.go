@@ -25,23 +25,23 @@ func (p SelectedPlayer) IsOutOfPosition() bool {
 	return p.SelectedPosition != p.Attributes.Position
 }
 
-func (p SelectedPlayer) GetControlScore() int {
+func (p SelectedPlayer) GetControlScore() float64 {
 	if p.IsOutOfPosition() {
-		return int(float64(p.Attributes.GetControlScore()) * OutOfPositionScaleFactor)
+		return float64(p.Attributes.GetControlScore()) * OutOfPositionScaleFactor
 	}
 	return p.Attributes.GetControlScore()
 }
 
-func (p SelectedPlayer) GetAttackScore() int {
+func (p SelectedPlayer) GetAttackScore() float64 {
 	if p.IsOutOfPosition() {
-		return int(float64(p.Attributes.GetAttackScore()) * OutOfPositionScaleFactor)
+		return float64(p.Attributes.GetAttackScore()) * OutOfPositionScaleFactor
 	}
 	return p.Attributes.GetAttackScore()
 }
 
-func (p SelectedPlayer) GetDefenseScore() int {
+func (p SelectedPlayer) GetDefenseScore() float64 {
 	if p.IsOutOfPosition() {
-		return int(float64(p.Attributes.GetDefenseScore()) * OutOfPositionScaleFactor)
+		return float64(p.Attributes.GetDefenseScore()) * OutOfPositionScaleFactor
 	}
 	return p.Attributes.GetDefenseScore()
 }
@@ -154,8 +154,11 @@ func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTe
 		return GameEvent{}, err
 	}
 
-	scaledDefenseScore := ScalingFunction(applyBoost(defenseBoost, CalculateTeamDefenseScore(defensiveTeamLineup.Players)))
-	scaledAttackScore := ScalingFunction(applyBoost(attackBoost, attackPlayer.GetAttackScore()))
+	teamDefenseScore := CalculateTeamDefenseScore(defensiveTeamLineup.Players)
+	scaledDefenseScore := ScalingFunction(applyBoost(defenseBoost, teamDefenseScore))
+
+	attackingPlayerAttackScore := attackPlayer.GetAttackScore()
+	scaledAttackScore := ScalingFunction(applyBoost(attackBoost, attackingPlayerAttackScore))
 
 	goalChanceChoices := []weightedrand.Choice{
 		{Item: true, Weight: uint(scaledAttackScore)},
@@ -198,8 +201,8 @@ func getDefenseBoost(lineup GameLineup) float64 {
 	return formationConfig.DefenseModifier
 }
 
-func applyBoost(boost float64, score int) int {
-	return int(float64(score) * boost)
+func applyBoost(boost float64, score float64) float64 {
+	return score * boost
 }
 
 func getFormationConfig(formationType FormationType) FormationConfig {

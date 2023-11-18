@@ -10,7 +10,7 @@ func TestPlayerAttributes_GetControlRating(t *testing.T) {
 	tests := map[string]struct {
 		gotPlayerSpeedRating   int
 		gotPlayerControlRating int
-		wantPlayerControlScore int
+		wantPlayerControlScore float64
 	}{
 		"equal speed and control rating": {
 			gotPlayerSpeedRating:   80,
@@ -46,7 +46,7 @@ func TestPlayerAttributes_GetAttackRating(t *testing.T) {
 	tests := map[string]struct {
 		gotPlayerSpeedRating  int
 		gotPlayerAttackRating int
-		wantPlayerAttackScore int
+		wantPlayerAttackScore float64
 	}{
 		"equal speed and attack rating": {
 			gotPlayerSpeedRating:  80,

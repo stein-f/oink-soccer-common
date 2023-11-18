@@ -3,13 +3,14 @@ package soccer_test
 import (
 	soccer "github.com/stein-f/oink-soccer-common"
 	"github.com/stretchr/testify/assert"
+	"math"
 	"testing"
 )
 
 func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 	tests := map[string]struct {
 		gotPlayers                  []soccer.SelectedPlayer
-		wantOverallTeamControlScore int
+		wantOverallTeamControlScore float64
 	}{
 		"low control midfielders has larger overall impact on team control": {
 			gotPlayers: []soccer.SelectedPlayer{
@@ -151,7 +152,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			overallTeamControlScore := soccer.CalculateTeamControlScore(test.gotPlayers)
 
-			assert.Equal(t, test.wantOverallTeamControlScore, overallTeamControlScore)
+			assert.Equal(t, test.wantOverallTeamControlScore, math.Floor(overallTeamControlScore))
 		})
 	}
 }
@@ -165,7 +166,7 @@ func TestCalculateTeamControlScore_OutOfPositionPenalty(t *testing.T) {
 		createPlayer(constRating, constRating, soccer.PlayerPositionMidfield, soccer.PlayerPositionMidfield),
 		createPlayer(constRating, constRating, soccer.PlayerPositionAttack, soccer.PlayerPositionAttack),
 	})
-	assert.Equal(t, constRating, score)
+	assert.Equal(t, float64(constRating), score)
 
 	scoreWithOutOfPositionMidfielder := soccer.CalculateTeamControlScore([]soccer.SelectedPlayer{
 		createPlayer(constRating, constRating, soccer.PlayerPositionGoalkeeper, soccer.PlayerPositionGoalkeeper),
@@ -174,7 +175,7 @@ func TestCalculateTeamControlScore_OutOfPositionPenalty(t *testing.T) {
 		createPlayer(constRating, constRating, soccer.PlayerPositionMidfield, soccer.PlayerPositionAttack),
 		createPlayer(constRating, constRating, soccer.PlayerPositionAttack, soccer.PlayerPositionAttack),
 	})
-	assert.Equal(t, 72, scoreWithOutOfPositionMidfielder)
+	assert.Equal(t, float64(72), math.Floor(scoreWithOutOfPositionMidfielder))
 }
 
 func createPlayer(control, speed int, position soccer.PlayerPosition, selectedPosition soccer.PlayerPosition) soccer.SelectedPlayer {
@@ -191,7 +192,7 @@ func createPlayer(control, speed int, position soccer.PlayerPosition, selectedPo
 func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 	tests := map[string]struct {
 		gotPlayers                  []soccer.SelectedPlayer
-		wantOverallTeamDefenseScore int
+		wantOverallTeamDefenseScore float64
 	}{
 		"high scoring defenders has larger overall impact on team defense": {
 			gotPlayers: []soccer.SelectedPlayer{
@@ -236,7 +237,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 107,
+			wantOverallTeamDefenseScore: 86,
 		},
 		"low scoring defenders has smaller overall impact on team defense": {
 			gotPlayers: []soccer.SelectedPlayer{
@@ -281,7 +282,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 86,
+			wantOverallTeamDefenseScore: 69,
 		},
 		"with max score": {
 			gotPlayers: []soccer.SelectedPlayer{
@@ -326,7 +327,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 125,
+			wantOverallTeamDefenseScore: 100,
 		},
 		"handles free agents": {
 			gotPlayers: []soccer.SelectedPlayer{
@@ -342,8 +343,8 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					SelectedPosition: soccer.PlayerPositionDefense,
 					Attributes: soccer.PlayerAttributes{
 						Position:      soccer.PlayerPositionAny,
-						DefenseRating: 140,
-						SpeedRating:   140,
+						DefenseRating: 40,
+						SpeedRating:   40,
 					},
 				},
 				{
@@ -371,14 +372,14 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 86,
+			wantOverallTeamDefenseScore: 29,
 		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			overallTeamDefenseScore := soccer.CalculateTeamDefenseScore(test.gotPlayers)
 
-			assert.Equal(t, test.wantOverallTeamDefenseScore, overallTeamDefenseScore)
+			assert.Equal(t, test.wantOverallTeamDefenseScore, math.Floor(overallTeamDefenseScore))
 		})
 	}
 }

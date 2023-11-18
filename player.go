@@ -19,21 +19,21 @@ type PlayerAttributes struct {
 // GetControlScore returns the control score for a player
 // It is calculated using the control and speed rating where control is weighted 3x more than speed
 // controlScore = (controlRating * 3 + speedRating) / 4
-func (p PlayerAttributes) GetControlScore() int {
+func (p PlayerAttributes) GetControlScore() float64 {
 	return getRating(p.ControlRating, p.SpeedRating)
 }
 
 // GetAttackScore returns the attack score for a player
 // It is calculated using the attack and speed rating where attack is weighted 3x more than speed
 // attackScore = (attackRating * 3 + speedRating) / 4
-func (p PlayerAttributes) GetAttackScore() int {
+func (p PlayerAttributes) GetAttackScore() float64 {
 	return getRating(p.AttackRating, p.SpeedRating)
 }
 
 // GetDefenseScore returns the defense score for a player
 // It is calculated using the defense and speed rating where defense is weighted 3x more than speed
 // defenseScore = (defenseRating * 3 + speedRating) / 4
-func (p PlayerAttributes) GetDefenseScore() int {
+func (p PlayerAttributes) GetDefenseScore() float64 {
 	rating := p.DefenseRating
 	if p.Position == PlayerPositionGoalkeeper {
 		rating = p.GoalkeeperRating
@@ -41,6 +41,6 @@ func (p PlayerAttributes) GetDefenseScore() int {
 	return getRating(rating, p.SpeedRating)
 }
 
-func getRating(rating, speedRating int) int {
-	return int(math.Round(float64(rating*3+speedRating) / 4))
+func getRating(rating, speedRating int) float64 {
+	return math.Round(float64(rating*3+speedRating) / 4)
 }

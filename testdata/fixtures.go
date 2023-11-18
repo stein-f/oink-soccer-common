@@ -12,6 +12,7 @@ var StrongTeamPlayers = []soccer.SelectedPlayer{
 			AttackRating:     37,
 			Position:         soccer.PlayerPositionGoalkeeper,
 		},
+		SelectedPosition: soccer.PlayerPositionGoalkeeper,
 	},
 	{
 		Attributes: soccer.PlayerAttributes{
@@ -22,6 +23,7 @@ var StrongTeamPlayers = []soccer.SelectedPlayer{
 			AttackRating:     37,
 			Position:         soccer.PlayerPositionDefense,
 		},
+		SelectedPosition: soccer.PlayerPositionDefense,
 	},
 	{
 		Attributes: soccer.PlayerAttributes{
@@ -32,6 +34,7 @@ var StrongTeamPlayers = []soccer.SelectedPlayer{
 			AttackRating:     91,
 			Position:         soccer.PlayerPositionMidfield,
 		},
+		SelectedPosition: soccer.PlayerPositionMidfield,
 	},
 	{
 		Attributes: soccer.PlayerAttributes{
@@ -42,6 +45,7 @@ var StrongTeamPlayers = []soccer.SelectedPlayer{
 			AttackRating:     71,
 			Position:         soccer.PlayerPositionMidfield,
 		},
+		SelectedPosition: soccer.PlayerPositionMidfield,
 	},
 	{
 		Attributes: soccer.PlayerAttributes{
@@ -52,6 +56,7 @@ var StrongTeamPlayers = []soccer.SelectedPlayer{
 			AttackRating:     93,
 			Position:         soccer.PlayerPositionAttack,
 		},
+		SelectedPosition: soccer.PlayerPositionAttack,
 	},
 }
 
@@ -65,6 +70,7 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 			AttackRating:     2,
 			Position:         soccer.PlayerPositionGoalkeeper,
 		},
+		SelectedPosition: soccer.PlayerPositionGoalkeeper,
 	},
 	{
 		Attributes: soccer.PlayerAttributes{
@@ -75,6 +81,7 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 			AttackRating:     11,
 			Position:         soccer.PlayerPositionDefense,
 		},
+		SelectedPosition: soccer.PlayerPositionDefense,
 	},
 	{
 		Attributes: soccer.PlayerAttributes{
@@ -85,6 +92,7 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 			AttackRating:     72,
 			Position:         soccer.PlayerPositionMidfield,
 		},
+		SelectedPosition: soccer.PlayerPositionMidfield,
 	},
 	{
 		Attributes: soccer.PlayerAttributes{
@@ -95,6 +103,7 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 			AttackRating:     55,
 			Position:         soccer.PlayerPositionMidfield,
 		},
+		SelectedPosition: soccer.PlayerPositionMidfield,
 	},
 	{
 		Attributes: soccer.PlayerAttributes{
@@ -105,5 +114,6 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 			AttackRating:     74,
 			Position:         soccer.PlayerPositionAttack,
 		},
+		SelectedPosition: soccer.PlayerPositionAttack,
 	},
 }

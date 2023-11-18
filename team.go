@@ -13,7 +13,7 @@ type Team struct {
 //	defense: 15%
 //	midfield: 65%
 //	attack: 15%
-func CalculateTeamControlScore(players []SelectedPlayer) int {
+func CalculateTeamControlScore(players []SelectedPlayer) float64 {
 	// group players by position
 	var playersByPosition = make(map[PlayerPosition][]SelectedPlayer)
 	for _, player := range players {
@@ -21,7 +21,7 @@ func CalculateTeamControlScore(players []SelectedPlayer) int {
 	}
 
 	// calculate the average control score for each position
-	var averageControlScoresByPosition = make(map[PlayerPosition]int)
+	var averageControlScoresByPosition = make(map[PlayerPosition]float64)
 	for position, players := range playersByPosition {
 		averageControlScoresByPosition[position] = getAverageControlScore(players)
 	}
@@ -34,12 +34,12 @@ func CalculateTeamControlScore(players []SelectedPlayer) int {
 	return gkScore + defScore + midfieldScore + attackScore
 }
 
-func getAverageControlScore(players []SelectedPlayer) int {
-	var totalControlScore int
+func getAverageControlScore(players []SelectedPlayer) float64 {
+	var totalControlScore float64
 	for _, player := range players {
 		totalControlScore += player.GetControlScore()
 	}
-	return totalControlScore / len(players)
+	return totalControlScore / float64(len(players))
 }
 
 // CalculateTeamDefenseScore calculates the overall team defense score for a team.
@@ -49,8 +49,7 @@ func getAverageControlScore(players []SelectedPlayer) int {
 //	defense: 40%
 //	midfield: 20%
 //	attack: 5%
-func CalculateTeamDefenseScore(players []SelectedPlayer) int {
-	scalingFactor := 1.15
+func CalculateTeamDefenseScore(players []SelectedPlayer) float64 {
 	// group players by position
 	var playersByPosition = make(map[PlayerPosition][]SelectedPlayer)
 	for _, player := range players {
@@ -58,7 +57,7 @@ func CalculateTeamDefenseScore(players []SelectedPlayer) int {
 	}
 
 	// calculate the average control score for each position
-	averageControlScoresByPosition := make(map[PlayerPosition]int)
+	averageControlScoresByPosition := make(map[PlayerPosition]float64)
 	for position, players := range playersByPosition {
 		averageControlScoresByPosition[position] = getAverageDefenseScore(players)
 	}
@@ -68,13 +67,13 @@ func CalculateTeamDefenseScore(players []SelectedPlayer) int {
 	midfieldScore := averageControlScoresByPosition[PlayerPositionMidfield] * 20 / 100
 	attackScore := averageControlScoresByPosition[PlayerPositionAttack] * 5 / 100
 
-	return int(scalingFactor * float64(gkScore+defScore+midfieldScore+attackScore))
+	return gkScore + defScore + midfieldScore + attackScore
 }
 
-func getAverageDefenseScore(players []SelectedPlayer) int {
-	var totalDefenseScore int
+func getAverageDefenseScore(players []SelectedPlayer) float64 {
+	var totalDefenseScore float64
 	for _, player := range players {
 		totalDefenseScore += player.GetDefenseScore()
 	}
-	return totalDefenseScore / len(players)
+	return totalDefenseScore / float64(len(players))
 }

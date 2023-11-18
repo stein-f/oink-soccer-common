@@ -1,38 +1,12 @@
 package soccer
 
-import "math"
-
-// ScalingFunction is a Gompertz function that takes a rating and returns a biased rating.
-// For example, a rating of 100 will much more likely to score than a rating of 75.
-// See scaling_test.go for a table of inputs and outputs.
-func ScalingFunction(input int) int {
-	// Scale the input to a range of 0 to 1
-	scaledRating := float64(input) / 100
-
-	// Calculate a probability using the Gompertz function
-	probability := 1 - math.Exp(-math.Exp(4.5*scaledRating-4.5))
-
-	// Ensure the probability is within the range of 0 to 1
-	probability = math.Max(0, math.Min(1, probability))
-
-	return int(probability * 100)
-}
-
-// NormalizeRating ensures the rating value is between 0-100
-// To normalize, divide the sum of the weighted ratings by the product of the total number of players and the maximum possible score.
-func NormalizeRating(sumOfRatings int, maxTotalRating int) int {
-	if maxTotalRating == 0 {
-		// Avoid division by zero
-		return 0
-	}
-
-	normalizedRating := (float64(sumOfRatings) / float64(maxTotalRating)) * 100.0
-
-	if normalizedRating < 0 {
-		return 0
-	} else if normalizedRating > 100 {
-		return 100
-	}
-
-	return int(normalizedRating)
+// ScalingFunction is a function that aims to give higher rated players a more significant advantage over lower rated players.
+// If we took the raw player ratings, then a lower skilled player on 80 would have almost the same ability as a higher skilled player 84, given the random nature of the game.
+// This function aims to give higher rated players a more significant advantage over lower rated players.
+// We use a function that grows more rapidly as the input increases.
+// y = ax^b
+// where y is the scaled rating, x is the original rating (0-100) and a and b are constants that can be adjusted to change the shape of the curve.
+func ScalingFunction(originalRating float64) float64 {
+	const a float64 = 0.0001
+	return a * originalRating * originalRating * originalRating
 }
