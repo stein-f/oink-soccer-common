@@ -338,8 +338,8 @@ func CreateGameStats(events []GameEvent) GameStats {
 }
 
 var eventCountWeights = []weightedrand.Choice{
-	{Item: 3, Weight: 2},
-	{Item: 4, Weight: 3},
+	{Item: 3, Weight: 1},
+	{Item: 4, Weight: 2},
 	{Item: 5, Weight: 5},
 	{Item: 6, Weight: 8},
 	{Item: 7, Weight: 8},
