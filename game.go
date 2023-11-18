@@ -342,11 +342,11 @@ var eventCountWeights = []weightedrand.Choice{
 	{Item: 4, Weight: 2},
 	{Item: 5, Weight: 5},
 	{Item: 6, Weight: 8},
-	{Item: 7, Weight: 8},
-	{Item: 8, Weight: 5},
-	{Item: 9, Weight: 3},
-	{Item: 10, Weight: 2},
-	{Item: 11, Weight: 1},
+	{Item: 7, Weight: 10},
+	{Item: 8, Weight: 10},
+	{Item: 9, Weight: 8},
+	{Item: 10, Weight: 5},
+	{Item: 11, Weight: 2},
 	{Item: 12, Weight: 1},
 }
 

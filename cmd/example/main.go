@@ -17,7 +17,7 @@ func main() {
 				CustomName: "Coventry City",
 				Formation:  soccer.FormationTypeDiamond,
 			},
-			Players: testdata.WeakTeamPlayers,
+			Players: testdata.StrongTeamPlayers,
 		}
 		awayLineup := soccer.GameLineup{
 			Team: soccer.Team{
@@ -25,7 +25,7 @@ func main() {
 				CustomName: "Aston Villa",
 				Formation:  soccer.FormationTypeDiamond,
 			},
-			Players: testdata.StrongTeamPlayers,
+			Players: testdata.WeakTeamPlayers,
 		}
 
 		gameOutcome, err := soccer.RunGame(homeLineup, awayLineup)
