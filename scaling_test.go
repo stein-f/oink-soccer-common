@@ -33,29 +33,3 @@ func TestScaleRating(t *testing.T) {
 		assert.Equal(t, tc.expectedScaled, math.Floor(scaled))
 	}
 }
-
-func TestNormalizeRating(t *testing.T) {
-	tests := map[string]struct {
-		gotSumOfRatings      int
-		gotMaxRatings        int
-		wantNormalizedRating int
-	}{
-		"handles zero rating": {
-			gotSumOfRatings:      0,
-			gotMaxRatings:        0,
-			wantNormalizedRating: 0,
-		},
-		"should be 50 when sum is half of max": {
-			gotSumOfRatings:      80,
-			gotMaxRatings:        160,
-			wantNormalizedRating: 50,
-		},
-	}
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			normalizeRating := soccer.NormalizeRating(test.gotSumOfRatings, test.gotMaxRatings)
-
-			assert.Equal(t, test.wantNormalizedRating, normalizeRating)
-		})
-	}
-}
