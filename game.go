@@ -262,8 +262,8 @@ func DetermineTeamChances(
 		return nil, err
 	}
 
-	homeTeamControlScore := ScalingFunction(CalculateTeamControlScore(homeTeamPlayers))
-	awayTeamControlScore := ScalingFunction(CalculateTeamControlScore(awayTeamPlayers))
+	homeTeamControlScore := 100 * ScalingFunction(CalculateTeamControlScore(homeTeamPlayers))
+	awayTeamControlScore := 100 * ScalingFunction(CalculateTeamControlScore(awayTeamPlayers))
 
 	choices := []weightedrand.Choice{
 		{Item: TeamTypeHome, Weight: uint(homeTeamControlScore)},
