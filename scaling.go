@@ -1,7 +1,5 @@
 package soccer
 
-const scalingConstant = float64(1.3368054448513546e-06)
-
 // ScalingFunction is a function that aims to give higher rated players a more significant advantage over lower rated players.
 // If we took the raw player ratings, then a lower skilled player on 80 would have almost the same ability as a higher skilled player 84, given the random nature of the game.
 // This function aims to give higher rated players a more significant advantage over lower rated players.
@@ -9,5 +7,10 @@ const scalingConstant = float64(1.3368054448513546e-06)
 // y = ax^b
 // where y is the scaled rating, x is the original rating (0-100) and a and b are constants that can be adjusted to change the shape of the curve.
 func ScalingFunction(originalRating float64) float64 {
-	return scalingConstant * originalRating * originalRating * originalRating * originalRating
+	const a float64 = 0.0001204
+	scaledRating := a * originalRating * originalRating * originalRating
+	if scaledRating > 100 {
+		scaledRating = 100
+	}
+	return scaledRating
 }
