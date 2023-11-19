@@ -17,7 +17,7 @@ func CalculateTeamControlScore(players []SelectedPlayer) float64 {
 	// group players by position
 	var playersByPosition = make(map[PlayerPosition][]SelectedPlayer)
 	for _, player := range players {
-		playersByPosition[player.Attributes.Position] = append(playersByPosition[player.SelectedPosition], player)
+		playersByPosition[player.SelectedPosition] = append(playersByPosition[player.SelectedPosition], player)
 	}
 
 	// calculate the average control score for each position

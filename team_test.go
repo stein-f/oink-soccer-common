@@ -175,7 +175,7 @@ func TestCalculateTeamControlScore_OutOfPositionPenalty(t *testing.T) {
 		createPlayer(constRating, constRating, soccer.PlayerPositionMidfield, soccer.PlayerPositionAttack),
 		createPlayer(constRating, constRating, soccer.PlayerPositionAttack, soccer.PlayerPositionAttack),
 	})
-	assert.Equal(t, float64(72), math.Floor(scoreWithOutOfPositionMidfielder))
+	assert.Equal(t, float64(27), math.Floor(scoreWithOutOfPositionMidfielder))
 }
 
 func createPlayer(control, speed int, position soccer.PlayerPosition, selectedPosition soccer.PlayerPosition) soccer.SelectedPlayer {
