@@ -7,17 +7,23 @@ The purpose of this repository is to publish the algorithm used to determine the
 You must have Go installed to run the example. https://go.dev/doc/install
 
 ```shell
-go run cmd/example/main.go
+go run cmd/simulate/main.go
 ```
 
 The following will output to the console.
 
 ```text
-Coventry City wins: 376
-Aston Villa wins: 51
-Draws: 73
-Goals/game: 3.402000
-Scorer by position: map[Attack:1129 Defense:56 Goalkeeper:5 Midfield:567]
+Games played: 10000
+StrongTeam wins: 9021
+StrongTeam chances/game: 4.442100
+WeakTeam wins: 284
+WeakTeam chances/game: 2.078500
+Draws: 695
+Goals/game: 3.928200
+Attacker goals: 25642 (65.276717%)
+Midfielder goals: 12903 (32.847106%)
+Defender goals: 631 (1.606334%)
+Goalkeeper goals: 106 (0.269844%)
 ```
 
 ## algorithm

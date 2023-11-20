@@ -16,7 +16,7 @@ var awayTeamConfig []byte
 
 func main() {
 	var homeWins, awayWins, draws, goals, homeChances, awayChances int
-	gameCount := 500
+	gameCount := 10000
 
 	scorerByPosition := make(map[soccer.PlayerPosition]int)
 
@@ -76,7 +76,23 @@ func main() {
 	fmt.Printf("WeakTeam chances/game: %f\n", awayTeamChancePerGame)
 	fmt.Printf("Draws: %d\n", draws)
 	fmt.Printf("Goals/game: %f\n", goalsPerGame)
-	fmt.Printf("Scorer by position: %v\n", scorerByPosition)
+
+	attackerGoals := scorerByPosition[soccer.PlayerPositionAttack]
+	totalGoals := scorerByPosition[soccer.PlayerPositionAttack] + scorerByPosition[soccer.PlayerPositionMidfield] + scorerByPosition[soccer.PlayerPositionDefense] + scorerByPosition[soccer.PlayerPositionGoalkeeper]
+	attackerGoalsPercentage := float64(attackerGoals) / float64(totalGoals) * 100
+	fmt.Printf("Attacker goals: %d (%f%%)\n", attackerGoals, attackerGoalsPercentage)
+
+	midfielderGoals := scorerByPosition[soccer.PlayerPositionMidfield]
+	midfielderGoalsPercentage := float64(midfielderGoals) / float64(totalGoals) * 100
+	fmt.Printf("Midfielder goals: %d (%f%%)\n", midfielderGoals, midfielderGoalsPercentage)
+
+	defenderGoals := scorerByPosition[soccer.PlayerPositionDefense]
+	defenderGoalsPercentage := float64(defenderGoals) / float64(totalGoals) * 100
+	fmt.Printf("Defender goals: %d (%f%%)\n", defenderGoals, defenderGoalsPercentage)
+
+	goalkeeperGoals := scorerByPosition[soccer.PlayerPositionGoalkeeper]
+	goalkeeperGoalsPercentage := float64(goalkeeperGoals) / float64(totalGoals) * 100
+	fmt.Printf("Goalkeeper goals: %d (%f%%)\n", goalkeeperGoals, goalkeeperGoalsPercentage)
 }
 
 func loadConfig(config []byte) soccer.GameLineup {
