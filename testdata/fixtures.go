@@ -4,6 +4,8 @@ import soccer "github.com/stein-f/oink-soccer-common"
 
 var StrongTeamPlayers = []soccer.SelectedPlayer{
 	{
+		ID:   "1",
+		Name: "1",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 88,
 			SpeedRating:      74,
@@ -15,6 +17,8 @@ var StrongTeamPlayers = []soccer.SelectedPlayer{
 		SelectedPosition: soccer.PlayerPositionGoalkeeper,
 	},
 	{
+		ID:   "2",
+		Name: "2",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 14,
 			SpeedRating:      80,
@@ -26,6 +30,8 @@ var StrongTeamPlayers = []soccer.SelectedPlayer{
 		SelectedPosition: soccer.PlayerPositionDefense,
 	},
 	{
+		ID:   "3",
+		Name: "3",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 14,
 			SpeedRating:      80,
@@ -37,6 +43,8 @@ var StrongTeamPlayers = []soccer.SelectedPlayer{
 		SelectedPosition: soccer.PlayerPositionMidfield,
 	},
 	{
+		ID:   "4",
+		Name: "4",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 11,
 			SpeedRating:      81,
@@ -48,6 +56,8 @@ var StrongTeamPlayers = []soccer.SelectedPlayer{
 		SelectedPosition: soccer.PlayerPositionMidfield,
 	},
 	{
+		ID:   "5",
+		Name: "5",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 14,
 			SpeedRating:      80,
@@ -62,6 +72,8 @@ var StrongTeamPlayers = []soccer.SelectedPlayer{
 
 var WeakTeamPlayers = []soccer.SelectedPlayer{
 	{
+		ID:   "6",
+		Name: "6",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 65,
 			SpeedRating:      55,
@@ -73,6 +85,8 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 		SelectedPosition: soccer.PlayerPositionGoalkeeper,
 	},
 	{
+		ID:   "7",
+		Name: "7",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 14,
 			SpeedRating:      56,
@@ -84,6 +98,8 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 		SelectedPosition: soccer.PlayerPositionDefense,
 	},
 	{
+		ID:   "8",
+		Name: "8",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 14,
 			SpeedRating:      68,
@@ -95,6 +111,8 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 		SelectedPosition: soccer.PlayerPositionMidfield,
 	},
 	{
+		ID:   "9",
+		Name: "9",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 11,
 			SpeedRating:      71,
@@ -106,6 +124,8 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 		SelectedPosition: soccer.PlayerPositionMidfield,
 	},
 	{
+		ID:   "10",
+		Name: "10",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 14,
 			SpeedRating:      68,

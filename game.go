@@ -223,12 +223,18 @@ func determinePositionOfAttackingTeamChance(attackingTeamLineup GameLineup) (Pla
 	for i := range attackingTeamLineup.Players {
 		var weight uint
 		switch attackingTeamLineup.Players[i].SelectedPosition {
+		case PlayerPositionGoalkeeper:
+			weight = uint(2)
 		case PlayerPositionDefense:
 			weight = uint(10)
+		case PlayerPositionAny:
+			weight = uint(10)
 		case PlayerPositionMidfield:
-			weight = uint(30)
+			weight = uint(25)
+		case PlayerPositionAttack:
+			weight = uint(65)
 		default:
-			weight = uint(60)
+			weight = uint(1)
 		}
 		playerChoices = append(playerChoices, weightedrand.Choice{
 			Item:   attackingTeamLineup.Players[i],
@@ -340,14 +346,12 @@ func CreateGameStats(events []GameEvent) GameStats {
 var eventCountWeights = []weightedrand.Choice{
 	{Item: 3, Weight: 1},
 	{Item: 4, Weight: 2},
-	{Item: 5, Weight: 5},
-	{Item: 6, Weight: 8},
-	{Item: 7, Weight: 10},
-	{Item: 8, Weight: 10},
-	{Item: 9, Weight: 8},
-	{Item: 10, Weight: 5},
-	{Item: 11, Weight: 2},
-	{Item: 12, Weight: 1},
+	{Item: 5, Weight: 3},
+	{Item: 6, Weight: 5},
+	{Item: 7, Weight: 5},
+	{Item: 8, Weight: 3},
+	{Item: 9, Weight: 2},
+	{Item: 10, Weight: 1},
 }
 
 type eventMinuteRange struct {

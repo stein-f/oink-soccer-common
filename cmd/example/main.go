@@ -10,6 +10,8 @@ func main() {
 	var homeWins, awayWins, draws, goals int
 	games := 500
 
+	scorerByPosition := make(map[soccer.PlayerPosition]int)
+
 	for i := 0; i < games; i++ {
 		homeLineup := soccer.GameLineup{
 			Team: soccer.Team{
@@ -28,12 +30,12 @@ func main() {
 			Players: testdata.WeakTeamPlayers,
 		}
 
-		gameOutcome, err := soccer.RunGame(homeLineup, awayLineup)
+		gameEvents, err := soccer.RunGame(homeLineup, awayLineup)
 		if err != nil {
 			panic(err)
 		}
 
-		gameStats := soccer.CreateGameStats(gameOutcome)
+		gameStats := soccer.CreateGameStats(gameEvents)
 		fmt.Printf("Coventry City %d - Aston Villa %d\n", gameStats.HomeTeamStats.Goals, gameStats.AwayTeamStats.Goals)
 
 		if gameStats.HomeTeamStats.Goals > gameStats.AwayTeamStats.Goals {
@@ -42,6 +44,22 @@ func main() {
 			awayWins++
 		} else {
 			draws++
+		}
+
+		for _, event := range gameEvents {
+			if event.Type == soccer.GameEventTypeGoal {
+				scorerID := event.Event.(soccer.GoalEvent).PlayerID
+				homeScorer, homeFound := homeLineup.FindPlayer(scorerID)
+				awayScorer, awayFound := awayLineup.FindPlayer(scorerID)
+				if !homeFound && !awayFound {
+					panic(fmt.Sprintf("scorer %s not found", scorerID))
+				}
+				if homeFound {
+					scorerByPosition[homeScorer.SelectedPosition]++
+					continue
+				}
+				scorerByPosition[awayScorer.SelectedPosition]++
+			}
 		}
 
 		fmt.Println(fmt.Sprintf("Coventry City scored %d goals from %d chances", gameStats.HomeTeamStats.Goals, gameStats.HomeTeamStats.Shots))
@@ -56,4 +74,5 @@ func main() {
 	fmt.Printf("Aston Villa wins: %d\n", awayWins)
 	fmt.Printf("Draws: %d\n", draws)
 	fmt.Printf("Goals/game: %f\n", goalsPerGame)
+	fmt.Printf("Scorer by position: %v\n", scorerByPosition)
 }
