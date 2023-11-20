@@ -8,7 +8,7 @@ import (
 var homeLineup = soccer.GameLineup{
 	Team: soccer.Team{
 		ID:         "1",
-		CustomName: "Coventry City",
+		CustomName: "StrongTeam",
 		Formation:  soccer.FormationTypeDiamond,
 	},
 	Players: []soccer.SelectedPlayer{
@@ -16,7 +16,7 @@ var homeLineup = soccer.GameLineup{
 			ID:   "1",
 			Name: "1",
 			Attributes: soccer.PlayerAttributes{
-				GoalkeeperRating: 88,
+				GoalkeeperRating: 90,
 				SpeedRating:      74,
 				DefenseRating:    33,
 				ControlRating:    21,
@@ -58,7 +58,7 @@ var homeLineup = soccer.GameLineup{
 				GoalkeeperRating: 11,
 				SpeedRating:      81,
 				DefenseRating:    75,
-				ControlRating:    81,
+				ControlRating:    88,
 				AttackRating:     71,
 				Position:         soccer.PlayerPositionMidfield,
 			},
@@ -83,7 +83,7 @@ var homeLineup = soccer.GameLineup{
 var awayLineup = soccer.GameLineup{
 	Team: soccer.Team{
 		ID:         "2",
-		CustomName: "Aston Villa",
+		CustomName: "WeakTeam",
 		Formation:  soccer.FormationTypeDiamond,
 	},
 	Players: []soccer.SelectedPlayer{
@@ -106,7 +106,7 @@ var awayLineup = soccer.GameLineup{
 			Attributes: soccer.PlayerAttributes{
 				GoalkeeperRating: 14,
 				SpeedRating:      56,
-				DefenseRating:    75,
+				DefenseRating:    68,
 				ControlRating:    81,
 				AttackRating:     11,
 				Position:         soccer.PlayerPositionDefense,
@@ -147,7 +147,7 @@ var awayLineup = soccer.GameLineup{
 				SpeedRating:      68,
 				DefenseRating:    22,
 				ControlRating:    67,
-				AttackRating:     74,
+				AttackRating:     70,
 				Position:         soccer.PlayerPositionAttack,
 			},
 			SelectedPosition: soccer.PlayerPositionAttack,
@@ -168,7 +168,7 @@ func main() {
 		}
 
 		gameStats := soccer.CreateGameStats(gameEvents)
-		fmt.Printf("Coventry City %d - Aston Villa %d\n", gameStats.HomeTeamStats.Goals, gameStats.AwayTeamStats.Goals)
+		fmt.Printf("StrongTeam %d - WeakTeam %d\n", gameStats.HomeTeamStats.Goals, gameStats.AwayTeamStats.Goals)
 
 		if gameStats.HomeTeamStats.Goals > gameStats.AwayTeamStats.Goals {
 			homeWins++
@@ -194,8 +194,8 @@ func main() {
 			}
 		}
 
-		fmt.Println(fmt.Sprintf("Coventry City scored %d goals from %d chances", gameStats.HomeTeamStats.Goals, gameStats.HomeTeamStats.Shots))
-		fmt.Println(fmt.Sprintf("Aston Villa scored %d goals from %d chances", gameStats.AwayTeamStats.Goals, gameStats.AwayTeamStats.Shots))
+		fmt.Println(fmt.Sprintf("StrongTeam scored %d goals from %d chances", gameStats.HomeTeamStats.Goals, gameStats.HomeTeamStats.Shots))
+		fmt.Println(fmt.Sprintf("WeakTeam scored %d goals from %d chances", gameStats.AwayTeamStats.Goals, gameStats.AwayTeamStats.Shots))
 
 		goals += gameStats.HomeTeamStats.Goals + gameStats.AwayTeamStats.Goals
 	}
@@ -204,8 +204,8 @@ func main() {
 
 	fmt.Printf("\nGame summary:\n")
 	fmt.Printf("Games played: %d\n", gameCount)
-	fmt.Printf("Coventry City wins: %d\n", homeWins)
-	fmt.Printf("Aston Villa wins: %d\n", awayWins)
+	fmt.Printf("StrongTeam wins: %d\n", homeWins)
+	fmt.Printf("WeakTeam wins: %d\n", awayWins)
 	fmt.Printf("Draws: %d\n", draws)
 	fmt.Printf("Goals/game: %f\n", goalsPerGame)
 	fmt.Printf("Scorer by position: %v\n", scorerByPosition)
