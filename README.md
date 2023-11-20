@@ -17,7 +17,7 @@ Coventry City wins: 376
 Aston Villa wins: 51
 Draws: 73
 Goals/game: 3.402000
-Scorer by position: map[Attack:998 Defense:53 Goalkeeper:6 Midfield:644]
+Scorer by position: map[Attack:1129 Defense:56 Goalkeeper:5 Midfield:567]
 ```
 
 ## algorithm
