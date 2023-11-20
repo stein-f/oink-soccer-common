@@ -2,6 +2,24 @@
 
 The purpose of this repository is to publish the algorithm used to determine the outcome of an oink soccer match.
 
+## Run the example
+
+You must have Go installed to run the example. https://go.dev/doc/install
+
+```shell
+go run cmd/example/main.go
+```
+
+The following will output to the console.
+
+```text
+Coventry City wins: 376
+Aston Villa wins: 51
+Draws: 73
+Goals/game: 3.402000
+Scorer by position: map[Attack:998 Defense:53 Goalkeeper:6 Midfield:644]
+```
+
 ## algorithm
 
 1. Choose the number of events (goal|miss) in the game. It is a weighted random number between 1 and 12.
