@@ -224,15 +224,15 @@ func determinePositionOfAttackingTeamChance(attackingTeamLineup GameLineup) (Pla
 		var weight uint
 		switch attackingTeamLineup.Players[i].SelectedPosition {
 		case PlayerPositionGoalkeeper:
-			weight = uint(2)
+			weight = uint(1)
 		case PlayerPositionDefense:
 			weight = uint(10)
 		case PlayerPositionAny:
 			weight = uint(10)
 		case PlayerPositionMidfield:
-			weight = uint(25)
+			weight = uint(20)
 		case PlayerPositionAttack:
-			weight = uint(65)
+			weight = uint(70)
 		default:
 			weight = uint(1)
 		}
