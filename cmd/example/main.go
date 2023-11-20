@@ -15,7 +15,7 @@ var homeTeamConfig []byte
 var awayTeamConfig []byte
 
 func main() {
-	var homeWins, awayWins, draws, goals int
+	var homeWins, awayWins, draws, goals, homeChances, awayChances int
 	gameCount := 500
 
 	scorerByPosition := make(map[soccer.PlayerPosition]int)
@@ -60,14 +60,20 @@ func main() {
 		fmt.Println(fmt.Sprintf("WeakTeam scored %d goals from %d chances", gameStats.AwayTeamStats.Goals, gameStats.AwayTeamStats.Shots))
 
 		goals += gameStats.HomeTeamStats.Goals + gameStats.AwayTeamStats.Goals
+		homeChances += gameStats.HomeTeamStats.Shots
+		awayChances += gameStats.AwayTeamStats.Shots
 	}
 
 	goalsPerGame := float64(goals) / float64(gameCount)
+	homeTeamChancePerGame := float64(homeChances) / float64(gameCount)
+	awayTeamChancePerGame := float64(awayChances) / float64(gameCount)
 
 	fmt.Printf("\nGame summary:\n")
 	fmt.Printf("Games played: %d\n", gameCount)
 	fmt.Printf("StrongTeam wins: %d\n", homeWins)
+	fmt.Printf("StrongTeam chances/game: %f\n", homeTeamChancePerGame)
 	fmt.Printf("WeakTeam wins: %d\n", awayWins)
+	fmt.Printf("WeakTeam chances/game: %f\n", awayTeamChancePerGame)
 	fmt.Printf("Draws: %d\n", draws)
 	fmt.Printf("Goals/game: %f\n", goalsPerGame)
 	fmt.Printf("Scorer by position: %v\n", scorerByPosition)
