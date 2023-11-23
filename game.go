@@ -230,8 +230,8 @@ func getFormationConfig(formationType FormationType) FormationConfig {
 	}
 }
 
-// determines the position of the player that will have the chance to score a goal.
-// weighted rand based on player position: 60% attack, 30% midfield, 10% defense
+// determines the position of the gotPlayer that will have the chance to score a goal.
+// weighted rand based on gotPlayer position: 60% attack, 30% midfield, 10% defense
 func determinePositionOfAttackingTeamChance(attackingTeamLineup GameLineup) (PlayerPosition, error) {
 	playerChoices := []weightedrand.Choice{}
 	for i := range attackingTeamLineup.Players {
@@ -257,7 +257,7 @@ func determinePositionOfAttackingTeamChance(attackingTeamLineup GameLineup) (Pla
 	}
 	chooser, err := weightedrand.NewChooser(playerChoices...)
 	if err != nil {
-		return "", fmt.Errorf("failed to create player chooser. %w", err)
+		return "", fmt.Errorf("failed to create gotPlayer chooser. %w", err)
 	}
 	return chooser.Pick().(SelectedPlayer).SelectedPosition, nil
 }

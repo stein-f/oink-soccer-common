@@ -77,3 +77,58 @@ func TestPlayerAttributes_GetAttackRating(t *testing.T) {
 		})
 	}
 }
+
+func TestGetOverallRating(t *testing.T) {
+	tests := map[string]struct {
+		gotPlayer soccer.PlayerAttributes
+		expected  int
+	}{
+		"gk": {
+			gotPlayer: soccer.PlayerAttributes{
+				Position:         soccer.PlayerPositionGoalkeeper,
+				GoalkeeperRating: 86,
+				SpeedRating:      80,
+				ControlRating:    21,
+			},
+			expected: 84,
+		},
+		"df": {
+			gotPlayer: soccer.PlayerAttributes{
+				Position:      soccer.PlayerPositionDefense,
+				DefenseRating: 80,
+				SpeedRating:   73,
+				ControlRating: 70,
+				AttackRating:  12,
+			},
+			expected: 77,
+		},
+		"mf": {
+			gotPlayer: soccer.PlayerAttributes{
+				Position:      soccer.PlayerPositionMidfield,
+				DefenseRating: 70,
+				SpeedRating:   80,
+				ControlRating: 83,
+				AttackRating:  75,
+			},
+			expected: 80,
+		},
+		"att": {
+			gotPlayer: soccer.PlayerAttributes{
+				Position:      soccer.PlayerPositionAttack,
+				DefenseRating: 44,
+				SpeedRating:   78,
+				ControlRating: 79,
+				AttackRating:  92,
+			},
+			expected: 89,
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			if got := tt.gotPlayer.GetOverallRating(); got != tt.expected {
+				t.Errorf("GetOverallRating() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}

@@ -16,21 +16,38 @@ type PlayerAttributes struct {
 	BasedOnPlayerURL string         `json:"based_on_player_url"`
 }
 
-// GetControlScore returns the control score for a player
+// GetOverallRating returns the overall rating for a gotPlayer based on their position
+func (p PlayerAttributes) GetOverallRating() int {
+	if p.Position == PlayerPositionGoalkeeper {
+		return (p.GoalkeeperRating*3 + p.SpeedRating) / 4
+	}
+	if p.Position == PlayerPositionDefense {
+		return (p.DefenseRating*4 + p.SpeedRating + p.ControlRating) / 6
+	}
+	if p.Position == PlayerPositionMidfield {
+		return (p.DefenseRating + p.SpeedRating + p.ControlRating*5 + p.AttackRating) / 8
+	}
+	if p.Position == PlayerPositionAttack {
+		return (p.SpeedRating + p.ControlRating + p.AttackRating*9) / 11
+	}
+	return p.OverallRating
+}
+
+// GetControlScore returns the control score for a gotPlayer
 // It is calculated using the control and speed rating where control is weighted 3x more than speed
 // controlScore = (controlRating * 3 + speedRating) / 4
 func (p PlayerAttributes) GetControlScore() float64 {
 	return getRating(p.ControlRating, p.SpeedRating)
 }
 
-// GetAttackScore returns the attack score for a player
+// GetAttackScore returns the attack score for a gotPlayer
 // It is calculated using the attack and speed rating where attack is weighted 3x more than speed
 // attackScore = (attackRating * 3 + speedRating) / 4
 func (p PlayerAttributes) GetAttackScore() float64 {
 	return getRating(p.AttackRating, p.SpeedRating)
 }
 
-// GetDefenseScore returns the defense score for a player
+// GetDefenseScore returns the defense score for a gotPlayer
 // It is calculated using the defense and speed rating where defense is weighted 3x more than speed
 // defenseScore = (defenseRating * 3 + speedRating) / 4
 func (p PlayerAttributes) GetDefenseScore() float64 {
