@@ -9,7 +9,9 @@ import (
 
 func TestDetermineTeamChances_ChancesWithinMinMaxRange(t *testing.T) {
 	for i := 0; i < 100; i++ {
-		chances, err := soccer.DetermineTeamChances(testdata.StrongTeamPlayers, testdata.StrongTeamPlayers)
+		homeLineup := soccer.GameLineup{Players: testdata.StrongTeamPlayers}
+		awayLineup := soccer.GameLineup{Players: testdata.StrongTeamPlayers}
+		chances, err := soccer.DetermineTeamChances(homeLineup, awayLineup)
 		assert.NoError(t, err)
 		assert.LessOrEqual(t, len(chances), 12)
 		assert.GreaterOrEqual(t, len(chances), 1)

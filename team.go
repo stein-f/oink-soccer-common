@@ -13,10 +13,10 @@ type Team struct {
 //	defense: 15%
 //	midfield: 65%
 //	attack: 15%
-func CalculateTeamControlScore(players []SelectedPlayer) float64 {
+func CalculateTeamControlScore(lineup GameLineup) float64 {
 	// group players by position
 	var playersByPosition = make(map[PlayerPosition][]SelectedPlayer)
-	for _, player := range players {
+	for _, player := range lineup.Players {
 		playersByPosition[player.SelectedPosition] = append(playersByPosition[player.SelectedPosition], player)
 	}
 
@@ -31,7 +31,9 @@ func CalculateTeamControlScore(players []SelectedPlayer) float64 {
 	midfieldScore := averageControlScoresByPosition[PlayerPositionMidfield] * 65 / 100
 	attackScore := averageControlScoresByPosition[PlayerPositionAttack] * 15 / 100
 
-	return gkScore + defScore + midfieldScore + attackScore
+	controlScore := gkScore + defScore + midfieldScore + attackScore
+	itemBoost := getTeamItemBoost(lineup)
+	return applyBoost(itemBoost, controlScore)
 }
 
 func getAverageControlScore(players []SelectedPlayer) float64 {
@@ -49,10 +51,10 @@ func getAverageControlScore(players []SelectedPlayer) float64 {
 //	defense: 40%
 //	midfield: 20%
 //	attack: 5%
-func CalculateTeamDefenseScore(players []SelectedPlayer) float64 {
+func CalculateTeamDefenseScore(lineup GameLineup) float64 {
 	// group players by position
 	var playersByPosition = make(map[PlayerPosition][]SelectedPlayer)
-	for _, player := range players {
+	for _, player := range lineup.Players {
 		playersByPosition[player.SelectedPosition] = append(playersByPosition[player.SelectedPosition], player)
 	}
 
@@ -67,7 +69,9 @@ func CalculateTeamDefenseScore(players []SelectedPlayer) float64 {
 	midfieldScore := averageControlScoresByPosition[PlayerPositionMidfield] * 20 / 100
 	attackScore := averageControlScoresByPosition[PlayerPositionAttack] * 5 / 100
 
-	return gkScore + defScore + midfieldScore + attackScore
+	defenseScore := gkScore + defScore + midfieldScore + attackScore
+	itemBoost := getTeamItemBoost(lineup)
+	return applyBoost(itemBoost, defenseScore)
 }
 
 func getAverageDefenseScore(players []SelectedPlayer) float64 {

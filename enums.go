@@ -62,3 +62,17 @@ func GameEventTypeValues() []GameEventType {
 		GameEventTypeMiss,
 	}
 }
+
+type BoostType string
+
+const (
+	BoostTypeTeam     BoostType = "Team Boost"
+	BoostTypePosition BoostType = "Position Boost"
+)
+
+func BoostTypeValues() []BoostType {
+	return []BoostType{
+		BoostTypeTeam,
+		BoostTypePosition,
+	}
+}

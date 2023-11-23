@@ -21,7 +21,10 @@ func main() {
 	scorerByPosition := make(map[soccer.PlayerPosition]int)
 
 	homeLineup := loadConfig(homeTeamConfig)
-	awayLineup := loadConfig(awayTeamConfig)
+	homeLineup.ItemBoosts = []soccer.Boost{
+		{BoostType: soccer.BoostTypeTeam, MinBoost: 1.01, MaxBoost: 1.05}, // apply a 1-5% boost to the team
+	}
+	awayLineup := loadConfig(homeTeamConfig)
 
 	for i := 0; i < gameCount; i++ {
 		gameEvents, err := soccer.RunGame(homeLineup, awayLineup)

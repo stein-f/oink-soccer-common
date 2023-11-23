@@ -47,8 +47,9 @@ func (p SelectedPlayer) GetDefenseScore() float64 {
 }
 
 type GameLineup struct {
-	Team    Team             `json:"team"`
-	Players []SelectedPlayer `json:"players"`
+	Team       Team             `json:"team"`
+	Players    []SelectedPlayer `json:"players"`
+	ItemBoosts []Boost          `json:"item_boosts"`
 }
 
 func (l GameLineup) FindPlayer(id string) (SelectedPlayer, bool) {
@@ -108,7 +109,8 @@ type TeamStats struct {
 
 func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, error) {
 	events := []GameEvent{}
-	teamChances, err := DetermineTeamChances(homeTeam.Players, awayTeam.Players)
+
+	teamChances, err := DetermineTeamChances(homeTeam, awayTeam)
 	if err != nil {
 		return nil, err
 	}
@@ -127,6 +129,15 @@ func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, error) {
 		events = append(events, event)
 	}
 	return events, nil
+}
+
+func getTeamItemBoost(lineup GameLineup) float64 {
+	for _, boost := range lineup.ItemBoosts {
+		if boost.BoostType == BoostTypeTeam {
+			return boost.GetBoost()
+		}
+	}
+	return 1
 }
 
 func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTeamLineup GameLineup, minuteOfEvent int) (GameEvent, error) {
@@ -154,11 +165,14 @@ func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTe
 		return GameEvent{}, err
 	}
 
-	teamDefenseScore := CalculateTeamDefenseScore(defensiveTeamLineup.Players)
-	scaledDefenseScore := ScalingFunction(applyBoost(defenseBoost, teamDefenseScore))
+	teamDefenseScore := CalculateTeamDefenseScore(defensiveTeamLineup)
+	scaledDefenseScore := applyBoost(defenseBoost, ScalingFunction(teamDefenseScore))
 
 	attackingPlayerAttackScore := attackPlayer.GetAttackScore()
-	scaledAttackScore := ScalingFunction(applyBoost(attackBoost, attackingPlayerAttackScore))
+	scaledAttackScore := applyBoost(attackBoost, ScalingFunction(attackingPlayerAttackScore))
+
+	attackingTeamBoost := getTeamItemBoost(attackingTeamLineup)
+	scaledAttackScore = applyBoost(attackingTeamBoost, scaledAttackScore)
 
 	goalChanceChoices := []weightedrand.Choice{
 		{Item: true, Weight: uint(scaledAttackScore)},
@@ -255,14 +269,14 @@ func getRandomPlayerByPosition(position PlayerPosition, players []SelectedPlayer
 			playersByPosition = append(playersByPosition, player)
 		}
 	}
+	if len(playersByPosition) == 0 {
+		return players[rand.Intn(len(players))], nil
+	}
 	return playersByPosition[rand.Intn(len(playersByPosition))], nil
 }
 
 // DetermineTeamChances determines the chances of each team to score a goal. It is based on the control score of each team.
-func DetermineTeamChances(
-	homeTeamPlayers []SelectedPlayer,
-	awayTeamPlayers []SelectedPlayer,
-) ([]TeamType, error) {
+func DetermineTeamChances(homeTeamPlayers GameLineup, awayTeamPlayers GameLineup) ([]TeamType, error) {
 	eventCount, err := getEventCount()
 	if err != nil {
 		return nil, err
@@ -369,6 +383,14 @@ var eventMinuteWeights = []weightedrand.Choice{
 }
 
 func getEventMinute() (int, error) {
+	// validate max and min aren't the same, which would cause a panic in rand.Intn
+	for _, eventMinuteWeight := range eventMinuteWeights {
+		eventMinuteRange := eventMinuteWeight.Item.(eventMinuteRange)
+		if eventMinuteRange.MinMinute == eventMinuteRange.MaxMinute {
+			return 0, fmt.Errorf("event minute range is invalid. min: %d, max: %d", eventMinuteRange.MinMinute, eventMinuteRange.MaxMinute)
+		}
+	}
+
 	chooser, err := weightedrand.NewChooser(eventMinuteWeights...)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create event count chooser. %w", err)
