@@ -17,6 +17,7 @@ func TeamTypeValues() []TeamType {
 type PlayerLevel string
 
 const (
+	PlayerLevelLegendary        PlayerLevel = "Legendary"
 	PlayerLevelWorldClass       PlayerLevel = "World class"
 	PlayerLevelProfessional     PlayerLevel = "Professional"
 	PlayerLevelSemiProfessional PlayerLevel = "Semi Professional"
