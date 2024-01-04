@@ -1,10 +1,11 @@
 package soccer_test
 
 import (
-	soccer "github.com/stein-f/oink-soccer-common"
-	"github.com/stretchr/testify/assert"
 	"math"
 	"testing"
+
+	soccer "github.com/stein-f/oink-soccer-common"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTeam_GetOverallTeamControlScore(t *testing.T) {
@@ -14,6 +15,9 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 	}{
 		"low control midfielders has larger overall impact on team control": {
 			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypePyramid,
+				},
 				Players: []soccer.SelectedPlayer{
 					{
 						SelectedPosition: soccer.PlayerPositionGoalkeeper,
@@ -61,6 +65,9 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 		},
 		"low control attackers has smaller overall impact on team control": {
 			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypePyramid,
+				},
 				Players: []soccer.SelectedPlayer{
 					{
 						SelectedPosition: soccer.PlayerPositionGoalkeeper,
@@ -106,8 +113,61 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 			},
 			wantOverallTeamControlScore: 75,
 		},
+		"with diamond control boost": {
+			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypeDiamond,
+				},
+				Players: []soccer.SelectedPlayer{
+					{
+						SelectedPosition: soccer.PlayerPositionGoalkeeper,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionGoalkeeper,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionDefense,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionDefense,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionMidfield,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionMidfield,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionMidfield,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionMidfield,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionAttack,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionAttack,
+							ControlRating: 50,
+							SpeedRating:   50,
+						},
+					},
+				},
+			},
+			wantOverallTeamControlScore: 79,
+		},
 		"with max score": {
 			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypePyramid,
+				},
 				Players: []soccer.SelectedPlayer{
 					{
 						SelectedPosition: soccer.PlayerPositionGoalkeeper,
@@ -155,6 +215,9 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 		},
 		"with 10% boost": {
 			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypePyramid,
+				},
 				ItemBoosts: []soccer.Boost{
 					{
 						BoostType: soccer.BoostTypeTeam,
@@ -220,6 +283,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 func TestCalculateTeamControlScore_OutOfPositionPenalty(t *testing.T) {
 	constRating := 80
 	score := soccer.CalculateTeamControlScore(soccer.GameLineup{
+		Team: soccer.Team{Formation: soccer.FormationTypePyramid},
 		Players: []soccer.SelectedPlayer{
 			createPlayer(constRating, constRating, soccer.PlayerPositionGoalkeeper, soccer.PlayerPositionGoalkeeper),
 			createPlayer(constRating, constRating, soccer.PlayerPositionDefense, soccer.PlayerPositionDefense),
@@ -230,6 +294,7 @@ func TestCalculateTeamControlScore_OutOfPositionPenalty(t *testing.T) {
 	assert.Equal(t, float64(constRating), score)
 
 	scoreWithOutOfPositionMidfielder := soccer.CalculateTeamControlScore(soccer.GameLineup{
+		Team: soccer.Team{Formation: soccer.FormationTypePyramid},
 		Players: []soccer.SelectedPlayer{
 			createPlayer(constRating, constRating, soccer.PlayerPositionGoalkeeper, soccer.PlayerPositionGoalkeeper),
 			createPlayer(constRating, constRating, soccer.PlayerPositionDefense, soccer.PlayerPositionDefense),
@@ -258,6 +323,9 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 	}{
 		"high scoring defenders has larger overall impact on team defense": {
 			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypePyramid,
+				},
 				Players: []soccer.SelectedPlayer{
 					{
 						SelectedPosition: soccer.PlayerPositionGoalkeeper,
@@ -304,6 +372,9 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 		},
 		"low scoring defenders has smaller overall impact on team defense": {
 			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypePyramid,
+				},
 				Players: []soccer.SelectedPlayer{
 					{
 						SelectedPosition: soccer.PlayerPositionGoalkeeper,
@@ -351,6 +422,9 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 		},
 		"with max score": {
 			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypePyramid,
+				},
 				Players: []soccer.SelectedPlayer{
 					{
 						SelectedPosition: soccer.PlayerPositionGoalkeeper,
@@ -398,6 +472,9 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 		},
 		"handles free agents": {
 			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypePyramid,
+				},
 				Players: []soccer.SelectedPlayer{
 					{
 						SelectedPosition: soccer.PlayerPositionGoalkeeper,
@@ -445,6 +522,9 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 		},
 		"with 10% boost": {
 			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypePyramid,
+				},
 				ItemBoosts: []soccer.Boost{
 					{
 						BoostType: soccer.BoostTypeTeam,

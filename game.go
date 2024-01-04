@@ -2,9 +2,10 @@ package soccer
 
 import (
 	"fmt"
-	"github.com/mroth/weightedrand"
 	"math/rand"
 	"sort"
+
+	"github.com/mroth/weightedrand"
 )
 
 const (
@@ -301,6 +302,11 @@ func DetermineTeamChances(homeTeamPlayers GameLineup, awayTeamPlayers GameLineup
 	}
 
 	return teamChances, nil
+}
+
+func getControlBoost(lineup GameLineup) float64 {
+	formationConfig := getFormationConfig(lineup.Team.Formation)
+	return formationConfig.ControlModifier
 }
 
 func getEventCount() (int, error) {

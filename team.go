@@ -31,7 +31,8 @@ func CalculateTeamControlScore(lineup GameLineup) float64 {
 	midfieldScore := averageControlScoresByPosition[PlayerPositionMidfield] * 65 / 100
 	attackScore := averageControlScoresByPosition[PlayerPositionAttack] * 15 / 100
 
-	controlScore := gkScore + defScore + midfieldScore + attackScore
+	controlScore := (gkScore + defScore + midfieldScore + attackScore) * getControlBoost(lineup)
+
 	itemBoost := getTeamItemBoost(lineup)
 	return applyBoost(itemBoost, controlScore)
 }

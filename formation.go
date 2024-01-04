@@ -4,6 +4,7 @@ type FormationConfig struct {
 	FormationType   FormationType
 	Slots           map[uint64]PlayerPosition
 	DefenseModifier float64
+	ControlModifier float64
 	AttackModifier  float64
 }
 
@@ -25,6 +26,7 @@ var TheYFormation = FormationConfig{
 		5: PlayerPositionAttack,
 	},
 	DefenseModifier: 0.9,
+	ControlModifier: 1,
 	AttackModifier:  1.1,
 }
 
@@ -46,6 +48,7 @@ var ThePyramidFormation = FormationConfig{
 		5: PlayerPositionAttack,
 	},
 	DefenseModifier: 1.1,
+	ControlModifier: 1,
 	AttackModifier:  0.9,
 }
 
@@ -65,6 +68,7 @@ var TheDiamondFormation = FormationConfig{
 		4: PlayerPositionMidfield,
 		5: PlayerPositionAttack,
 	},
-	DefenseModifier: 1,
-	AttackModifier:  1,
+	DefenseModifier: 0.975,
+	ControlModifier: 1.05,
+	AttackModifier:  0.975,
 }
