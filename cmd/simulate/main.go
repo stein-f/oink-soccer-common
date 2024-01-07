@@ -4,8 +4,9 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	soccer "github.com/stein-f/oink-soccer-common"
 	"log"
+
+	soccer "github.com/stein-f/oink-soccer-common"
 )
 
 //go:embed home_team.json
@@ -21,10 +22,7 @@ func main() {
 	scorerByPosition := make(map[soccer.PlayerPosition]int)
 
 	homeLineup := loadConfig(homeTeamConfig)
-	homeLineup.ItemBoosts = []soccer.Boost{
-		{BoostType: soccer.BoostTypeTeam, MinBoost: 1.01, MaxBoost: 1.05}, // apply a 1-5% boost to the team
-	}
-	awayLineup := loadConfig(homeTeamConfig)
+	awayLineup := loadConfig(awayTeamConfig)
 
 	for i := 0; i < gameCount; i++ {
 		gameEvents, err := soccer.RunGame(homeLineup, awayLineup)
@@ -33,7 +31,6 @@ func main() {
 		}
 
 		gameStats := soccer.CreateGameStats(gameEvents)
-		fmt.Printf("StrongTeam %d - WeakTeam %d\n", gameStats.HomeTeamStats.Goals, gameStats.AwayTeamStats.Goals)
 
 		if gameStats.HomeTeamStats.Goals > gameStats.AwayTeamStats.Goals {
 			homeWins++
@@ -59,9 +56,6 @@ func main() {
 			}
 		}
 
-		fmt.Println(fmt.Sprintf("StrongTeam scored %d goals from %d chances", gameStats.HomeTeamStats.Goals, gameStats.HomeTeamStats.Shots))
-		fmt.Println(fmt.Sprintf("WeakTeam scored %d goals from %d chances", gameStats.AwayTeamStats.Goals, gameStats.AwayTeamStats.Shots))
-
 		goals += gameStats.HomeTeamStats.Goals + gameStats.AwayTeamStats.Goals
 		homeChances += gameStats.HomeTeamStats.Shots
 		awayChances += gameStats.AwayTeamStats.Shots
@@ -73,10 +67,10 @@ func main() {
 
 	fmt.Printf("\nGame summary:\n")
 	fmt.Printf("Games played: %d\n", gameCount)
-	fmt.Printf("StrongTeam wins: %d\n", homeWins)
-	fmt.Printf("StrongTeam chances/game: %f\n", homeTeamChancePerGame)
-	fmt.Printf("WeakTeam wins: %d\n", awayWins)
-	fmt.Printf("WeakTeam chances/game: %f\n", awayTeamChancePerGame)
+	fmt.Printf("Home Team wins: %d\n", homeWins)
+	fmt.Printf("Home Team chances/game: %f\n", homeTeamChancePerGame)
+	fmt.Printf("Away Team wins: %d\n", awayWins)
+	fmt.Printf("Away Team chances/game: %f\n", awayTeamChancePerGame)
 	fmt.Printf("Draws: %d\n", draws)
 	fmt.Printf("Goals/game: %f\n", goalsPerGame)
 
