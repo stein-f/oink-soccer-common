@@ -22,13 +22,13 @@ func (p PlayerAttributes) GetOverallRating() int {
 		return (p.GoalkeeperRating*3 + p.SpeedRating) / 4
 	}
 	if p.Position == PlayerPositionDefense {
-		return (p.DefenseRating*4 + p.SpeedRating + p.ControlRating) / 6
+		return (p.DefenseRating*3 + p.SpeedRating) / 4
 	}
 	if p.Position == PlayerPositionMidfield {
-		return (p.DefenseRating + p.SpeedRating + p.ControlRating*5 + p.AttackRating) / 8
+		return (p.ControlRating*3 + p.SpeedRating) / 4
 	}
 	if p.Position == PlayerPositionAttack {
-		return (p.SpeedRating + p.ControlRating + p.AttackRating*9) / 11
+		return (p.AttackRating*3 + p.SpeedRating) / 4
 	}
 	return p.OverallRating
 }

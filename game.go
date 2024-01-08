@@ -141,19 +141,29 @@ func getTeamItemBoost(lineup GameLineup) float64 {
 	return 1
 }
 
+func getPositionItemBoost(boosts []Boost, position PlayerPosition) float64 {
+	for _, boost := range boosts {
+		if boost.BoostType == BoostTypePosition && boost.BoostPosition == position {
+			return boost.GetBoost()
+		}
+	}
+	return 1
+}
+
 func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTeamLineup GameLineup, minuteOfEvent int) (GameEvent, error) {
 	attackingTeamLineup := homeTeamLineup
-	attackBoost := getAttackBoost(homeTeamLineup)
-
 	defensiveTeamLineup := awayTeamLineup
-	defenseBoost := getDefenseBoost(awayTeamLineup)
+
+	// determine formation boosts - applied to the overall team scores rather than at individual level
+	attackFormationBoost := getAttackFormationBoost(homeTeamLineup)
+	defenseFormationBoost := getDefenseFormationBoost(awayTeamLineup)
 
 	if attackingTeamType == TeamTypeAway {
 		attackingTeamLineup = awayTeamLineup
-		attackBoost = getAttackBoost(awayTeamLineup)
-
 		defensiveTeamLineup = homeTeamLineup
-		defenseBoost = getDefenseBoost(homeTeamLineup)
+
+		attackFormationBoost = getAttackFormationBoost(awayTeamLineup)
+		defenseFormationBoost = getDefenseFormationBoost(homeTeamLineup)
 	}
 
 	positionOfAttackPlayer, err := determinePositionOfAttackingTeamChance(attackingTeamLineup)
@@ -167,10 +177,10 @@ func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTe
 	}
 
 	teamDefenseScore := CalculateTeamDefenseScore(defensiveTeamLineup)
-	scaledDefenseScore := applyBoost(defenseBoost, ScalingFunction(teamDefenseScore))
+	scaledDefenseScore := applyBoost(defenseFormationBoost, ScalingFunction(teamDefenseScore))
 
 	attackingPlayerAttackScore := attackPlayer.GetAttackScore()
-	scaledAttackScore := applyBoost(attackBoost, ScalingFunction(attackingPlayerAttackScore))
+	scaledAttackScore := applyBoost(attackFormationBoost, ScalingFunction(attackingPlayerAttackScore))
 
 	attackingTeamBoost := getTeamItemBoost(attackingTeamLineup)
 	scaledAttackScore = applyBoost(attackingTeamBoost, scaledAttackScore)
@@ -206,12 +216,12 @@ func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTe
 	}, nil
 }
 
-func getAttackBoost(lineup GameLineup) float64 {
+func getAttackFormationBoost(lineup GameLineup) float64 {
 	formationConfig := getFormationConfig(lineup.Team.Formation)
 	return formationConfig.AttackModifier
 }
 
-func getDefenseBoost(lineup GameLineup) float64 {
+func getDefenseFormationBoost(lineup GameLineup) float64 {
 	formationConfig := getFormationConfig(lineup.Team.Formation)
 	return formationConfig.DefenseModifier
 }
@@ -304,7 +314,7 @@ func DetermineTeamChances(homeTeamPlayers GameLineup, awayTeamPlayers GameLineup
 	return teamChances, nil
 }
 
-func getControlBoost(lineup GameLineup) float64 {
+func getFormationControlBoost(lineup GameLineup) float64 {
 	formationConfig := getFormationConfig(lineup.Team.Formation)
 	return formationConfig.ControlModifier
 }

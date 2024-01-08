@@ -1,9 +1,10 @@
 package soccer_test
 
 import (
+	"testing"
+
 	soccer "github.com/stein-f/oink-soccer-common"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestPlayerAttributes_GetControlRating(t *testing.T) {
@@ -100,7 +101,7 @@ func TestGetOverallRating(t *testing.T) {
 				ControlRating: 70,
 				AttackRating:  12,
 			},
-			expected: 77,
+			expected: 78,
 		},
 		"mf": {
 			gotPlayer: soccer.PlayerAttributes{
@@ -110,7 +111,7 @@ func TestGetOverallRating(t *testing.T) {
 				ControlRating: 83,
 				AttackRating:  75,
 			},
-			expected: 80,
+			expected: 82,
 		},
 		"att": {
 			gotPlayer: soccer.PlayerAttributes{
@@ -120,7 +121,7 @@ func TestGetOverallRating(t *testing.T) {
 				ControlRating: 79,
 				AttackRating:  92,
 			},
-			expected: 89,
+			expected: 88,
 		},
 	}
 

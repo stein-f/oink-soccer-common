@@ -6,9 +6,10 @@ import (
 )
 
 type Boost struct {
-	BoostType BoostType `json:"boost_type"`
-	MinBoost  float64   `json:"min_boost"`
-	MaxBoost  float64   `json:"max_boost"`
+	BoostType     BoostType      `json:"boost_type"`
+	BoostPosition PlayerPosition `json:"boost_position"`
+	MinBoost      float64        `json:"min_boost"`
+	MaxBoost      float64        `json:"max_boost"`
 }
 
 func (b Boost) GetBoost() float64 {

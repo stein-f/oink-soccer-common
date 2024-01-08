@@ -213,7 +213,123 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 			},
 			wantOverallTeamControlScore: 100,
 		},
-		"with 10% boost": {
+		"with 10% position boost": {
+			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypePyramid,
+				},
+				ItemBoosts: []soccer.Boost{
+					{
+						BoostType:     soccer.BoostTypePosition,
+						BoostPosition: soccer.PlayerPositionMidfield,
+						MinBoost:      1.1,
+						MaxBoost:      1.1,
+					},
+				},
+				Players: []soccer.SelectedPlayer{
+					{
+						SelectedPosition: soccer.PlayerPositionGoalkeeper,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionGoalkeeper,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionDefense,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionDefense,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionMidfield,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionMidfield,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionMidfield,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionMidfield,
+							ControlRating: 50,
+							SpeedRating:   50,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionAttack,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionAttack,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+				},
+			},
+			wantOverallTeamControlScore: 70 + 7,
+		},
+		"with no position boost when position doesn't match": {
+			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypePyramid,
+				},
+				ItemBoosts: []soccer.Boost{
+					{
+						BoostType:     soccer.BoostTypePosition,
+						BoostPosition: soccer.PlayerPositionAttack,
+						MinBoost:      1.1,
+						MaxBoost:      1.1,
+					},
+				},
+				Players: []soccer.SelectedPlayer{
+					{
+						SelectedPosition: soccer.PlayerPositionGoalkeeper,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionGoalkeeper,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionDefense,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionDefense,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionMidfield,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionMidfield,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionMidfield,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionMidfield,
+							ControlRating: 50,
+							SpeedRating:   50,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionAttack,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionAttack,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+				},
+			},
+			wantOverallTeamControlScore: 70,
+		},
+		"with 10% team boost": {
 			gotTeam: soccer.GameLineup{
 				Team: soccer.Team{
 					Formation: soccer.FormationTypePyramid,
