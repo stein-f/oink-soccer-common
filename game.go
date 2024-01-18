@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
+	"time"
 
 	"github.com/mroth/weightedrand"
 )
@@ -108,28 +109,34 @@ type TeamStats struct {
 	Goals    int      `json:"goals"`
 }
 
-func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, error) {
+func RunGameWithSeed(randSource *rand.Rand, homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, error) {
 	events := []GameEvent{}
 
-	teamChances, err := DetermineTeamChances(homeTeam, awayTeam)
+	teamChances, err := DetermineTeamChances(randSource, homeTeam, awayTeam)
 	if err != nil {
 		return nil, err
 	}
 
-	eventMinutes, err := GetRandomMinutes(len(teamChances))
+	eventMinutes, err := GetRandomMinutes(randSource, len(teamChances))
 	if err != nil {
 		return nil, err
 	}
 
 	for i, teamChance := range teamChances {
 		minuteOfEvent := eventMinutes[i]
-		event, err := runTeamChance(teamChance, homeTeam, awayTeam, minuteOfEvent)
+		event, err := runTeamChance(randSource, teamChance, homeTeam, awayTeam, minuteOfEvent)
 		if err != nil {
 			return nil, err
 		}
 		events = append(events, event)
 	}
 	return events, nil
+}
+
+func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, error) {
+	source := rand.NewSource(time.Now().UnixNano())
+	randSource := rand.New(source)
+	return RunGameWithSeed(randSource, homeTeam, awayTeam)
 }
 
 func getTeamItemBoost(lineup GameLineup) float64 {
@@ -150,7 +157,7 @@ func getPositionItemBoost(boosts []Boost, position PlayerPosition) float64 {
 	return 1
 }
 
-func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTeamLineup GameLineup, minuteOfEvent int) (GameEvent, error) {
+func runTeamChance(randSource *rand.Rand, attackingTeamType TeamType, homeTeamLineup GameLineup, awayTeamLineup GameLineup, minuteOfEvent int) (GameEvent, error) {
 	attackingTeamLineup := homeTeamLineup
 	defensiveTeamLineup := awayTeamLineup
 
@@ -166,12 +173,12 @@ func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTe
 		defenseFormationBoost = getDefenseFormationBoost(homeTeamLineup)
 	}
 
-	positionOfAttackPlayer, err := determinePositionOfAttackingTeamChance(attackingTeamLineup)
+	positionOfAttackPlayer, err := determinePositionOfAttackingTeamChance(randSource, attackingTeamLineup)
 	if err != nil {
 		return GameEvent{}, err
 	}
 
-	attackPlayer, err := getRandomPlayerByPosition(positionOfAttackPlayer, attackingTeamLineup.Players)
+	attackPlayer, err := getRandomPlayerByPosition(randSource, positionOfAttackPlayer, attackingTeamLineup.Players)
 	if err != nil {
 		return GameEvent{}, err
 	}
@@ -194,7 +201,7 @@ func runTeamChance(attackingTeamType TeamType, homeTeamLineup GameLineup, awayTe
 		return GameEvent{}, fmt.Errorf("failed to create result chooser. %w", err)
 	}
 
-	isGoal := resultChooser.Pick().(bool)
+	isGoal := resultChooser.PickSource(randSource).(bool)
 	if isGoal {
 		return GameEvent{
 			Type: GameEventTypeGoal,
@@ -243,7 +250,7 @@ func getFormationConfig(formationType FormationType) FormationConfig {
 
 // determines the position of the gotPlayer that will have the chance to score a goal.
 // weighted rand based on gotPlayer position: 60% attack, 30% midfield, 10% defense
-func determinePositionOfAttackingTeamChance(attackingTeamLineup GameLineup) (PlayerPosition, error) {
+func determinePositionOfAttackingTeamChance(randSource *rand.Rand, attackingTeamLineup GameLineup) (PlayerPosition, error) {
 	playerChoices := []weightedrand.Choice{}
 	for i := range attackingTeamLineup.Players {
 		var weight uint
@@ -270,10 +277,10 @@ func determinePositionOfAttackingTeamChance(attackingTeamLineup GameLineup) (Pla
 	if err != nil {
 		return "", fmt.Errorf("failed to create gotPlayer chooser. %w", err)
 	}
-	return chooser.Pick().(SelectedPlayer).SelectedPosition, nil
+	return chooser.PickSource(randSource).(SelectedPlayer).SelectedPosition, nil
 }
 
-func getRandomPlayerByPosition(position PlayerPosition, players []SelectedPlayer) (SelectedPlayer, error) {
+func getRandomPlayerByPosition(randSource *rand.Rand, position PlayerPosition, players []SelectedPlayer) (SelectedPlayer, error) {
 	var playersByPosition []SelectedPlayer
 	for _, player := range players {
 		if player.SelectedPosition == position {
@@ -281,14 +288,14 @@ func getRandomPlayerByPosition(position PlayerPosition, players []SelectedPlayer
 		}
 	}
 	if len(playersByPosition) == 0 {
-		return players[rand.Intn(len(players))], nil
+		return players[randSource.Intn(len(players))], nil
 	}
-	return playersByPosition[rand.Intn(len(playersByPosition))], nil
+	return playersByPosition[randSource.Intn(len(playersByPosition))], nil
 }
 
 // DetermineTeamChances determines the chances of each team to score a goal. It is based on the control score of each team.
-func DetermineTeamChances(homeTeamPlayers GameLineup, awayTeamPlayers GameLineup) ([]TeamType, error) {
-	eventCount, err := getEventCount()
+func DetermineTeamChances(randSource *rand.Rand, homeTeamPlayers GameLineup, awayTeamPlayers GameLineup) ([]TeamType, error) {
+	eventCount, err := getEventCount(randSource)
 	if err != nil {
 		return nil, err
 	}
@@ -307,7 +314,7 @@ func DetermineTeamChances(homeTeamPlayers GameLineup, awayTeamPlayers GameLineup
 
 	var teamChances []TeamType
 	for i := 0; i < eventCount; i++ {
-		teamType := chooser.Pick().(TeamType)
+		teamType := chooser.PickSource(randSource).(TeamType)
 		teamChances = append(teamChances, teamType)
 	}
 
@@ -319,18 +326,18 @@ func getFormationControlBoost(lineup GameLineup) float64 {
 	return formationConfig.ControlModifier
 }
 
-func getEventCount() (int, error) {
+func getEventCount(randSource *rand.Rand) (int, error) {
 	chooser, err := weightedrand.NewChooser(eventCountWeights...)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create event count chooser. %w", err)
 	}
-	return chooser.Pick().(int), nil
+	return chooser.PickSource(randSource).(int), nil
 }
 
-func GetRandomMinutes(count int) ([]int, error) {
+func GetRandomMinutes(randSource *rand.Rand, count int) ([]int, error) {
 	var minutes []int
 	for i := 0; i < count; i++ {
-		minute, err := getEventMinute()
+		minute, err := getEventMinute(randSource)
 		if err != nil {
 			return nil, err
 		}
@@ -398,7 +405,7 @@ var eventMinuteWeights = []weightedrand.Choice{
 	{Item: eventMinuteRange{MinMinute: 76, MaxMinute: 98}, Weight: 254},
 }
 
-func getEventMinute() (int, error) {
+func getEventMinute(randSource *rand.Rand) (int, error) {
 	// validate max and min aren't the same, which would cause a panic in rand.Intn
 	for _, eventMinuteWeight := range eventMinuteWeights {
 		eventMinuteRange := eventMinuteWeight.Item.(eventMinuteRange)
@@ -411,6 +418,6 @@ func getEventMinute() (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("failed to create event count chooser. %w", err)
 	}
-	eventRange := chooser.Pick().(eventMinuteRange)
+	eventRange := chooser.PickSource(randSource).(eventMinuteRange)
 	return rand.Intn(eventRange.MaxMinute-eventRange.MinMinute+1) + eventRange.MinMinute, nil
 }

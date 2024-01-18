@@ -1,6 +1,11 @@
 package testdata
 
-import soccer "github.com/stein-f/oink-soccer-common"
+import (
+	"math/rand"
+	"time"
+
+	soccer "github.com/stein-f/oink-soccer-common"
+)
 
 var StrongTeamPlayers = []soccer.SelectedPlayer{
 	{
@@ -68,6 +73,11 @@ var StrongTeamPlayers = []soccer.SelectedPlayer{
 		},
 		SelectedPosition: soccer.PlayerPositionAttack,
 	},
+}
+
+func TimeNowRandSource() *rand.Rand {
+	source := rand.NewSource(time.Now().UnixNano())
+	return rand.New(source)
 }
 
 var WeakTeamPlayers = []soccer.SelectedPlayer{

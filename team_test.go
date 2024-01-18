@@ -329,6 +329,56 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 			},
 			wantOverallTeamControlScore: 70,
 		},
+		"handles free agents": {
+			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypePyramid,
+				},
+				Players: []soccer.SelectedPlayer{
+					{
+						SelectedPosition: soccer.PlayerPositionGoalkeeper,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionAny,
+							ControlRating: 55,
+							SpeedRating:   55,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionDefense,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionAny,
+							ControlRating: 55,
+							SpeedRating:   55,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionMidfield,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionAny,
+							ControlRating: 55,
+							SpeedRating:   55,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionMidfield,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionAny,
+							ControlRating: 55,
+							SpeedRating:   55,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionAttack,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionAny,
+							ControlRating: 55,
+							SpeedRating:   55,
+						},
+					},
+				},
+			},
+			wantOverallTeamControlScore: 55,
+		},
 		"with 10% team boost": {
 			gotTeam: soccer.GameLineup{
 				Team: soccer.Team{
