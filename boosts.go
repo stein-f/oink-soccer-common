@@ -2,7 +2,6 @@ package soccer
 
 import (
 	"math/rand"
-	"time"
 )
 
 type Boost struct {
@@ -12,9 +11,7 @@ type Boost struct {
 	MaxBoost      float64        `json:"max_boost"`
 }
 
-func (b Boost) GetBoost() float64 {
-	src := rand.NewSource(time.Now().UnixNano())
-	rnd := rand.New(src)
-	randomFloat := rnd.Float64()
+func (b Boost) GetBoost(source *rand.Rand) float64 {
+	randomFloat := source.Float64()
 	return b.MinBoost + randomFloat*(b.MaxBoost-b.MinBoost)
 }

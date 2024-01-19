@@ -1,8 +1,11 @@
 package soccer_test
 
 import (
-	soccer "github.com/stein-f/oink-soccer-common"
+	"math/rand"
 	"testing"
+	"time"
+
+	soccer "github.com/stein-f/oink-soccer-common"
 )
 
 func TestGetBoost(t *testing.T) {
@@ -16,7 +19,7 @@ func TestGetBoost(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.boost.GetBoost()
+			got := tt.boost.GetBoost(rand.New(rand.NewSource(time.Now().UnixNano())))
 			if got < tt.boost.MinBoost || got > tt.boost.MaxBoost {
 				t.Errorf("GetBoost() = %v, want range [%v, %v]", got, tt.boost.MinBoost, tt.boost.MaxBoost)
 			}

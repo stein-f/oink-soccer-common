@@ -139,19 +139,19 @@ func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, error) {
 	return RunGameWithSeed(randSource, homeTeam, awayTeam)
 }
 
-func getTeamItemBoost(lineup GameLineup) float64 {
+func getTeamItemBoost(source *rand.Rand, lineup GameLineup) float64 {
 	for _, boost := range lineup.ItemBoosts {
 		if boost.BoostType == BoostTypeTeam {
-			return boost.GetBoost()
+			return boost.GetBoost(source)
 		}
 	}
 	return 1
 }
 
-func getPositionItemBoost(boosts []Boost, position PlayerPosition) float64 {
+func getPositionItemBoost(source *rand.Rand, boosts []Boost, position PlayerPosition) float64 {
 	for _, boost := range boosts {
 		if boost.BoostType == BoostTypePosition && boost.BoostPosition == position {
-			return boost.GetBoost()
+			return boost.GetBoost(source)
 		}
 	}
 	return 1
@@ -183,13 +183,13 @@ func runTeamChance(randSource *rand.Rand, attackingTeamType TeamType, homeTeamLi
 		return GameEvent{}, err
 	}
 
-	teamDefenseScore := CalculateTeamDefenseScore(defensiveTeamLineup)
+	teamDefenseScore := CalculateTeamDefenseScore(randSource, defensiveTeamLineup)
 	scaledDefenseScore := applyBoost(defenseFormationBoost, ScalingFunction(teamDefenseScore))
 
 	attackingPlayerAttackScore := attackPlayer.GetAttackScore()
 	scaledAttackScore := applyBoost(attackFormationBoost, ScalingFunction(attackingPlayerAttackScore))
 
-	attackingTeamBoost := getTeamItemBoost(attackingTeamLineup)
+	attackingTeamBoost := getTeamItemBoost(randSource, attackingTeamLineup)
 	scaledAttackScore = applyBoost(attackingTeamBoost, scaledAttackScore)
 
 	goalChanceChoices := []weightedrand.Choice{
@@ -300,8 +300,8 @@ func DetermineTeamChances(randSource *rand.Rand, homeTeamPlayers GameLineup, awa
 		return nil, err
 	}
 
-	homeTeamControlScore := 100 * ScalingFunction(CalculateTeamControlScore(homeTeamPlayers))
-	awayTeamControlScore := 100 * ScalingFunction(CalculateTeamControlScore(awayTeamPlayers))
+	homeTeamControlScore := 100 * ScalingFunction(CalculateTeamControlScore(randSource, homeTeamPlayers))
+	awayTeamControlScore := 100 * ScalingFunction(CalculateTeamControlScore(randSource, awayTeamPlayers))
 
 	choices := []weightedrand.Choice{
 		{Item: TeamTypeHome, Weight: uint(homeTeamControlScore)},
@@ -419,5 +419,5 @@ func getEventMinute(randSource *rand.Rand) (int, error) {
 		return 0, fmt.Errorf("failed to create event count chooser. %w", err)
 	}
 	eventRange := chooser.PickSource(randSource).(eventMinuteRange)
-	return rand.Intn(eventRange.MaxMinute-eventRange.MinMinute+1) + eventRange.MinMinute, nil
+	return randSource.Intn(eventRange.MaxMinute-eventRange.MinMinute+1) + eventRange.MinMinute, nil
 }

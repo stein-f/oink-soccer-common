@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	soccer "github.com/stein-f/oink-soccer-common"
+	"github.com/stein-f/oink-soccer-common/testdata"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -439,7 +440,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			overallTeamControlScore := soccer.CalculateTeamControlScore(test.gotTeam)
+			overallTeamControlScore := soccer.CalculateTeamControlScore(testdata.TimeNowRandSource(), test.gotTeam)
 
 			assert.Equal(t, test.wantOverallTeamControlScore, math.Floor(overallTeamControlScore))
 		})
@@ -448,7 +449,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 
 func TestCalculateTeamControlScore_OutOfPositionPenalty(t *testing.T) {
 	constRating := 80
-	score := soccer.CalculateTeamControlScore(soccer.GameLineup{
+	score := soccer.CalculateTeamControlScore(testdata.TimeNowRandSource(), soccer.GameLineup{
 		Team: soccer.Team{Formation: soccer.FormationTypePyramid},
 		Players: []soccer.SelectedPlayer{
 			createPlayer(constRating, constRating, soccer.PlayerPositionGoalkeeper, soccer.PlayerPositionGoalkeeper),
@@ -459,7 +460,7 @@ func TestCalculateTeamControlScore_OutOfPositionPenalty(t *testing.T) {
 		}})
 	assert.Equal(t, float64(constRating), score)
 
-	scoreWithOutOfPositionMidfielder := soccer.CalculateTeamControlScore(soccer.GameLineup{
+	scoreWithOutOfPositionMidfielder := soccer.CalculateTeamControlScore(testdata.TimeNowRandSource(), soccer.GameLineup{
 		Team: soccer.Team{Formation: soccer.FormationTypePyramid},
 		Players: []soccer.SelectedPlayer{
 			createPlayer(constRating, constRating, soccer.PlayerPositionGoalkeeper, soccer.PlayerPositionGoalkeeper),
@@ -746,7 +747,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			overallTeamDefenseScore := soccer.CalculateTeamDefenseScore(test.gotTeam)
+			overallTeamDefenseScore := soccer.CalculateTeamDefenseScore(testdata.TimeNowRandSource(), test.gotTeam)
 
 			assert.Equal(t, test.wantOverallTeamDefenseScore, math.Floor(overallTeamDefenseScore))
 		})

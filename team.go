@@ -1,5 +1,7 @@
 package soccer
 
+import "math/rand"
+
 type Team struct {
 	ID         string        `json:"id"`
 	CustomName string        `json:"custom_name"`
@@ -13,7 +15,7 @@ type Team struct {
 //	defense: 15%
 //	midfield: 65%
 //	attack: 15%
-func CalculateTeamControlScore(lineup GameLineup) float64 {
+func CalculateTeamControlScore(source *rand.Rand, lineup GameLineup) float64 {
 	// group players by position
 	var playersByPosition = make(map[PlayerPosition][]SelectedPlayer)
 	for _, player := range lineup.Players {
@@ -22,7 +24,7 @@ func CalculateTeamControlScore(lineup GameLineup) float64 {
 
 	// calculate the average control score for each position
 	var averageControlScoresByPosition = make(map[PlayerPosition]float64)
-	boost := getPositionItemBoost(lineup.ItemBoosts, PlayerPositionMidfield)
+	boost := getPositionItemBoost(source, lineup.ItemBoosts, PlayerPositionMidfield)
 	for position, players := range playersByPosition {
 		averageControlScoresByPosition[position] = getAverageControlScore(boost, players)
 	}
@@ -34,7 +36,7 @@ func CalculateTeamControlScore(lineup GameLineup) float64 {
 
 	controlScore := (gkScore + defScore + midfieldScore + attackScore) * getFormationControlBoost(lineup)
 
-	itemBoost := getTeamItemBoost(lineup)
+	itemBoost := getTeamItemBoost(source, lineup)
 
 	return applyBoost(itemBoost, controlScore)
 }
@@ -54,7 +56,7 @@ func getAverageControlScore(boost float64, players []SelectedPlayer) float64 {
 //	defense: 40%
 //	midfield: 20%
 //	attack: 5%
-func CalculateTeamDefenseScore(lineup GameLineup) float64 {
+func CalculateTeamDefenseScore(source *rand.Rand, lineup GameLineup) float64 {
 	// group players by position
 	var playersByPosition = make(map[PlayerPosition][]SelectedPlayer)
 	for _, player := range lineup.Players {
@@ -63,7 +65,7 @@ func CalculateTeamDefenseScore(lineup GameLineup) float64 {
 
 	// calculate the average control score for each position
 	averageControlScoresByPosition := make(map[PlayerPosition]float64)
-	boost := getPositionItemBoost(lineup.ItemBoosts, PlayerPositionDefense)
+	boost := getPositionItemBoost(source, lineup.ItemBoosts, PlayerPositionDefense)
 	for position, players := range playersByPosition {
 		averageControlScoresByPosition[position] = getAverageDefenseScore(boost, players)
 	}
@@ -75,7 +77,7 @@ func CalculateTeamDefenseScore(lineup GameLineup) float64 {
 
 	defenseScore := gkScore + defScore + midfieldScore + attackScore
 
-	itemBoost := getTeamItemBoost(lineup)
+	itemBoost := getTeamItemBoost(source, lineup)
 
 	return applyBoost(itemBoost, defenseScore)
 }
