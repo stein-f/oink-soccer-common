@@ -26,6 +26,26 @@ Defender goals: 631 (1.606334%)
 Goalkeeper goals: 106 (0.269844%)
 ```
 
+## Verify a game
+
+The random number generator used in the engine is seeded with a round from the blockchain. This means that the outcome of a game can be verified by running the engine with the same seed.
+Running the simulation with the same seed will produce the same outcome.
+
+Edit the game key in `cmd/verify/main.go` to verify a the game of your choice. The game key is the last path segment of the game's highlights URL. For example, the highlights URL `https://www.thelostpigs.com/oink-soccer/player/TC0yLTYtMS05` has a game key of `TC0yLTYtMS05`.
+
+Then run the following command:
+
+```shell
+go run cmd/verify/main.go
+```
+
+which will print the result to the console.
+
+```text
+Round: 35323350, Block hash: TMUTUFAKGCDT4VHG2QJCIRR26ATBIWDOKDGDLDEQTGLAY34ZKDTA
+Team1 FC 2 - 2 Team2 FC
+```
+
 ## algorithm
 
 1. Choose the number of events (goal|miss) in the game. It is a weighted random number between 1 and 12.
