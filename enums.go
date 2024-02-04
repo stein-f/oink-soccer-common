@@ -81,15 +81,15 @@ func BoostTypeValues() []BoostType {
 type GameOutcomeType string
 
 const (
-	GameOutcomeTypeGoal  GameOutcomeType = "Won"
-	GameOutcomeTypeMiss  GameOutcomeType = "Lost"
+	GameOutcomeTypeWon   GameOutcomeType = "Won"
+	GameOutcomeTypeLost  GameOutcomeType = "Lost"
 	GameOutcomeTypeDrawn GameOutcomeType = "Drawn"
 )
 
 func GameOutcomeTypeValues() []GameOutcomeType {
 	return []GameOutcomeType{
-		GameOutcomeTypeGoal,
-		GameOutcomeTypeMiss,
+		GameOutcomeTypeWon,
+		GameOutcomeTypeLost,
 		GameOutcomeTypeDrawn,
 	}
 }
