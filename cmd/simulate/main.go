@@ -68,10 +68,13 @@ func main() {
 	fmt.Printf("\nGame summary:\n")
 	fmt.Printf("Games played: %d\n", gameCount)
 	fmt.Printf("Home Team wins: %d\n", homeWins)
+	fmt.Printf("Home Team wins ratio: %f\n", float64(homeWins)/float64(gameCount)*100)
 	fmt.Printf("Home Team chances/game: %f\n", homeTeamChancePerGame)
 	fmt.Printf("Away Team wins: %d\n", awayWins)
+	fmt.Printf("Away Team wins ratio: %f\n", float64(awayWins)/float64(gameCount)*100)
 	fmt.Printf("Away Team chances/game: %f\n", awayTeamChancePerGame)
 	fmt.Printf("Draws: %d\n", draws)
+	fmt.Printf("Draw ratio: %f\n", float64(draws)/float64(gameCount)*100)
 	fmt.Printf("Goals/game: %f\n", goalsPerGame)
 
 	attackerGoals := scorerByPosition[soccer.PlayerPositionAttack]
