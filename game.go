@@ -139,13 +139,14 @@ func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, error) {
 	return RunGameWithSeed(randSource, homeTeam, awayTeam)
 }
 
-func getTeamItemBoost(source *rand.Rand, lineup GameLineup) float64 {
+func GetTeamBoost(source *rand.Rand, lineup GameLineup) float64 {
+	var totalBoost = 1.0
 	for _, boost := range lineup.ItemBoosts {
 		if boost.BoostType == BoostTypeTeam {
-			return boost.GetBoost(source)
+			totalBoost *= boost.GetBoost(source)
 		}
 	}
-	return 1
+	return totalBoost
 }
 
 func getPositionItemBoost(source *rand.Rand, boosts []Boost, position PlayerPosition) float64 {
@@ -189,7 +190,7 @@ func runTeamChance(randSource *rand.Rand, attackingTeamType TeamType, homeTeamLi
 	attackingPlayerAttackScore := attackPlayer.GetAttackScore()
 	scaledAttackScore := applyBoost(attackFormationBoost, ScalingFunction(attackingPlayerAttackScore))
 
-	attackingTeamBoost := getTeamItemBoost(randSource, attackingTeamLineup)
+	attackingTeamBoost := GetTeamBoost(randSource, attackingTeamLineup)
 	scaledAttackScore = applyBoost(attackingTeamBoost, scaledAttackScore)
 
 	goalChanceChoices := []weightedrand.Choice{

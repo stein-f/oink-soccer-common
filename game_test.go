@@ -34,3 +34,23 @@ func TestGetRandomMinutes(t *testing.T) {
 		assert.Len(t, minutes, 10)
 	}
 }
+
+func TestGetTeamBoost_CanStackMultipleBoosts(t *testing.T) {
+	lineup := soccer.GameLineup{Players: testdata.StrongTeamPlayers}
+	lineup.ItemBoosts = []soccer.Boost{
+		{BoostType: soccer.BoostTypeTeam, MinBoost: 2, MaxBoost: 2},
+		{BoostType: soccer.BoostTypeTeam, MinBoost: 2, MaxBoost: 2},
+	}
+
+	teamBoost := soccer.GetTeamBoost(testdata.TimeNowRandSource(), lineup)
+
+	assert.Equal(t, 4.0, teamBoost)
+}
+
+func TestGetTeamBoost_HandlesNoBoosts(t *testing.T) {
+	lineup := soccer.GameLineup{Players: testdata.StrongTeamPlayers}
+
+	teamBoost := soccer.GetTeamBoost(testdata.TimeNowRandSource(), lineup)
+
+	assert.Equal(t, 1.0, teamBoost)
+}

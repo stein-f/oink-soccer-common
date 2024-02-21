@@ -36,7 +36,7 @@ func CalculateTeamControlScore(source *rand.Rand, lineup GameLineup) float64 {
 
 	controlScore := (gkScore + defScore + midfieldScore + attackScore) * getFormationControlBoost(lineup)
 
-	itemBoost := getTeamItemBoost(source, lineup)
+	itemBoost := GetTeamBoost(source, lineup)
 
 	return applyBoost(itemBoost, controlScore)
 }
@@ -77,7 +77,7 @@ func CalculateTeamDefenseScore(source *rand.Rand, lineup GameLineup) float64 {
 
 	defenseScore := gkScore + defScore + midfieldScore + attackScore
 
-	itemBoost := getTeamItemBoost(source, lineup)
+	itemBoost := GetTeamBoost(source, lineup)
 
 	return applyBoost(itemBoost, defenseScore)
 }
