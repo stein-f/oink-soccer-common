@@ -9,7 +9,7 @@ type Boost struct {
 	BoostPosition PlayerPosition `json:"boost_position"`
 	MinBoost      float64        `json:"min_boost"`
 	MaxBoost      float64        `json:"max_boost"`
-	Note          float64        `json:"note"`
+	Note          string         `json:"note"`
 }
 
 func (b Boost) GetBoost(source *rand.Rand) float64 {
