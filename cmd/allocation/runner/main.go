@@ -44,7 +44,7 @@ func main() {
 		log.Fatal().Err(err).Send()
 	}
 
-	log.Info().Msgf("saved eligibility for %d assets", len(assets))
+	log.Info().Msgf("saved eligibility for %d assets. Run `grep Salah cmd/allocation/s3/out/assigned_players.csv` to search a player", len(assets))
 }
 
 func assignPlayersToEligibleAssets(r *rand.Rand, lookup *allocation.PlayersLookup, assets []allocation.EligibleAsset) ([]allocation.PlayerProfile, error) {

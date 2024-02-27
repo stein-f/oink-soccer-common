@@ -1,5 +1,3 @@
-!!! SAMPLE - not the actual allocation.
-
 asset_id,asset_name,player_id,player_name
 369251208,Lost Pigs 0001 - Aurous,202556,M. Depay
 369267255,Lost Pigs 0002 - 2wo,175943,D. Mertens
@@ -737,7 +735,7 @@ asset_id,asset_name,player_id,player_name
 398263290,AL Goanna 357,252448,J. Leweling
 404278986,AL Goanna 400,259413,D. Sea
 404287266,AL Goanna 408,186148,R. Zieler
-357812204,Al Goanan 217,245146,Y. Rosales
+357812204,Al Goanan 217,230938,F. Kessié
 326189642,Al Goanna 001,10899,C. Porter
 326197463,Al Goanna 002,234791,Luan Peres
 328494610,Al Goanna 003,182412,Dai Lin
@@ -751,10 +749,10 @@ asset_id,asset_name,player_id,player_name
 328502288,Al Goanna 011,221430,U. Đurđević
 328503002,Al Goanna 012,259036,V. Korniienko
 328503506,Al Goanna 013,236599,S. Shashoua
-328504167,Al Goanna 014,259745,H. Singh
+328504167,Al Goanna 014,153079,S. Agüero
 328505062,Al Goanna 015,258709,V. Nikolov
 328505825,Al Goanna 016,263295,M. Fall
-328506449,Al Goanna 017,253478,R. Ali
+328506449,Al Goanna 017,189513,Parejo
 328507319,Al Goanna 018,241411,T. Holmes
 328507916,Al Goanna 019,198706,Luis Alberto
 328517537,Al Goanna 020,262310,M. Gómez
@@ -763,7 +761,7 @@ asset_id,asset_name,player_id,player_name
 328522422,Al Goanna 023,206585,Kepa
 328523922,Al Goanna 024,193247,H. Lindner
 328524762,Al Goanna 025,243537,M. Breunig
-328526043,Al Goanna 026,208093,Gerard Moreno
+328526043,Al Goanna 026,253681,Ma Fuyu
 328527340,Al Goanna 027,230515,Vagnão Junior
 328528518,Al Goanna 028,203023,D. Cole
 328530483,Al Goanna 029,246914,R. Rojas
@@ -778,19 +776,19 @@ asset_id,asset_name,player_id,player_name
 328544786,Al Goanna 038,208989,F. Ladapo
 328545759,Al Goanna 039,261097,A. Costa
 328546381,Al Goanna 040,189296,E. Berisha
-328550271,Al Goanna 041,264634,M. Cabrera
+328550271,Al Goanna 041,228702,F. de Jong
 328558722,Al Goanna 042,225316,J. Hendry
-328559225,Al Goanna 043,210243,Ricardo Pereira
+328559225,Al Goanna 043,255660,T. Hallstensen
 328559956,Al Goanna 044,224396,Y. Gómez Andrade
 328560895,Al Goanna 045,215064,J. Furch
 328562025,Al Goanna 046,238274,F. Coman
-328562778,Al Goanna 047,254704,K. Miura
-328563689,Al Goanna 048,263277,H. Al Mohammed
+328562778,Al Goanna 047,215333,D. Zapata
+328563689,Al Goanna 048,216460,J. Giménez
 328565014,Al Goanna 049,228245,M. Wanitzek
 328566193,Al Goanna 050,248485,Jung Hoon Sung
 329839470,Al Goanna 051,199700,Aridai
 330597170,Al Goanna 052,211241,Rubén Peña
-330598116,Al Goanna 053,201535,R. Varane
+330598116,Al Goanna 053,177971,J. McNulty
 330598680,Al Goanna 054,255809,B. Scorza
 330599549,Al Goanna 055,198538,B. Paulsen
 330600155,Al Goanna 056,239207,M. Gómez
@@ -807,7 +805,7 @@ asset_id,asset_name,player_id,player_name
 334801479,Al Goanna 067,224221,J. Andersen
 334802763,Al Goanna 068,215165,C. Rius
 335090720,Al Goanna 069,231612,R. Del Castillo
-335091495,Al Goanna 070,193301,A. Lacazette
+335091495,Al Goanna 070,262756,M. Gumaneh
 335119178,Al Goanna 071,224967,M. Sylla
 335121926,Al Goanna 072,241708,M. Sagnan
 335127139,Al Goanna 073,230251,Melvin Parrela
@@ -815,11 +813,11 @@ asset_id,asset_name,player_id,player_name
 335130906,Al Goanna 075,214287,V. González
 335131430,Al Goanna 076,200110,M. Bizot
 335136344,Al Goanna 077,239272,V. Barkas
-335136993,Al Goanna 078,261028,H. Johansson
+335136993,Al Goanna 078,215333,D. Zapata
 335137631,Al Goanna 079,257439,R. Ofori
 335138360,Al Goanna 080,222183,Aidi Fulangxisi
 335138808,Al Goanna 081,235424,D. Samassékou
-335140288,Al Goanna 083,200647,J. Iličić
+335140288,Al Goanna 083,261951,Li Xiang
 335141021,Al Goanna 084,162240,M. Dembélé
 335141503,Al Goanna 085,230515,Vagnão Junior
 335149637,Al Goanna 086,259215,F. Mendy
@@ -829,7 +827,7 @@ asset_id,asset_name,player_id,player_name
 335153323,Al Goanna 090,257304,A. Helac
 335154671,Al Goanna 091,243502,J. Bursztyn
 335155248,Al Goanna 092,230315,Ailton Cardenhas
-335155944,Al Goanna 093,262688,K. Bartoszek
+335155944,Al Goanna 093,163705,S. Mandanda
 335166547,Al Goanna 094,219814,S. Klaiber
 335166961,Al Goanna 095,186140,F. Macheda
 335167490,Al Goanna 096,199580,C. Goldson
@@ -840,7 +838,7 @@ asset_id,asset_name,player_id,player_name
 337012926,Al Goanna 101,204349,I. Šehić
 337013855,Al Goanna 102,220148,N. Orsini
 337015250,Al Goanna 103,162240,M. Dembélé
-337015576,Al Goanna 104,262755,S. Ogbaidze
+337015576,Al Goanna 104,124375,B. Yılmaz
 337015864,Al Goanna 105,216145,A. Izzo
 337016411,Al Goanna 106,230147,F. Sacko
 342574076,Al Goanna 107,235172,Rúben Vinagre
@@ -850,7 +848,7 @@ asset_id,asset_name,player_id,player_name
 342576301,Al Goanna 111,239721,J. Lescano
 342576919,Al Goanna 112,204977,I. Piris
 342577575,Al Goanna 113,178005,Rui Patrício
-342578683,Al Goanna 114,203574,J. Stones
+342578683,Al Goanna 114,260510,H. Araúz
 342579388,Al Goanna 115,215333,D. Zapata
 342579915,Al Goanna 116,259405,Zarzana
 342581684,Al Goanna 117,203415,J. Reeves
@@ -874,7 +872,7 @@ asset_id,asset_name,player_id,player_name
 342604022,Al Goanna 135,262417,Daniel Figueira
 342610168,Al Goanna 136,199007,M. McGinley
 342610860,Al Goanna 137,155862,Sergio Ramos
-342612630,Al Goanna 138,262837,S. Mellack
+342612630,Al Goanna 138,162835,S. Handanovič
 342613206,Al Goanna 139,167397,Falcao
 342614640,Al Goanna 140,214896,P. Mullin
 342616181,Al Goanna 141,251423,G. Shelvey
@@ -882,7 +880,7 @@ asset_id,asset_name,player_id,player_name
 342618350,Al Goanna 143,263418,L. Varaldo
 342629086,Al Goanna 144,193152,Herrerín
 342629720,Al Goanna 145,259568,C. Harvey
-342630781,Al Goanna 146,256738,A. Jatta
+342630781,Al Goanna 146,230498,Luimo Boas Santos
 342631450,Al Goanna 147,208375,M. Müller
 342632405,Al Goanna 148,155862,Sergio Ramos
 342633196,Al Goanna 149,220893,C. Baker-Richardson
@@ -913,14 +911,14 @@ asset_id,asset_name,player_id,player_name
 351036402,Al Goanna 174,235889,C. Ünder
 351036782,Al Goanna 175,189357,C. Toselli
 351045432,Al Goanna 176,203309,B. Halloran
-351045938,Al Goanna 177,227969,Zhao Shi
+351045938,Al Goanna 177,192984,K. Casteels
 351046296,Al Goanna 178,182883,K. Agard
 351046627,Al Goanna 179,252865,Iker Losada
 351047051,Al Goanna 180,240744,M. Ojeda
-351048078,Al Goanna 181,182521,T. Kroos
+351048078,Al Goanna 181,262020,I. Homoki
 351049039,Al Goanna 182,262301,Davo
 351049598,Al Goanna 183,250851,F. Alves
-351056027,Al Goanna 184,248324,P. Kumar
+351056027,Al Goanna 184,178086,Adán
 351056633,Al Goanna 185,262123,C. Browne
 351057416,Al Goanna 186,221671,Lee Jae Sung
 351058084,Al Goanna 187,227527,Fábio Abreu
@@ -936,8 +934,8 @@ asset_id,asset_name,player_id,player_name
 351142474,Al Goanna 197,188377,K. Walker
 351143875,Al Goanna 198,234796,J. Louchet
 351147149,Al Goanna 199,251353,K. Laba
-351147615,Al Goanna 200,192984,K. Casteels
-351148747,Al Goanna 201,233064,M. Mount
+351147615,Al Goanna 200,260714,P. Zvar
+351148747,Al Goanna 201,225935,S. Shamal
 351149755,Al Goanna 202,208240,T. De Vincenti
 351152918,Al Goanna 203,169389,A. Sheehan
 351159041,Al Goanna 204,198350,D. Bentley
@@ -953,13 +951,13 @@ asset_id,asset_name,player_id,player_name
 357810515,Al Goanna 214,187337,G. Molins
 357811089,Al Goanna 215,204638,W. Orban
 357811513,Al Goanna 216,263241,M. Goliński
-357812643,Al Goanna 218,205070,Portu
+357812643,Al Goanna 218,261762,I. Hoffman
 357813060,Al Goanna 219,210935,D. Berardi
 357813498,Al Goanna 220,189484,D. Santon
 357814858,Al Goanna 221,259997,A. Johansson
 357815902,Al Goanna 222,195093,Willian José
 357820088,Al Goanna 223,213151,C. Norman
-357820613,Al Goanna 224,211256,N. Tagliafico
+357820613,Al Goanna 224,253697,S. Tavora
 357820948,Al Goanna 225,240926,N. Phillips
 357821399,Al Goanna 226,261561,L. Campos
 357822102,Al Goanna 227,229251,V. Mogoș
@@ -1060,7 +1058,7 @@ asset_id,asset_name,player_id,player_name
 384115563,Al Goanna 322,192922,O. Jiménez
 386676057,Al Goanna 323,261115,Lee Ho Jae
 386676630,Al Goanna 324,240359,O. Alderete
-386678024,Al Goanna 325,263844,N. Botic
+386678024,Al Goanna 325,212188,T. Werner
 386678534,Al Goanna 326,236771,R. Vargas
 386679027,Al Goanna 327,179971,R. Munsy
 386679558,Al Goanna 328,212831,Alisson
@@ -1081,7 +1079,7 @@ asset_id,asset_name,player_id,player_name
 386754623,Al Goanna 343,225395,Ezkieta
 386755533,Al Goanna 344,251346,J. Martin
 386756478,Al Goanna 345,241708,M. Sagnan
-386941384,Al Goanna 346,262378,M. Aguek
+386941384,Al Goanna 346,179813,E. Cavani
 386941848,Al Goanna 347,225600,A. Al Ammar
 386942367,Al Goanna 348,244811,D. Bumberger
 386942977,Al Goanna 349,212118,M. Grimes
@@ -1089,7 +1087,7 @@ asset_id,asset_name,player_id,player_name
 386954778,Al Goanna 351,213434,J. Brown
 386955578,Al Goanna 352,239078,S. Schimmer
 386956116,Al Goanna 353,262389,K. Gkezos
-387779639,Al Goanna 354,202811,E. Martínez
+387779639,Al Goanna 354,261656,C. Mizell
 387780523,Al Goanna 355,203574,J. Stones
 396523835,Al Goanna 356,215079,P. Pérez
 398266816,Al Goanna 358,237942,P. Estupiñán
@@ -1105,8 +1103,8 @@ asset_id,asset_name,player_id,player_name
 398311670,Al Goanna 368,253846,R. Bentancur
 398312573,Al Goanna 369,213573,M. Gersbeck
 398313581,Al Goanna 370,246405,B. Angulo
-398315817,Al Goanna 371,207732,Roger
-398316892,Al Goanna 372,233407,Li Guanxi
+398315817,Al Goanna 371,263795,Zhang Xiao
+398316892,Al Goanna 372,230621,G. Donnarumma
 398317819,Al Goanna 373,262353,G. Sangaré
 398318793,Al Goanna 374,248301,K. Singh
 398319545,Al Goanna 375,226832,J. Calero
@@ -1122,11 +1120,11 @@ asset_id,asset_name,player_id,player_name
 398331199,Al Goanna 385,192598,Ai Kesen
 398331833,Al Goanna 386,204688,S. Schwab
 398332587,Al Goanna 387,258623,J. Hutchinson
-398333216,Al Goanna 388,225850,P. Kimpembe
+398333216,Al Goanna 388,163581,T. Craig
 404269571,Al Goanna 389,204538,R. Ruidíaz
 404270194,Al Goanna 390,206254,M. Stevanović
 404271051,Al Goanna 391,260702,L. Jackson
-404271649,Al Goanna 392,199285,S. Kukuruzović
+404271649,Al Goanna 392,120533,Pepe
 404272362,Al Goanna 393,239580,Bremer
 404273247,Al Goanna 394,219681,J. Amavi
 404274138,Al Goanna 395,220831,M. Malsa
@@ -1135,7 +1133,7 @@ asset_id,asset_name,player_id,player_name
 404277289,Al Goanna 398,216349,A. Halilović
 404278239,Al Goanna 399,231266,N. Janvier
 404281390,Al Goanna 401,210021,H. Mukhtar
-404282104,Al Goanna 402,134820,S. Brown
+404282104,Al Goanna 402,218667,Bernardo Silva
 404283294,Al Goanna 403,237256,J. Ebobisse
 404284041,Al Goanna 404,192505,R. Lukaku
 404284741,Al Goanna 405,213017,B. Davies
@@ -1151,7 +1149,7 @@ asset_id,asset_name,player_id,player_name
 418137888,Al Goanna 416,254858,C. Saydee
 418139488,Al Goanna 417,232225,J. Serra
 418140351,Al Goanna 418,259241,I. Mamut
-418141283,Al Goanna 419,263795,Zhang Xiao
+418141283,Al Goanna 419,153079,S. Agüero
 418142231,Al Goanna 420,263560,A. Porter
 418143075,Al Goanna 421,173608,Joselu
 418143875,Al Goanna 422,201285,C. Gytkjær
@@ -1162,7 +1160,7 @@ asset_id,asset_name,player_id,player_name
 418217057,Al Goanna 427,207557,R. Olsen
 418217851,Al Goanna 428,252078,S. Loric
 418219030,Al Goanna 429,1179,G. Buffon
-418222343,Al Goanna 430,257294,S. Hopeau
+418222343,Al Goanna 430,143076,A. Gómez
 418223077,Al Goanna 431,261688,R. Aguilera
 418223699,Al Goanna 432,204549,D. Roef
 418224422,Al Goanna 433,250939,D. Stipica
@@ -1172,8 +1170,8 @@ asset_id,asset_name,player_id,player_name
 418227757,Al Goanna 437,214408,I. Lichnovsky
 418228431,Al Goanna 438,254309,J. Nilsson
 435015927,Al Goanna 439,167435,O. Ustari
-435062343,Al Goanna 440,212831,Alisson
-435062845,Al Goanna 441,258297,J. Cáceres
+435062343,Al Goanna 440,263510,P. Prange
+435062845,Al Goanna 441,204923,M. Sabitzer
 435063502,Al Goanna 442,255837,N. Al Sharari
 435064009,Al Goanna 443,248567,S. Anderson
 435064696,Al Goanna 444,261242,J. Stafford
@@ -1204,7 +1202,7 @@ asset_id,asset_name,player_id,player_name
 445439401,Al Goanna 469,231628,Rafa Mir
 445439766,Al Goanna 470,261975,Zhang Xingbo
 445440046,Al Goanna 471,208045,O. Tannane
-445440302,Al Goanna 472,263835,G. D'Asaro
+445440302,Al Goanna 472,199354,Lucas Pérez
 445440739,Al Goanna 473,165429,C. Keșerü
 445441164,Al Goanna 474,211899,F. Niederlechner
 445442004,Al Goanna 475,240452,M. Nzola
@@ -1213,7 +1211,7 @@ asset_id,asset_name,player_id,player_name
 445443099,Al Goanna 478,245535,A. Parmak
 445444339,Al Goanna 479,198657,J. Svensson
 445444628,Al Goanna 480,255977,Ricard Pujol
-445444972,Al Goanna 481,242630,R. Manley
+445444972,Al Goanna 481,230498,Luimo Boas Santos
 445445226,Al Goanna 482,233154,S. Takagi
 445445646,Al Goanna 483,239964,E. Shomurodov
 445446049,Al Goanna 484,215270,L. Zelarayán
@@ -1221,12 +1219,12 @@ asset_id,asset_name,player_id,player_name
 445446786,Al Goanna 486,244929,J. Daly
 445447240,Al Goanna 487,225850,P. Kimpembe
 445447548,Al Goanna 488,228684,R. Nyambe
-445448499,Al Goanna 489,178005,Rui Patrício
+445448499,Al Goanna 489,240592,B. James
 335139687,Al Goanna 82,215043,S. Pol
 1103750698,The Lost Bots #0031,257489,J. Carrillo
 1103751411,The Lost Bots #0041,260184,M. Watai
 1103751490,The Lost Bots #0044,150477,R. Salin
-1103751584,The Lost Bots #0047,208093,Gerard Moreno
+1103751584,The Lost Bots #0047,253681,Ma Fuyu
 1103847539,The Lost Bots #0053,234796,J. Louchet
 1103847728,The Lost Bots #0060,216158,S. Widmer
 1103847863,The Lost Bots #0065,208722,S. Mané
@@ -1239,9 +1237,9 @@ asset_id,asset_name,player_id,player_name
 1103850070,The Lost Bots #0087,232080,J. Harrison
 1103852501,The Lost Bots #0122,232729,C. Tarragona
 1103859110,The Lost Bots #0140,178287,S. Arfield
-1103859610,The Lost Bots #0148,230258,Rosberto Dourado
-1103860100,The Lost Bots #0156,175943,D. Mertens
-1103860365,The Lost Bots #0162,232656,T. Hernández
+1103859610,The Lost Bots #0148,255660,T. Hallstensen
+1103860100,The Lost Bots #0156,262820,L. Rudden
+1103860365,The Lost Bots #0162,263744,D. Jacovic
 1103860527,The Lost Bots #0164,172203,F. Forster
 1103863852,The Lost Bots #0174,256674,J. Justvan
 1103864322,The Lost Bots #0176,222204,Cao Yunding
@@ -1265,12 +1263,12 @@ asset_id,asset_name,player_id,player_name
 1103873242,The Lost Bots #0340,172723,A. Begović
 1103873516,The Lost Bots #0346,215117,L. Desábato
 1103874086,The Lost Bots #0352,239093,J. Clauss
-1103874273,The Lost Bots #0355,198009,M. Perin
+1103874273,The Lost Bots #0355,262807,J. Nowaczek
 1103875676,The Lost Bots #0372,264027,S. Delaye
 1103877833,The Lost Bots #0388,193958,L. Brown
 1103878026,The Lost Bots #0391,200741,Jiang Guangtai
 1103878934,The Lost Bots #0400,262069,Y. Pandor
-1103879321,The Lost Bots #0408,242853,S. Brynn
+1103879321,The Lost Bots #0408,203841,N. Pope
 1103880177,The Lost Bots #0423,254551,G. Mikautadze
 1103880807,The Lost Bots #0434,227127,Álex Remiro
 1103882048,The Lost Bots #0438,245540,S. Svarnas
@@ -1286,7 +1284,7 @@ asset_id,asset_name,player_id,player_name
 1103886244,The Lost Bots #0490,255036,R. Königsdörffer
 1103886345,The Lost Bots #0491,214491,L. Quiñones
 1103886411,The Lost Bots #0492,259560,N. Singh
-1103888226,The Lost Bots #0521,262999,L. Becker
+1103888226,The Lost Bots #0521,198009,M. Perin
 1103888685,The Lost Bots #0531,259165,J. Wosz
 1103888701,The Lost Bots #0532,235913,E. Embleton
 1103888735,The Lost Bots #0533,233078,P. Sabbag
@@ -1314,21 +1312,21 @@ asset_id,asset_name,player_id,player_name
 1103895557,The Lost Bots #0654,181795,F. Kudryashov
 1103895729,The Lost Bots #0659,263936,D. Ayala
 1103895908,The Lost Bots #0664,228321,Sergi Palencia
-1103896033,The Lost Bots #0666,241818,L. Buades
+1103896033,The Lost Bots #0666,230375,Josué Chiamulera
 1103896169,The Lost Bots #0668,211672,T. Boyd
 1103896407,The Lost Bots #0674,201143,A. Mandi
 1103898212,The Lost Bots #0700,241269,A. Bruus
-1103898354,The Lost Bots #0702,233407,Li Guanxi
+1103898354,The Lost Bots #0702,167948,H. Lloris
 1103899491,The Lost Bots #0723,172198,J. Moulin
 1103899904,The Lost Bots #0726,171574,Santamaría
 1103900709,The Lost Bots #0739,230621,G. Donnarumma
 1103900873,The Lost Bots #0744,220165,J. Pohjanpalo
 1103901229,The Lost Bots #0754,253988,A. Chawan
-1103901897,The Lost Bots #0768,262756,M. Gumaneh
-1103901937,The Lost Bots #0769,193747,Koke
+1103901897,The Lost Bots #0768,194209,Y. El Arabi
+1103901937,The Lost Bots #0769,263202,M. Bergum
 1103901973,The Lost Bots #0770,245628,A. Abqar
 1103902034,The Lost Bots #0771,230965,N. Nández
-1103902494,The Lost Bots #0782,213502,R. Cornwall
+1103902494,The Lost Bots #0782,225100,J. Gomez
 1103902624,The Lost Bots #0785,260387,J. Assi
 1103902758,The Lost Bots #0789,257179,Gonçalo Inácio
 1103903097,The Lost Bots #0797,179645,S. Kjær
@@ -1339,9 +1337,9 @@ asset_id,asset_name,player_id,player_name
 1103904632,The Lost Bots #0829,220198,B. Celina
 1103905072,The Lost Bots #0837,216237,K. Azamoum
 1103905458,The Lost Bots #0842,233140,R. Harakawa
-1103905834,The Lost Bots #0851,204399,E. Zahavi
+1103905834,The Lost Bots #0851,261876,C. Noonan
 1103906026,The Lost Bots #0854,260847,T. Hayakawa
-1103906143,The Lost Bots #0858,124375,B. Yılmaz
+1103906143,The Lost Bots #0858,256414,P. Ferry
 1103907319,The Lost Bots #0875,263014,B. Makouana
 1103907376,The Lost Bots #0877,243806,O. Darfalou
 1103908435,The Lost Bots #0893,242630,R. Manley
@@ -1356,20 +1354,20 @@ asset_id,asset_name,player_id,player_name
 1103912867,The Lost Bots #0954,237325,C. Gilmour
 1103912995,The Lost Bots #0955,237819,N. Domínguez
 1103913526,The Lost Bots #0963,207863,Felipe
-1103913563,The Lost Bots #0964,263244,B. Kłudka
+1103913563,The Lost Bots #0964,230258,Rosberto Dourado
 1103913647,The Lost Bots #0966,256118,Y. Keitel
 1103914366,The Lost Bots #0972,223596,S. Prevljak
 1103915378,The Lost Bots #0988,248492,J. Hill
 1103915581,The Lost Bots #0991,242917,L. Chávez
 1103915662,The Lost Bots #0993,248243,E. Camavinga
-1103916060,The Lost Bots #1000,257157,F. Bundgaard
+1103916060,The Lost Bots #1000,202652,R. Sterling
 1103916364,The Lost Bots #1007,222028,J. Weigl
 1103916412,The Lost Bots #1008,171877,M. Hamšík
 1103917522,The Lost Bots #1023,226675,F. Lanzillotta
-1103918256,The Lost Bots #1034,178603,M. Hummels
+1103918256,The Lost Bots #1034,258964,Zhang Jinliang
 1103920618,The Lost Bots #1058,150724,J. Hart
 1103920742,The Lost Bots #1060,210923,M. Al Owais
-1103921291,The Lost Bots #1072,259764,N. Bhutia
+1103921291,The Lost Bots #1072,211110,P. Dybala
 1103921890,The Lost Bots #1085,205214,Z. Tripić
 1103923289,The Lost Bots #1093,244476,C. Vidal
 1103923303,The Lost Bots #1094,234726,J. Rodríguez
@@ -1382,7 +1380,7 @@ asset_id,asset_name,player_id,player_name
 1103924831,The Lost Bots #1130,198011,T. Eaves
 1103924944,The Lost Bots #1133,257151,P. Argañaraz
 1103925116,The Lost Bots #1137,198145,S. Araujo
-1103925596,The Lost Bots #1141,263271,A. Emakhu
+1103925596,The Lost Bots #1141,179813,E. Cavani
 1103925665,The Lost Bots #1142,205498,Jorginho
 1103925703,The Lost Bots #1143,234050,S. Mbaye
 1103925879,The Lost Bots #1148,202848,G. Caprari
@@ -1393,7 +1391,7 @@ asset_id,asset_name,player_id,player_name
 1103929032,The Lost Bots #1181,186954,B. Ideye
 1103929429,The Lost Bots #1191,226637,Rubén Duarte
 1103929741,The Lost Bots #1200,230185,Túlio Changas
-1103930091,The Lost Bots #1211,212759,Kong Min Hyeon
+1103930091,The Lost Bots #1211,226226,G. Lo Celso
 1103930307,The Lost Bots #1217,243312,Pablo Martínez
 1103931138,The Lost Bots #1235,230869,Unai Simón
 1103931559,The Lost Bots #1242,205988,L. Shaw
@@ -1402,8 +1400,8 @@ asset_id,asset_name,player_id,player_name
 1103933780,The Lost Bots #1278,264563,F. Alcedo
 1103933907,The Lost Bots #1279,258400,M. Schikora
 1103934192,The Lost Bots #1284,243966,G. May
-1103935433,The Lost Bots #1303,202651,Suso
-1103935633,The Lost Bots #1305,227528,B. Romero
+1103935433,The Lost Bots #1303,233948,Gao Huaze
+1103935633,The Lost Bots #1305,260007,J. Conway
 1103936535,The Lost Bots #1319,235173,I. Sangaré
 1103940200,The Lost Bots #1348,236499,Douglas Luiz
 1103940268,The Lost Bots #1350,195012,Adrián Sardinero
@@ -1422,9 +1420,9 @@ asset_id,asset_name,player_id,player_name
 1103943686,The Lost Bots #1417,203741,T. Delaine
 1103943874,The Lost Bots #1421,189860,Kiko Femenía
 1103944440,The Lost Bots #1435,215965,C. Strandberg
-1103945002,The Lost Bots #1449,260974,M. Otazú
+1103945002,The Lost Bots #1449,237692,P. Foden
 1103945085,The Lost Bots #1451,224490,Z. Çelik
-1103945221,The Lost Bots #1455,190286,Canales
+1103945221,The Lost Bots #1455,212759,Kong Min Hyeon
 1103945646,The Lost Bots #1462,144160,T. Acar
 1103945920,The Lost Bots #1469,219728,Edgar Méndez
 1103946139,The Lost Bots #1476,252208,R. Yılmaz
@@ -1433,20 +1431,20 @@ asset_id,asset_name,player_id,player_name
 1103946534,The Lost Bots #1488,242530,N. Okafor
 1103946876,The Lost Bots #1497,233630,H. Cuypers
 1103947298,The Lost Bots #1508,247458,Álex Sola
-1103947456,The Lost Bots #1513,184200,M. Arnautović
+1103947456,The Lost Bots #1513,259745,H. Singh
 1103948155,The Lost Bots #1530,230254,Paulson Junqueira
-1103948428,The Lost Bots #1537,262447,A. Compagno
+1103948428,The Lost Bots #1537,210315,De Tomás
 1103948552,The Lost Bots #1541,264567,C. Abastoflor
 1103948696,The Lost Bots #1545,229517,Toni Villa
 1103948771,The Lost Bots #1547,247045,J. Kayamba
-1103949130,The Lost Bots #1558,205659,A. Cragno
+1103949130,The Lost Bots #1558,259987,M. Ellborg
 1103949347,The Lost Bots #1562,224065,D. Blanco
 1103949457,The Lost Bots #1565,237556,C. Luyindama
 1103949528,The Lost Bots #1567,233556,R. Orsolini
 1103950193,The Lost Bots #1583,212763,S. McGuinness
 1103950441,The Lost Bots #1592,246420,J. Doku
-1103950737,The Lost Bots #1601,205452,A. Rüdiger
-1103951171,The Lost Bots #1613,261236,R. Matsui
+1103950737,The Lost Bots #1601,253477,R. Aimol
+1103951171,The Lost Bots #1613,205678,E. Višća
 1103951295,The Lost Bots #1618,239986,Javi Alonso
 1103951455,The Lost Bots #1622,210358,A. Brignoli
 1103951558,The Lost Bots #1626,230621,G. Donnarumma
@@ -1454,7 +1452,7 @@ asset_id,asset_name,player_id,player_name
 1103951780,The Lost Bots #1632,201953,J. Sánchez Miño
 1103951959,The Lost Bots #1638,246762,S. Koita
 1103952203,The Lost Bots #1646,240813,J. Gibson
-1103952325,The Lost Bots #1651,230498,Luimo Boas Santos
+1103952325,The Lost Bots #1651,262540,C. Wagner
 1103952343,The Lost Bots #1652,201873,J. Bendik
 1103952387,The Lost Bots #1654,255065,T. Cantoro
 1103953281,The Lost Bots #1673,194404,Neto
@@ -1482,7 +1480,7 @@ asset_id,asset_name,player_id,player_name
 1103960132,The Lost Bots #1843,230295,Cris Laranjeiros
 1103960441,The Lost Bots #1846,199914,Allan
 1103961224,The Lost Bots #1852,260438,A. Rajamohan
-1103962007,The Lost Bots #1856,157190,J. Russell
+1103962007,The Lost Bots #1856,220834,Marco Asensio
 1103962445,The Lost Bots #1863,214169,W. Tesillo
 1103962478,The Lost Bots #1864,243032,Hugo Duro
 1103963524,The Lost Bots #1874,220509,L. Venuti
@@ -1499,7 +1497,7 @@ asset_id,asset_name,player_id,player_name
 1103967627,The Lost Bots #1949,251411,K. Struski
 1103967846,The Lost Bots #1953,203749,S. Bradley
 1103968216,The Lost Bots #1962,227978,M. Mehlem
-1103968255,The Lost Bots #1963,222665,M. Ødegaard
+1103968255,The Lost Bots #1963,261957,K. Xamixidin
 1103968540,The Lost Bots #1970,189160,G. McCleary
 1103968855,The Lost Bots #1977,223344,Wei Shihao
 1103969374,The Lost Bots #1986,225669,K. Ehizibue
@@ -1510,13 +1508,13 @@ asset_id,asset_name,player_id,player_name
 1103970521,The Lost Bots #2021,255860,Julio Martínez
 1103970707,The Lost Bots #2025,244467,O. Kolář
 1103971125,The Lost Bots #2032,198653,M. Silva
-1103971174,The Lost Bots #2034,231447,D. Malen
+1103971174,The Lost Bots #2034,251390,E. Arslan
 1103971216,The Lost Bots #2035,225117,N. Haas
 1103971834,The Lost Bots #2054,232488,C. Romero
 1103972050,The Lost Bots #2061,260335,G. Caro
 1103972438,The Lost Bots #2072,232241,M. Caktaš
 1103972604,The Lost Bots #2075,256018,Miguel Berry
-1103972692,The Lost Bots #2077,240455,B. Sass-Davies
+1103972692,The Lost Bots #2077,204639,S. Savić
 1103972949,The Lost Bots #2079,224494,R. Henry
 1103973014,The Lost Bots #2081,213689,B. Pearson
 1103973148,The Lost Bots #2084,224003,Sergio Herrera
@@ -1526,7 +1524,7 @@ asset_id,asset_name,player_id,player_name
 1103975034,The Lost Bots #2117,232469,Ramon Lopes
 1103975138,The Lost Bots #2120,179578,T. Midzierski
 1103976622,The Lost Bots #2131,213725,L. Phiri
-1103976671,The Lost Bots #2133,232488,C. Romero
+1103976671,The Lost Bots #2133,251590,L. Richards
 1103976914,The Lost Bots #2139,224508,L. Mancuso
 1103978280,The Lost Bots #2141,224031,A. Marušić
 1103979085,The Lost Bots #2145,247819,N. Schlotterbeck
@@ -1542,7 +1540,7 @@ asset_id,asset_name,player_id,player_name
 1103986265,The Lost Bots #2207,264537,M. Villarroel
 1103986298,The Lost Bots #2208,230239,Claudiano Sobrino
 1103986673,The Lost Bots #2214,231073,B. Radunović
-1103986739,The Lost Bots #2217,262968,A. Brown
+1103986739,The Lost Bots #2217,198176,S. de Vrij
 1103986785,The Lost Bots #2219,238190,J. Familia-Castillo
 1103986926,The Lost Bots #2225,250842,J. Graterol
 1103986966,The Lost Bots #2226,168435,S. Sirigu
@@ -1557,7 +1555,7 @@ asset_id,asset_name,player_id,player_name
 1103988700,The Lost Bots #2263,164835,Ł. Fabiański
 1103988966,The Lost Bots #2266,247972,D. Olaru
 1103989132,The Lost Bots #2270,193171,Jaume Costa
-1103989364,The Lost Bots #2276,200724,Nacho Fernández
+1103989364,The Lost Bots #2276,261615,Mao Kaiyu
 1103990173,The Lost Bots #2292,240595,A. Pears
 1103990513,The Lost Bots #2296,220466,F. Mattiello
 1103990713,The Lost Bots #2300,222987,H. Yamaguchi
@@ -1582,7 +1580,7 @@ asset_id,asset_name,player_id,player_name
 1103996060,The Lost Bots #2409,219293,M. Helik
 1103996181,The Lost Bots #2413,167665,N. Domingo
 1103996292,The Lost Bots #2416,192041,N. Araújo
-1103996414,The Lost Bots #2421,184344,L. Bonucci
+1103996414,The Lost Bots #2421,248293,M. Ali
 1103996468,The Lost Bots #2424,192906,L. Rodríguez
 1103996816,The Lost Bots #2433,239380,N. Lang
 1103996957,The Lost Bots #2438,140233,G. Ochoa
@@ -1596,7 +1594,7 @@ asset_id,asset_name,player_id,player_name
 1103998665,The Lost Bots #2478,177604,Nacho Monreal
 1103998676,The Lost Bots #2479,206529,F. Boli
 1103999210,The Lost Bots #2491,193532,G. Medel
-1103999324,The Lost Bots #2495,227528,B. Romero
+1103999324,The Lost Bots #2495,264071,G. Kirejczyk
 1103999435,The Lost Bots #2500,253281,A. Canobbio
 1103999523,The Lost Bots #2504,178022,C. Gönen
 1103999705,The Lost Bots #2511,244964,E. Minogue
@@ -1620,23 +1618,23 @@ asset_id,asset_name,player_id,player_name
 1104005570,The Lost Bots #2649,253737,Ma Kunyue
 1104005617,The Lost Bots #2650,221350,T. Ambrose
 1104005818,The Lost Bots #2656,239922,Rui Costa
-1104006561,The Lost Bots #2662,220440,C. Lenglet
+1104006561,The Lost Bots #2662,262521,R. Austin
 1104007005,The Lost Bots #2666,258343,F. Souček
 1104008265,The Lost Bots #2672,194079,A. Potuk
 1104011182,The Lost Bots #2685,142616,J. De Olivera
 1104011567,The Lost Bots #2688,182959,A. Hruška
 1104011734,The Lost Bots #2691,204549,D. Roef
 1104011759,The Lost Bots #2692,205531,V. Verre
-1104012108,The Lost Bots #2703,199354,Lucas Pérez
+1104012108,The Lost Bots #2703,253698,A. Halder
 1104012136,The Lost Bots #2704,255000,T. Moffi
 1104012909,The Lost Bots #2719,255434,J. Enciso
 1104013089,The Lost Bots #2724,142616,J. De Olivera
 1104013550,The Lost Bots #2739,257628,M. Jonsson
-1104013571,The Lost Bots #2740,253477,R. Aimol
+1104013571,The Lost Bots #2740,200145,Casemiro
 1104013780,The Lost Bots #2746,202986,Sin Jin Ho
 1104014143,The Lost Bots #2757,211302,G. Lapadula
 1104014336,The Lost Bots #2762,220633,D. Gray
-1104014513,The Lost Bots #2766,248404,V. Neacșu
+1104014513,The Lost Bots #2766,203841,N. Pope
 1104016199,The Lost Bots #2799,202686,N. Wells
 1104016571,The Lost Bots #2806,214047,M. Uribe
 1104016661,The Lost Bots #2809,205054,K. Naismith
@@ -1665,21 +1663,21 @@ asset_id,asset_name,player_id,player_name
 1104058517,The Lost Bots #2971,236733,A. Al Najai
 1104058535,The Lost Bots #2972,233994,Kainho Selva
 1104058682,The Lost Bots #2976,232520,D. Jaiyesimi
-1104059278,The Lost Bots #2987,262535,J. Fjeldberg
+1104059278,The Lost Bots #2987,183277,E. Hazard
 1104061121,The Lost Bots #3003,243818,M. Sangare
 1104061221,The Lost Bots #3007,237419,A. Abedzadeh
 1104061272,The Lost Bots #3009,264404,S. Buer
 1104061582,The Lost Bots #3016,203280,V. Germain
 1104061611,The Lost Bots #3017,178628,F. Forestieri
 1104061942,The Lost Bots #3027,236533,R. Glatzel
-1104062952,The Lost Bots #3053,208830,J. Vardy
+1104062952,The Lost Bots #3053,262180,V. Backman
 1104062985,The Lost Bots #3054,252143,Daniel Bragança
-1104063288,The Lost Bots #3063,222691,Seo Bo Min
+1104063288,The Lost Bots #3063,232488,C. Romero
 1104063689,The Lost Bots #3071,213160,R. Zobnin
 1104064246,The Lost Bots #3086,262629,F. Ezeh
 1104064613,The Lost Bots #3101,252551,S. Marković
 1104064964,The Lost Bots #3111,207653,M. Bolaños
-1104064984,The Lost Bots #3112,261961,Guo Jiawei
+1104064984,The Lost Bots #3112,198009,M. Perin
 1104065233,The Lost Bots #3120,261727,I. Tshipamba
 1104065280,The Lost Bots #3122,192387,C. Immobile
 1104065417,The Lost Bots #3127,219809,T. Bakayoko
@@ -1712,7 +1710,7 @@ asset_id,asset_name,player_id,player_name
 1104070372,The Lost Bots #3245,255430,M. Barbery
 1104070587,The Lost Bots #3251,230921,Hwang Mun Ki
 1104070764,The Lost Bots #3258,196934,O. Özyakup
-1104071038,The Lost Bots #3266,263325,J. Hinds
+1104071038,The Lost Bots #3266,192629,Iago Aspas
 1104071090,The Lost Bots #3268,226166,N. Mukiele
 1104071232,The Lost Bots #3272,223952,David Soria
 1104071497,The Lost Bots #3278,221168,D. Kownacki
@@ -1722,8 +1720,8 @@ asset_id,asset_name,player_id,player_name
 1104072645,The Lost Bots #3308,260084,M. Pagliuca
 1104073033,The Lost Bots #3318,254181,M. Duffard
 1104073133,The Lost Bots #3322,210896,M. Sanson
-1104073164,The Lost Bots #3323,264008,W. Kechrida
-1104073437,The Lost Bots #3331,192563,B. Leno
+1104073164,The Lost Bots #3323,193747,Koke
+1104073437,The Lost Bots #3331,257085,T. Ur
 1104073618,The Lost Bots #3338,162280,A. Mierzejewski
 1104073669,The Lost Bots #3340,202126,H. Kane
 1104074509,The Lost Bots #3368,193957,C. Montaño
@@ -1731,8 +1729,8 @@ asset_id,asset_name,player_id,player_name
 1104075091,The Lost Bots #3385,235633,Y. Diouf
 1104075673,The Lost Bots #3406,194894,F. Rossi
 1104075724,The Lost Bots #3408,234457,O. Etebo
-1104075770,The Lost Bots #3410,143076,A. Gómez
-1104076532,The Lost Bots #3430,264318,A. Aguilar
+1104075770,The Lost Bots #3410,262631,E. Hill
+1104076532,The Lost Bots #3430,146536,Jesús Navas
 1104077073,The Lost Bots #3443,251412,S. Weissman
 1104077414,The Lost Bots #3455,232756,F. Tomori
 1104077609,The Lost Bots #3463,240409,D. Kolovetsios
@@ -1741,13 +1739,13 @@ asset_id,asset_name,player_id,player_name
 1104078407,The Lost Bots #3477,235572,R. Sykes
 1104078841,The Lost Bots #3489,222493,M. Friedrich
 1104078865,The Lost Bots #3490,255577,Dani Plomer
-1104079096,The Lost Bots #3497,211300,A. Martial
+1104079096,The Lost Bots #3497,262063,K. Ichimori
 1104079169,The Lost Bots #3499,213242,A. Tameze
 1104079355,The Lost Bots #3506,213951,Helton Leite
 1104080108,The Lost Bots #3518,238990,S. Lavery
 1104080545,The Lost Bots #3529,230084,L. Nmecha
 1104080593,The Lost Bots #3531,232900,C. Monschein
-1104080613,The Lost Bots #3532,204399,E. Zahavi
+1104080613,The Lost Bots #3532,262627,J. Forst
 1104080646,The Lost Bots #3534,238843,T. Lebeau
 1104080679,The Lost Bots #3535,221332,G. Guerrieri
 1104080979,The Lost Bots #3546,212722,D. Yedlin
@@ -1762,25 +1760,25 @@ asset_id,asset_name,player_id,player_name
 1104082682,The Lost Bots #3600,203581,I. Balliu
 1104082692,The Lost Bots #3601,245235,A. Bah
 1104082807,The Lost Bots #3606,222611,D. Rodríguez
-1104083299,The Lost Bots #3622,203841,N. Pope
+1104083299,The Lost Bots #3622,263986,W. Pulisic
 1104083366,The Lost Bots #3626,257570,J. Wieckhoff
-1104083436,The Lost Bots #3628,258762,M. Chapman
+1104083436,The Lost Bots #3628,205659,A. Cragno
 1104083627,The Lost Bots #3637,228336,F. Grillitsch
 1104083711,The Lost Bots #3639,215223,W. Benítez
 1104084175,The Lost Bots #3642,230251,Melvin Parrela
 1104085721,The Lost Bots #3649,235868,Amorrortu
 1104086659,The Lost Bots #3655,258775,L. Sučić
 1104086934,The Lost Bots #3658,169416,C. Vela
-1104087054,The Lost Bots #3659,251390,E. Arslan
+1104087054,The Lost Bots #3659,193983,A. Delort
 1104088023,The Lost Bots #3681,224204,S. Kroll
 1104088406,The Lost Bots #3692,230666,Gabriel Jesus
 1104088413,The Lost Bots #3693,165229,L. Koscielny
 1104088592,The Lost Bots #3701,232635,K. Ichimi
 1104088730,The Lost Bots #3706,226677,J. Bacuna
-1104088876,The Lost Bots #3711,260878,R. O'Shea
+1104088876,The Lost Bots #3711,232363,M. Škriniar
 1104089516,The Lost Bots #3731,231478,L. Martínez
 1104089541,The Lost Bots #3732,230475,Adilson Edrada
-1104089755,The Lost Bots #3737,216475,Morales
+1104089755,The Lost Bots #3737,257930,P. Kyum
 1104089823,The Lost Bots #3740,242641,R. Aït Nouri
 1104090349,The Lost Bots #3756,263441,L. Bonelli
 1104090476,The Lost Bots #3760,210602,S. Al Dawsari
@@ -1792,8 +1790,8 @@ asset_id,asset_name,player_id,player_name
 1104091392,The Lost Bots #3795,198658,F. Midtsjø
 1104091683,The Lost Bots #3802,230869,Unai Simón
 1104091804,The Lost Bots #3806,209288,F. Mollet
-1104092539,The Lost Bots #3828,225100,J. Gomez
-1104092810,The Lost Bots #3835,225850,P. Kimpembe
+1104092539,The Lost Bots #3828,260478,S. Thomas
+1104092810,The Lost Bots #3835,261242,J. Stafford
 1104093035,The Lost Bots #3838,247304,M. Hundley
 1104093225,The Lost Bots #3846,231424,A. Arslan
 1104093359,The Lost Bots #3847,253147,T. Datković
@@ -1807,13 +1805,13 @@ asset_id,asset_name,player_id,player_name
 1104094216,The Lost Bots #3885,186954,B. Ideye
 1104094256,The Lost Bots #3887,207664,C. Bacca
 1104094296,The Lost Bots #3889,231874,J. Horn
-1104094415,The Lost Bots #3891,241946,T. Boni
+1104094415,The Lost Bots #3891,186942,İ. Gündoğan
 1104094844,The Lost Bots #3907,191043,Alex Sandro
 1104094871,The Lost Bots #3908,244261,L. Majer
 1104095169,The Lost Bots #3916,231104,Juninho
 1104095328,The Lost Bots #3921,241976,Tiago Sá
 1104095760,The Lost Bots #3933,167435,O. Ustari
-1104095780,The Lost Bots #3934,229558,D. Upamecano
+1104095780,The Lost Bots #3934,260885,A. Kazeem
 1104095911,The Lost Bots #3940,259027,J. Chávez
 1104095991,The Lost Bots #3944,228130,Oh Seung Hoon
 1104096580,The Lost Bots #3964,264353,B. Barcia

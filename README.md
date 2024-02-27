@@ -46,6 +46,22 @@ Round: 35323350, Block hash: TMUTUFAKGCDT4VHG2QJCIRR26ATBIWDOKDGDLDEQTGLAY34ZKDT
 Team1 FC 2 - 2 Team2 FC
 ```
 
+## Run player allocation
+
+The player allocation algorithm is used to allocate players to teams. It is a weighted random choice based on the player's `control score`.
+We use the block hash of a round from the Algorand blockchain to seed the random number generator. This means that the player allocation can be verified by running the engine with the same seed.
+It is a temper proof way to allocate players to teams that can be verified by anyone, ensuring that the allocation is fair, open and transparent.
+
+```shell
+go run cmd/allocation/runner/main.go
+```
+
+This will generate a csv file with the allocations in `cmd/allocation/s3/out/assigned_players.csv`. You can search the file using grep as follows:
+
+```shell
+grep Salah cmd/allocation/s3/out/assigned_players.csv
+```
+
 ## algorithm
 
 1. Choose the number of events (goal|miss) in the game. It is a weighted random number between 1 and 12.
