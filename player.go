@@ -16,7 +16,7 @@ type PlayerAttributes struct {
 	BasedOnPlayerURL string         `json:"based_on_player_url"`
 }
 
-// GetOverallRating returns the overall rating for a gotPlayer based on their position
+// GetOverallRating returns the overall rating for a player based on their position
 func (p PlayerAttributes) GetOverallRating() int {
 	if p.Position == PlayerPositionGoalkeeper {
 		return (p.GoalkeeperRating*3 + p.SpeedRating) / 4
