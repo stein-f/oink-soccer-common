@@ -48,7 +48,7 @@ Team1 FC 2 - 2 Team2 FC
 
 ## Run player allocation
 
-The player allocation algorithm is used to allocate players to teams. We use the block hash of a round from the Algorand blockchain to seed the random number generator. This means that the player allocation can be verified by running the engine with the same seed (block hash) to produce repeatable results. It is a tamper proof way to allocate players to teams that can be verified by anyone, ensuring that the allocation is fair, open, verifiable and transparent.
+The player allocation algorithm is used to allocate players to assets. We use the block hash of a round from the Algorand blockchain to seed the random number generator. This means that the player allocation can be verified by running the engine with the same seed (block hash) to produce repeatable results. It is a tamper proof way to allocate players to teams that can be verified by anyone, ensuring that the allocation is fair, open, verifiable and transparent.
 
 ```shell
 go run cmd/allocation/runner/main.go
