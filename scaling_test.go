@@ -1,10 +1,11 @@
 package soccer_test
 
 import (
-	soccer "github.com/stein-f/oink-soccer-common"
-	"github.com/stretchr/testify/assert"
 	"math"
 	"testing"
+
+	soccer "github.com/stein-f/oink-soccer-common"
+	"github.com/stretchr/testify/assert"
 )
 
 // TestScaleRating tests the scaleRating function with various input values.
@@ -13,6 +14,7 @@ func TestScaleRating(t *testing.T) {
 		originalRating float64
 		expectedScaled float64
 	}{
+		{1, 1},
 		{40, 1},
 		{45, 2},
 		{50, 4},

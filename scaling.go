@@ -13,5 +13,8 @@ func ScalingFunction(originalRating float64) float64 {
 	if rating > 100 {
 		return 100
 	}
+	if rating < 1 {
+		return 1
+	}
 	return rating
 }
