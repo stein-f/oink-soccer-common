@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"os"
 
@@ -26,7 +27,7 @@ func main() {
 		log.Fatal().Err(err).Send()
 	}
 
-	eligibleAssets, err := appCtx.EligibleAssetRepository.GetAllEligibleAssets()
+	eligibleAssets, err := appCtx.EligibleAssetRepository.GetAllEligibleAssets(appCtx.Config.Season)
 	if err != nil {
 		log.Fatal().Err(err).Send()
 	}
@@ -40,11 +41,11 @@ func main() {
 
 	log.Info().Msgf("assigned %d players to assets", len(assets))
 
-	if err := savePlayerAttributes(assets); err != nil {
+	if err := savePlayerAttributes(assets, appCtx.Config.Season); err != nil {
 		log.Fatal().Err(err).Send()
 	}
 
-	log.Info().Msgf("saved eligibility for %d assets. Run `grep Salah cmd/allocation/s3/out/assigned_players.csv` to search a player", len(assets))
+	log.Info().Msgf("saved eligibility for %d assets. Run `grep Salah cmd/allocation/s%d/out/assigned_players.csv` to search a player", len(assets), appCtx.Config.Season)
 }
 
 func assignPlayersToEligibleAssets(r *rand.Rand, lookup *allocation.PlayersLookup, assets []allocation.EligibleAsset) ([]allocation.PlayerProfile, error) {
@@ -80,7 +81,7 @@ func GetRandomPosition(randSource *rand.Rand) (soccer.PlayerPosition, error) {
 	return chooser.PickSource(randSource).(soccer.PlayerPosition), nil
 }
 
-func savePlayerAttributes(profiles []allocation.PlayerProfile) error {
+func savePlayerAttributes(profiles []allocation.PlayerProfile, season int) error {
 	var csvRows []outputRecordRow
 	for _, profile := range profiles {
 		csvRows = append(csvRows, outputRecordRow{
@@ -95,7 +96,7 @@ func savePlayerAttributes(profiles []allocation.PlayerProfile) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile("cmd/allocation/s3/out/assigned_players.csv", out, 0644)
+	return os.WriteFile(fmt.Sprintf("cmd/allocation/s%d/out/assigned_players.csv", season), out, 0644)
 }
 
 type outputRecordRow struct {

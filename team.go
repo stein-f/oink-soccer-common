@@ -64,16 +64,16 @@ func CalculateTeamDefenseScore(source *rand.Rand, lineup GameLineup) float64 {
 	}
 
 	// calculate the average control score for each position
-	averageControlScoresByPosition := make(map[PlayerPosition]float64)
+	averageDefenseScoresByPosition := make(map[PlayerPosition]float64)
 	boost := getPositionItemBoost(source, lineup.ItemBoosts, PlayerPositionDefense)
 	for position, players := range playersByPosition {
-		averageControlScoresByPosition[position] = getAverageDefenseScore(boost, players)
+		averageDefenseScoresByPosition[position] = getAverageDefenseScore(boost, players)
 	}
 
-	gkScore := averageControlScoresByPosition[PlayerPositionGoalkeeper] * 35 / 100
-	defScore := averageControlScoresByPosition[PlayerPositionDefense] * 40 / 100
-	midfieldScore := averageControlScoresByPosition[PlayerPositionMidfield] * 20 / 100
-	attackScore := averageControlScoresByPosition[PlayerPositionAttack] * 5 / 100
+	gkScore := averageDefenseScoresByPosition[PlayerPositionGoalkeeper] * 35 / 100
+	defScore := averageDefenseScoresByPosition[PlayerPositionDefense] * 40 / 100
+	midfieldScore := averageDefenseScoresByPosition[PlayerPositionMidfield] * 20 / 100
+	attackScore := averageDefenseScoresByPosition[PlayerPositionAttack] * 5 / 100
 
 	defenseScore := gkScore + defScore + midfieldScore + attackScore
 

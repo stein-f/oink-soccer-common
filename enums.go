@@ -68,7 +68,8 @@ type BoostType string
 
 const (
 	BoostTypeTeam     BoostType = "Team Boost"
-	BoostTypePosition BoostType = "Position Boost"
+	BoostTypePlayer   BoostType = "Player Boost"
+	BoostTypePosition BoostType = "Position Boost" // deprecated, use team and player boosts instead
 )
 
 func BoostTypeValues() []BoostType {

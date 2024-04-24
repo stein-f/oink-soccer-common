@@ -18,7 +18,7 @@ type FifaPlayersRepository struct {
 }
 
 func (f FifaPlayersRepository) GetAllPlayers() ([]FifaPlayer, error) {
-	file, err := os.ReadFile("cmd/allocation/s3/fifa_players_22.csv")
+	file, err := os.ReadFile("cmd/allocation/fifa_players_22.csv")
 	if err != nil {
 		return nil, err
 	}

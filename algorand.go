@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"math"
 	"math/rand"
 	"net/http"
 
@@ -33,5 +34,5 @@ func CreateRandomSourceFromAlgorandBlockHash(httpCli *http.Client, round uint64)
 	seed := int64(binary.BigEndian.Uint64(hash[:8]))
 
 	// Seed the random number generator
-	return rand.New(rand.NewSource(seed))
+	return rand.New(rand.NewSource(int64(math.Abs(float64(seed)))))
 }

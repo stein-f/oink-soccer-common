@@ -2,6 +2,7 @@ package allocation
 
 import (
 	"math/rand"
+	"sort"
 
 	"github.com/mroth/weightedrand"
 	"github.com/pkg/errors"
@@ -64,13 +65,26 @@ func getPlayerLevels(overallRating int) []soccer.PlayerLevel {
 
 func (p *PlayersLookup) GetRandomPlayer(position soccer.PlayerPosition, asset EligibleAsset) (FifaPlayer, error) {
 	levelProbabilities := tierToPlayerLevelProbability[asset.EligibleAssetTier]
+
+	// Extract keys and sort them
+	var levels []soccer.PlayerLevel
+	for level := range levelProbabilities {
+		levels = append(levels, level)
+	}
+	sort.Slice(levels, func(i, j int) bool {
+		return levels[i] < levels[j]
+	})
+
+	// Create weighted choices with sorted levels
 	levelChoices := []weightedrand.Choice{}
-	for level, probability := range levelProbabilities {
+	for _, level := range levels {
+		probability := levelProbabilities[level]
 		levelChoices = append(levelChoices, weightedrand.Choice{
 			Item:   level,
 			Weight: uint(probability),
 		})
 	}
+
 	chooser, err := weightedrand.NewChooser(levelChoices...)
 	if err != nil {
 		return FifaPlayer{}, errors.Wrap(err, "failed to get player position")

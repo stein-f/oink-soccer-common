@@ -1,20 +1,21 @@
 package allocation
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/gocarina/gocsv"
 )
 
 type SoccerEligibleAssetsRepository interface {
-	GetAllEligibleAssets() ([]EligibleAsset, error)
+	GetAllEligibleAssets(season int) ([]EligibleAsset, error)
 }
 
 type EligibleAssetsRepository struct {
 }
 
-func (f EligibleAssetsRepository) GetAllEligibleAssets() ([]EligibleAsset, error) {
-	file, err := os.ReadFile("cmd/allocation/s3/eligible_assets.csv")
+func (f EligibleAssetsRepository) GetAllEligibleAssets(season int) ([]EligibleAsset, error) {
+	file, err := os.ReadFile(fmt.Sprintf("cmd/allocation/s%d/eligible_assets.csv", season))
 	if err != nil {
 		return nil, err
 	}

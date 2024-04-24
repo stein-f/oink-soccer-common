@@ -1,11 +1,17 @@
 {
-  "current_season": 3,
+  "current_season": 4,
   "seasons": [
     {
       "season": 3,
       "collab": "Al Goanna",
       "assets_path": "cmd/allocation/s3/eligible_assets.csv",
       "round": 36559096
+    },
+    {
+      "season": 4,
+      "collab": "Shep",
+      "assets_path": "cmd/allocation/s4/eligible_assets.csv",
+      "round": 0
     }
   ]
 }
