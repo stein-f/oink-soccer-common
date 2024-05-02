@@ -2,10 +2,106 @@ package soccer
 
 import "time"
 
+func GetAllInjuries() []Injury {
+	return injuries
+}
+
+var injuries = []Injury{
+	// low severity
+	{
+		Severity:    InjurySeverityLow,
+		MinDays:     1,
+		MaxDays:     1,
+		Name:        "Minor sprain",
+		Description: "Overstretched a ligament performing an unsuccessful tackle.",
+		Weight:      100,
+	},
+	{
+		Severity:    InjurySeverityLow,
+		MinDays:     1,
+		MaxDays:     1,
+		Name:        "Squirrel Scare",
+		Description: "Spooked by a squirrel running onto the field, leading to a comical but unfortunate tumble.",
+		Weight:      100,
+	},
+	{
+		Severity:    InjurySeverityLow,
+		MinDays:     1,
+		MaxDays:     1,
+		Name:        "Pizza Burn",
+		Description: "Out for a game after trying to eat pizza too quickly before the match and burning the roof of their mouth.",
+		Weight:      100,
+	}, {
+		Severity:    InjurySeverityLow,
+		MinDays:     1,
+		MaxDays:     1,
+		Name:        "Laugh Attack",
+		Description: "Couldn't stop laughing after a teammate's joke and ended up with a side stitch.",
+		Weight:      100,
+	}, {
+		Severity:    InjurySeverityLow,
+		MinDays:     1,
+		MaxDays:     1,
+		Name:        "Dance-Off Defeat",
+		Description: "Suffered a minor ego bruise and twisted ankle during an impromptu pre-match dance-off.",
+		Weight:      100,
+	},
+	// medium severity
+	{
+		Severity:    InjurySeverityMid,
+		MinDays:     2,
+		MaxDays:     3,
+		Name:        "Hamstring strain",
+		Description: "Minor hamstring tear after sprinting to catch up with a breakaway.",
+		Weight:      25,
+	},
+	{
+		Severity:    InjurySeverityMid,
+		MinDays:     2,
+		MaxDays:     3,
+		Name:        "Concussion",
+		Description: "Wore two left boots to the game, resulting in blisters and confused running.",
+		Weight:      25,
+	},
+	{
+		Severity:    InjurySeverityMid,
+		MinDays:     2,
+		MaxDays:     3,
+		Name:        "Mismatched Boots",
+		Description: "Head injury after a collision with a teammate during a header.",
+		Weight:      25,
+	},
+	// high severity
+	{
+		Severity:    InjurySeverityHigh,
+		MinDays:     3,
+		MaxDays:     5,
+		Name:        "Achilles Tendon Rupture",
+		Description: "Achilles tendon rupture after a sudden acceleration to chase down a ball.",
+		Weight:      10,
+	},
+	{
+		Severity:    InjurySeverityHigh,
+		MinDays:     3,
+		MaxDays:     5,
+		Name:        "High-five fail",
+		Description: "Missed a high-five and accidentally poked themselves in the eye.",
+		Weight:      5,
+	},
+}
+
 type Injury struct {
-	Description      string    `json:"description"`
-	Expires          time.Time `json:"expires"`
-	PlayerID         string    `json:"player_id"`
-	SpeedReduction   float64   `json:"speed_reduction"`   // 0.8 = 20% reduction
-	ControlReduction float64   `json:"control_reduction"` // 0.8 = 20% reduction
+	Severity    InjurySeverity `json:"severity"`
+	MinDays     int            `json:"min_days"`
+	MaxDays     int            `json:"max_days"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Weight      int            `json:"weight"`
+}
+
+type InjuryEvent struct {
+	TeamID   string    `json:"team_id"`
+	PlayerID string    `json:"player_id"`
+	Expires  time.Time `json:"expires"`
+	Injury   Injury    `json:"injury"`
 }

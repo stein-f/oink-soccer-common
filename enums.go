@@ -94,3 +94,11 @@ func GameOutcomeTypeValues() []GameOutcomeType {
 		GameOutcomeTypeDrawn,
 	}
 }
+
+type InjurySeverity string
+
+const (
+	InjurySeverityLow  InjurySeverity = "Low Severity"
+	InjurySeverityMid  InjurySeverity = "Mid Severity"
+	InjurySeverityHigh InjurySeverity = "High Severity"
+)
