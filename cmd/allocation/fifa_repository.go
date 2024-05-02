@@ -49,6 +49,7 @@ type record struct {
 	Passing         int    `csv:"passing"`
 	Defending       int    `csv:"defending"`
 	Goalkeeping     int    `csv:"goalkeeping_handling"`
+	Mentality       int    `csv:"mentality_composure"`
 	Overall         int    `csv:"overall"`
 }
 
