@@ -1,9 +1,50 @@
 package soccer
 
-import "time"
+import (
+	"math/rand"
+	"time"
+
+	"github.com/mroth/weightedrand"
+)
 
 func GetAllInjuries() []Injury {
 	return injuries
+}
+
+var injuryWeightsDefaults = []weightedrand.Choice{
+	{Item: false, Weight: 50},
+	{Item: true, Weight: 1},
+}
+
+var injuryWeightsInjuryPronePlayers = []weightedrand.Choice{
+	{Item: false, Weight: 25},
+	{Item: true, Weight: 1},
+}
+
+func ApplyInjury(isInjuryProne bool, randSource *rand.Rand) (Injury, bool) {
+	choices := injuryWeightsDefaults
+	if isInjuryProne {
+		choices = injuryWeightsInjuryPronePlayers
+	}
+	chooser, err := weightedrand.NewChooser(choices...)
+	if err != nil {
+		return Injury{}, false
+	}
+	isInjured := chooser.PickSource(randSource).(bool)
+	if !isInjured {
+		return Injury{}, false
+	}
+
+	var injuryChoices []weightedrand.Choice
+	for _, i := range GetAllInjuries() {
+		injuryChoices = append(injuryChoices, weightedrand.Choice{Item: i, Weight: i.Weight})
+	}
+	injuryChooser, err := weightedrand.NewChooser(injuryChoices...)
+	if err != nil {
+		return Injury{}, false
+	}
+	injury := injuryChooser.PickSource(randSource).(Injury)
+	return injury, true
 }
 
 var injuries = []Injury{
@@ -28,8 +69,8 @@ var injuries = []Injury{
 		Severity:    InjurySeverityLow,
 		MinDays:     1,
 		MaxDays:     1,
-		Name:        "Pizza Burn",
-		Description: "Out for a game after trying to eat pizza too quickly before the match and burning the roof of their mouth.",
+		Name:        "Pie Burn",
+		Description: "Out for a game after trying to eat pie too quickly during half-time match and burning the roof of their mouth.",
 		Weight:      100,
 	}, {
 		Severity:    InjurySeverityLow,
@@ -96,7 +137,7 @@ type Injury struct {
 	MaxDays     int            `json:"max_days"`
 	Name        string         `json:"name"`
 	Description string         `json:"description"`
-	Weight      int            `json:"weight"`
+	Weight      uint           `json:"weight"`
 }
 
 type InjuryEvent struct {

@@ -16,7 +16,7 @@ var homeTeamConfig []byte
 var awayTeamConfig []byte
 
 func main() {
-	var homeWins, awayWins, draws, goals, homeChances, awayChances int
+	var homeWins, awayWins, draws, goals, homeChances, awayChances, injuryOccurances int
 	gameCount := 10000
 
 	scorerByPosition := make(map[soccer.PlayerPosition]int)
@@ -25,7 +25,7 @@ func main() {
 	awayLineup := loadConfig(awayTeamConfig)
 
 	for i := 0; i < gameCount; i++ {
-		gameEvents, err := soccer.RunGame(homeLineup, awayLineup)
+		gameEvents, injuries, err := soccer.RunGame(homeLineup, awayLineup)
 		if err != nil {
 			panic(err)
 		}
@@ -39,6 +39,8 @@ func main() {
 		} else {
 			draws++
 		}
+
+		injuryOccurances += len(injuries.AwayTeamInjuries) + len(injuries.HomeTeamInjuries)
 
 		for _, event := range gameEvents {
 			if event.Type == soccer.GameEventTypeGoal {
@@ -75,6 +77,7 @@ func main() {
 	fmt.Printf("Away Team chances/game: %f\n", awayTeamChancePerGame)
 	fmt.Printf("Draws: %d\n", draws)
 	fmt.Printf("Draw ratio: %f\n", float64(draws)/float64(gameCount)*100)
+	fmt.Printf("Total injuries: %d\n", injuryOccurances)
 	fmt.Printf("Goals/game: %f\n", goalsPerGame)
 
 	attackerGoals := scorerByPosition[soccer.PlayerPositionAttack]

@@ -44,6 +44,7 @@ type record struct {
 	SkillMoves      string `csv:"skill_moves"`
 	WorkRate        string `csv:"work_rate"`
 	PlayerTags      string `csv:"player_tags"`
+	PlayerTraits    string `csv:"player_traits"`
 	Pace            int    `csv:"pace"`
 	Shooting        int    `csv:"shooting"`
 	Passing         int    `csv:"passing"`
@@ -63,7 +64,17 @@ func (r *record) ToDomain(randSource *rand.Rand) FifaPlayer {
 	if r.PlayerTags != "" {
 		tokens := strings.Split(r.PlayerTags, ",")
 		for _, token := range tokens {
-			tags = append(tags, strings.TrimSpace(token))
+			withoutSpaces := strings.TrimSpace(token)
+			withoutHash := strings.ReplaceAll(withoutSpaces, "#", "")
+			tags = append(tags, withoutHash)
+		}
+	}
+	if r.PlayerTraits != "" {
+		tokens := strings.Split(r.PlayerTraits, ",")
+		for _, token := range tokens {
+			withoutSpaces := strings.TrimSpace(token)
+			withoutHash := strings.ReplaceAll(withoutSpaces, "#", "")
+			tags = append(tags, withoutHash)
 		}
 	}
 	attributes := soccer.PlayerAttributes{

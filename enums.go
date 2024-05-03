@@ -102,3 +102,9 @@ const (
 	InjurySeverityMid  InjurySeverity = "Mid Severity"
 	InjurySeverityHigh InjurySeverity = "High Severity"
 )
+
+type PlayerTag string
+
+const (
+	PlayerTagInjuryProne PlayerTag = "Injury Prone"
+)

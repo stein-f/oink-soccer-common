@@ -64,7 +64,7 @@ func fetchGameEventArchiveRecord(client *http.Client, gameKey string) (GameEvent
 }
 
 func runGame(r *rand.Rand, homeLineup, awayLineup soccer.GameLineup) {
-	gameEvents, err := soccer.RunGameWithSeed(r, homeLineup, awayLineup)
+	gameEvents, _, err := soccer.RunGameWithSeed(r, homeLineup, awayLineup)
 	if err != nil {
 		panic(err)
 	}

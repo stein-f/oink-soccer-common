@@ -16,6 +16,15 @@ type PlayerAttributes struct {
 	BasedOnPlayerURL string         `json:"based_on_player_url"`
 }
 
+func (p PlayerAttributes) IsInjuryProne() bool {
+	for _, tag := range p.Tag {
+		if tag == string(PlayerTagInjuryProne) {
+			return true
+		}
+	}
+	return false
+}
+
 // GetOverallRating returns the overall rating for a player based on their position
 func (p PlayerAttributes) GetOverallRating() int {
 	if p.Position == PlayerPositionGoalkeeper {

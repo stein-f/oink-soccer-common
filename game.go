@@ -109,34 +109,58 @@ type TeamStats struct {
 	Goals    int      `json:"goals"`
 }
 
-func RunGameWithSeed(randSource *rand.Rand, homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, error) {
+func RunGameWithSeed(randSource *rand.Rand, homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, Injuries, error) {
 	events := []GameEvent{}
 
 	teamChances, err := DetermineTeamChances(randSource, homeTeam, awayTeam)
 	if err != nil {
-		return nil, err
+		return nil, Injuries{}, err
 	}
 
 	eventMinutes, err := GetRandomMinutes(randSource, len(teamChances))
 	if err != nil {
-		return nil, err
+		return nil, Injuries{}, err
 	}
 
 	for i, teamChance := range teamChances {
 		minuteOfEvent := eventMinutes[i]
 		event, err := runTeamChance(randSource, teamChance, homeTeam, awayTeam, minuteOfEvent)
 		if err != nil {
-			return nil, err
+			return nil, Injuries{}, err
 		}
 		events = append(events, event)
 	}
-	return events, nil
+
+	homeTeamInjuries := GetInjuries(randSource, homeTeam)
+	awayTeamInjuries := GetInjuries(randSource, awayTeam)
+	injuries := Injuries{
+		HomeTeamInjuries: homeTeamInjuries,
+		AwayTeamInjuries: awayTeamInjuries,
+	}
+
+	return events, injuries, nil
 }
 
-func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, error) {
+type Injuries struct {
+	HomeTeamInjuries []Injury `json:"home_team_injuries"`
+	AwayTeamInjuries []Injury `json:"away_team_injuries"`
+}
+
+func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, Injuries, error) {
 	source := rand.NewSource(time.Now().UnixNano())
 	randSource := rand.New(source)
 	return RunGameWithSeed(randSource, homeTeam, awayTeam)
+}
+
+func GetInjuries(source *rand.Rand, lineup GameLineup) []Injury {
+	var injuries []Injury
+	for _, player := range lineup.Players {
+		injury, isInjured := ApplyInjury(player.Attributes.IsInjuryProne(), source)
+		if isInjured {
+			injuries = append(injuries, injury)
+		}
+	}
+	return injuries
 }
 
 func GetTeamBoost(source *rand.Rand, lineup GameLineup) float64 {

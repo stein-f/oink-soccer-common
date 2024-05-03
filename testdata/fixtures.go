@@ -80,6 +80,11 @@ func TimeNowRandSource() *rand.Rand {
 	return rand.New(source)
 }
 
+func FixedRandSource(seed int64) *rand.Rand {
+	source := rand.NewSource(seed)
+	return rand.New(source)
+}
+
 var WeakTeamPlayers = []soccer.SelectedPlayer{
 	{
 		ID:   "6",
