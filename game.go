@@ -142,8 +142,8 @@ func RunGameWithSeed(randSource *rand.Rand, homeTeam GameLineup, awayTeam GameLi
 }
 
 type Injuries struct {
-	HomeTeamInjuries []Injury `json:"home_team_injuries"`
-	AwayTeamInjuries []Injury `json:"away_team_injuries"`
+	HomeTeamInjuries []InjuryEvent `json:"home_team_injuries"`
+	AwayTeamInjuries []InjuryEvent `json:"away_team_injuries"`
 }
 
 func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, Injuries, error) {
@@ -152,12 +152,20 @@ func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, Injuries, e
 	return RunGameWithSeed(randSource, homeTeam, awayTeam)
 }
 
-func GetInjuries(source *rand.Rand, lineup GameLineup) []Injury {
-	var injuries []Injury
+func GetInjuries(source *rand.Rand, lineup GameLineup) []InjuryEvent {
+	var injuries []InjuryEvent
 	for _, player := range lineup.Players {
 		injury, isInjured := ApplyInjury(player.Attributes.IsInjuryProne(), source)
 		if isInjured {
-			injuries = append(injuries, injury)
+			daysInjured := source.Intn(injury.MaxDays-injury.MinDays+1) + injury.MinDays
+			expires := time.Now().AddDate(0, 0, daysInjured).UTC()
+			expiresEndOfDay := time.Date(expires.Year(), expires.Month(), expires.Day(), 23, 59, 59, 0, expires.Location())
+			injuries = append(injuries, InjuryEvent{
+				TeamID:   lineup.Team.ID,
+				PlayerID: player.ID,
+				Expires:  expiresEndOfDay,
+				Injury:   injury,
+			})
 		}
 	}
 	return injuries
