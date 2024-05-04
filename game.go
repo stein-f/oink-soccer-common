@@ -18,6 +18,7 @@ type SelectedPlayer struct {
 	Name             string           `json:"name"`
 	Attributes       PlayerAttributes `json:"attributes"`
 	SelectedPosition PlayerPosition   `json:"position"`
+	Injury           *InjuryEvent     `json:"injury,omitempty"`
 }
 
 func (p SelectedPlayer) IsOutOfPosition() bool {
@@ -29,23 +30,30 @@ func (p SelectedPlayer) IsOutOfPosition() bool {
 
 func (p SelectedPlayer) GetControlScore() float64 {
 	if p.IsOutOfPosition() {
-		return float64(p.Attributes.GetControlScore()) * OutOfPositionScaleFactor
+		return float64(p.Attributes.GetControlScore()) * OutOfPositionScaleFactor * p.GetInjuryScaleFactor()
 	}
-	return p.Attributes.GetControlScore()
+	return p.Attributes.GetControlScore() * p.GetInjuryScaleFactor()
 }
 
 func (p SelectedPlayer) GetAttackScore() float64 {
 	if p.IsOutOfPosition() {
-		return float64(p.Attributes.GetAttackScore()) * OutOfPositionScaleFactor
+		return float64(p.Attributes.GetAttackScore()) * OutOfPositionScaleFactor * p.GetInjuryScaleFactor()
 	}
-	return p.Attributes.GetAttackScore()
+	return p.Attributes.GetAttackScore() * p.GetInjuryScaleFactor()
 }
 
 func (p SelectedPlayer) GetDefenseScore() float64 {
 	if p.IsOutOfPosition() {
-		return float64(p.Attributes.GetDefenseScore()) * OutOfPositionScaleFactor
+		return float64(p.Attributes.GetDefenseScore()) * OutOfPositionScaleFactor * p.GetInjuryScaleFactor()
 	}
-	return p.Attributes.GetDefenseScore()
+	return p.Attributes.GetDefenseScore() * p.GetInjuryScaleFactor()
+}
+
+func (p SelectedPlayer) GetInjuryScaleFactor() float64 {
+	if p.Injury == nil {
+		return 1
+	}
+	return p.Injury.Injury.StatsReduction
 }
 
 type GameLineup struct {

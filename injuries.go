@@ -50,94 +50,105 @@ func ApplyInjury(isInjuryProne bool, randSource *rand.Rand) (Injury, bool) {
 var injuries = []Injury{
 	// low severity
 	{
-		Severity:    InjurySeverityLow,
-		MinDays:     1,
-		MaxDays:     1,
-		Name:        "Minor sprain",
-		Description: "Overstretched a ligament performing an unsuccessful tackle.",
-		Weight:      100,
+		Severity:       InjurySeverityLow,
+		StatsReduction: 0.95,
+		MinDays:        1,
+		MaxDays:        1,
+		Name:           "Minor sprain",
+		Description:    "Overstretched a ligament performing an unsuccessful tackle.",
+		Weight:         100,
 	},
 	{
-		Severity:    InjurySeverityLow,
-		MinDays:     1,
-		MaxDays:     1,
-		Name:        "Squirrel Scare",
-		Description: "Spooked by a squirrel running onto the field, leading to a comical but unfortunate tumble.",
-		Weight:      100,
+		Severity:       InjurySeverityLow,
+		StatsReduction: 0.95,
+		MinDays:        1,
+		MaxDays:        1,
+		Name:           "Squirrel Scare",
+		Description:    "Spooked by a squirrel running onto the field, leading to a comical but unfortunate tumble.",
+		Weight:         100,
 	},
 	{
-		Severity:    InjurySeverityLow,
-		MinDays:     1,
-		MaxDays:     1,
-		Name:        "Pie Burn",
-		Description: "Out for a game after trying to eat pie too quickly during half-time match and burning the roof of their mouth.",
-		Weight:      100,
+		Severity:       InjurySeverityLow,
+		StatsReduction: 0.95,
+		MinDays:        1,
+		MaxDays:        1,
+		Name:           "Pie Burn",
+		Description:    "Out for a game after trying to eat pie too quickly during half-time match and burning the roof of their mouth.",
+		Weight:         100,
 	}, {
-		Severity:    InjurySeverityLow,
-		MinDays:     1,
-		MaxDays:     1,
-		Name:        "Laugh Attack",
-		Description: "Couldn't stop laughing after a teammate's joke and ended up with a side stitch.",
-		Weight:      100,
+		Severity:       InjurySeverityLow,
+		StatsReduction: 0.95,
+		MinDays:        1,
+		MaxDays:        1,
+		Name:           "Laugh Attack",
+		Description:    "Couldn't stop laughing after a teammate's joke and ended up with a side stitch.",
+		Weight:         100,
 	}, {
-		Severity:    InjurySeverityLow,
-		MinDays:     1,
-		MaxDays:     1,
-		Name:        "Dance-Off Defeat",
-		Description: "Suffered a minor ego bruise and twisted ankle during an impromptu pre-match dance-off.",
-		Weight:      100,
+		Severity:       InjurySeverityLow,
+		StatsReduction: 0.95,
+		MinDays:        1,
+		MaxDays:        1,
+		Name:           "Dance-Off Defeat",
+		Description:    "Suffered a minor ego bruise and twisted ankle during an impromptu pre-match dance-off.",
+		Weight:         100,
 	},
 	// medium severity
 	{
-		Severity:    InjurySeverityMid,
-		MinDays:     2,
-		MaxDays:     3,
-		Name:        "Hamstring strain",
-		Description: "Minor hamstring tear after sprinting to catch up with a breakaway.",
-		Weight:      25,
+		Severity:       InjurySeverityMid,
+		StatsReduction: 0.9,
+		MinDays:        2,
+		MaxDays:        3,
+		Name:           "Hamstring strain",
+		Description:    "Minor hamstring tear after sprinting to catch up with a breakaway.",
+		Weight:         25,
 	},
 	{
-		Severity:    InjurySeverityMid,
-		MinDays:     2,
-		MaxDays:     3,
-		Name:        "Concussion",
-		Description: "Wore two left boots to the game, resulting in blisters and confused running.",
-		Weight:      25,
+		Severity:       InjurySeverityMid,
+		StatsReduction: 0.9,
+		MinDays:        2,
+		MaxDays:        3,
+		Name:           "Concussion",
+		Description:    "Wore two left boots to the game, resulting in blisters and confused running.",
+		Weight:         25,
 	},
 	{
-		Severity:    InjurySeverityMid,
-		MinDays:     2,
-		MaxDays:     3,
-		Name:        "Mismatched Boots",
-		Description: "Head injury after a collision with a teammate during a header.",
-		Weight:      25,
+		Severity:       InjurySeverityMid,
+		StatsReduction: 0.9,
+		MinDays:        2,
+		MaxDays:        3,
+		Name:           "Mismatched Boots",
+		Description:    "Head injury after a collision with a teammate during a header.",
+		Weight:         25,
 	},
 	// high severity
 	{
-		Severity:    InjurySeverityHigh,
-		MinDays:     3,
-		MaxDays:     5,
-		Name:        "Achilles Tendon Rupture",
-		Description: "Achilles tendon rupture after a sudden acceleration to chase down a ball.",
-		Weight:      10,
+		Severity:       InjurySeverityHigh,
+		StatsReduction: 0.85,
+		MinDays:        3,
+		MaxDays:        5,
+		Name:           "Achilles Tendon Rupture",
+		Description:    "Achilles tendon rupture after a sudden acceleration to chase down a ball.",
+		Weight:         10,
 	},
 	{
-		Severity:    InjurySeverityHigh,
-		MinDays:     3,
-		MaxDays:     5,
-		Name:        "High-five fail",
-		Description: "Missed a high-five and accidentally poked themselves in the eye.",
-		Weight:      5,
+		Severity:       InjurySeverityHigh,
+		StatsReduction: 0.85,
+		MinDays:        3,
+		MaxDays:        5,
+		Name:           "High-five fail",
+		Description:    "Missed a high-five and accidentally poked themselves in the eye.",
+		Weight:         5,
 	},
 }
 
 type Injury struct {
-	Severity    InjurySeverity `json:"severity"`
-	MinDays     int            `json:"min_days"`
-	MaxDays     int            `json:"max_days"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	Weight      uint           `json:"weight"`
+	Severity       InjurySeverity `json:"severity"`
+	MinDays        int            `json:"min_days"`
+	MaxDays        int            `json:"max_days"`
+	Name           string         `json:"name"`
+	StatsReduction float64        `json:"stats_reduction"`
+	Description    string         `json:"description"`
+	Weight         uint           `json:"weight"`
 }
 
 type InjuryEvent struct {

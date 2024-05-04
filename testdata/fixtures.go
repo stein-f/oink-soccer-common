@@ -7,72 +7,74 @@ import (
 	soccer "github.com/stein-f/oink-soccer-common"
 )
 
-var StrongTeamPlayers = []soccer.SelectedPlayer{
-	{
-		ID:   "1",
-		Name: "1",
-		Attributes: soccer.PlayerAttributes{
-			GoalkeeperRating: 88,
-			SpeedRating:      74,
-			DefenseRating:    33,
-			ControlRating:    21,
-			AttackRating:     37,
-			Position:         soccer.PlayerPositionGoalkeeper,
+func StrongTeam() []soccer.SelectedPlayer {
+	return []soccer.SelectedPlayer{
+		{
+			ID:   "1",
+			Name: "1",
+			Attributes: soccer.PlayerAttributes{
+				GoalkeeperRating: 88,
+				SpeedRating:      74,
+				DefenseRating:    33,
+				ControlRating:    21,
+				AttackRating:     37,
+				Position:         soccer.PlayerPositionGoalkeeper,
+			},
+			SelectedPosition: soccer.PlayerPositionGoalkeeper,
 		},
-		SelectedPosition: soccer.PlayerPositionGoalkeeper,
-	},
-	{
-		ID:   "2",
-		Name: "2",
-		Attributes: soccer.PlayerAttributes{
-			GoalkeeperRating: 14,
-			SpeedRating:      80,
-			DefenseRating:    90,
-			ControlRating:    81,
-			AttackRating:     37,
-			Position:         soccer.PlayerPositionDefense,
+		{
+			ID:   "2",
+			Name: "2",
+			Attributes: soccer.PlayerAttributes{
+				GoalkeeperRating: 14,
+				SpeedRating:      80,
+				DefenseRating:    90,
+				ControlRating:    81,
+				AttackRating:     37,
+				Position:         soccer.PlayerPositionDefense,
+			},
+			SelectedPosition: soccer.PlayerPositionDefense,
 		},
-		SelectedPosition: soccer.PlayerPositionDefense,
-	},
-	{
-		ID:   "3",
-		Name: "3",
-		Attributes: soccer.PlayerAttributes{
-			GoalkeeperRating: 14,
-			SpeedRating:      80,
-			DefenseRating:    55,
-			ControlRating:    85,
-			AttackRating:     91,
-			Position:         soccer.PlayerPositionMidfield,
+		{
+			ID:   "3",
+			Name: "3",
+			Attributes: soccer.PlayerAttributes{
+				GoalkeeperRating: 14,
+				SpeedRating:      80,
+				DefenseRating:    55,
+				ControlRating:    85,
+				AttackRating:     91,
+				Position:         soccer.PlayerPositionMidfield,
+			},
+			SelectedPosition: soccer.PlayerPositionMidfield,
 		},
-		SelectedPosition: soccer.PlayerPositionMidfield,
-	},
-	{
-		ID:   "4",
-		Name: "4",
-		Attributes: soccer.PlayerAttributes{
-			GoalkeeperRating: 11,
-			SpeedRating:      81,
-			DefenseRating:    75,
-			ControlRating:    81,
-			AttackRating:     71,
-			Position:         soccer.PlayerPositionMidfield,
+		{
+			ID:   "4",
+			Name: "4",
+			Attributes: soccer.PlayerAttributes{
+				GoalkeeperRating: 11,
+				SpeedRating:      81,
+				DefenseRating:    75,
+				ControlRating:    81,
+				AttackRating:     71,
+				Position:         soccer.PlayerPositionMidfield,
+			},
+			SelectedPosition: soccer.PlayerPositionMidfield,
 		},
-		SelectedPosition: soccer.PlayerPositionMidfield,
-	},
-	{
-		ID:   "5",
-		Name: "5",
-		Attributes: soccer.PlayerAttributes{
-			GoalkeeperRating: 14,
-			SpeedRating:      80,
-			DefenseRating:    22,
-			ControlRating:    85,
-			AttackRating:     93,
-			Position:         soccer.PlayerPositionAttack,
+		{
+			ID:   "5",
+			Name: "5",
+			Attributes: soccer.PlayerAttributes{
+				GoalkeeperRating: 14,
+				SpeedRating:      80,
+				DefenseRating:    22,
+				ControlRating:    85,
+				AttackRating:     93,
+				Position:         soccer.PlayerPositionAttack,
+			},
+			SelectedPosition: soccer.PlayerPositionAttack,
 		},
-		SelectedPosition: soccer.PlayerPositionAttack,
-	},
+	}
 }
 
 func TimeNowRandSource() *rand.Rand {
