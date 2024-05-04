@@ -10,7 +10,10 @@ import (
 )
 
 const (
-	OutOfPositionScaleFactor = 0.85
+	OutOfPositionScaleFactor   = 0.85
+	StatsReductionLowSeverity  = 0.95
+	StatsReductionMedSeverity  = 0.9
+	StatsReductionHighSeverity = 0.85
 )
 
 type SelectedPlayer struct {
@@ -50,7 +53,7 @@ func (p SelectedPlayer) GetDefenseScore() float64 {
 }
 
 func (p SelectedPlayer) GetInjuryScaleFactor() float64 {
-	if p.Injury == nil {
+	if p.Injury == nil || p.Injury.Injury.StatsReduction < StatsReductionHighSeverity {
 		return 1
 	}
 	return p.Injury.Injury.StatsReduction
