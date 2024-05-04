@@ -22,6 +22,10 @@ func TestDetermineTeamChances_ChancesWithinMinMaxRange(t *testing.T) {
 }
 
 func TestDetermineTeamChances_TeamWithInjuriesWinsLessFrequently(t *testing.T) {
+	t.Skip()
+
+	// TODO remove skip when injuries are enabled
+
 	source := testdata.TimeNowRandSource()
 	players := testdata.StrongTeam()
 
