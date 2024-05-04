@@ -108,7 +108,7 @@ var injuries = []Injury{
 		MinDays:        2,
 		MaxDays:        3,
 		Name:           "Concussion",
-		Description:    "Wore two left boots to the game, resulting in blisters and confused running.",
+		Description:    "Head injury after a collision with a teammate during a header.",
 		Weight:         25,
 	},
 	{
@@ -117,7 +117,7 @@ var injuries = []Injury{
 		MinDays:        2,
 		MaxDays:        3,
 		Name:           "Mismatched Boots",
-		Description:    "Head injury after a collision with a teammate during a header.",
+		Description:    "Wore two left boots to the game, resulting in blisters and confused running.",
 		Weight:         25,
 	},
 	// high severity
