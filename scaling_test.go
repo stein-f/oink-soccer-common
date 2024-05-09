@@ -8,26 +8,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestScaleRating tests the scaleRating function with various input values.
 func TestScaleRating(t *testing.T) {
 	testCases := []struct {
 		originalRating float64
 		expectedScaled float64
 	}{
-		{1, 5},
+		{1, 1},
 		{50, 5},
-		{65, 5},
-		{70, 6},
-		{75, 11},
-		{80, 20},
-		{85, 36},
-		{90, 67},
-		{91, 75},
-		{92, 85},
-		{93, 96},
+		{65, 18},
+		{70, 26},
+		{75, 35},
+		{80, 50},
+		{85, 64},
+		{90, 80},
+		{91, 82},
+		{95, 99},
 		{100, 100},
 	}
-
 	for _, tc := range testCases {
 		scaled := soccer.ScalingFunction(tc.originalRating)
 		assert.Equal(t, tc.expectedScaled, math.Floor(scaled))
