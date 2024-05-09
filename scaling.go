@@ -2,6 +2,7 @@ package soccer
 
 import (
 	_ "embed"
+	"math"
 
 	"github.com/gocarina/gocsv"
 )
@@ -10,14 +11,14 @@ import (
 var scalingData []byte
 
 type scalingRow struct {
-	Rating float64 `csv:"rating"`
+	Rating uint64  `csv:"rating"`
 	Scaled float64 `csv:"scaled"`
 }
 
-var scalingRecords map[float64]float64
+var scalingRecords map[uint64]float64
 
 func init() {
-	scalingRecords = make(map[float64]float64)
+	scalingRecords = make(map[uint64]float64)
 	var rows []scalingRow
 	if err := gocsv.UnmarshalBytes(scalingData, &rows); err != nil {
 		panic(err)
@@ -34,14 +35,17 @@ func init() {
 // y = ax^b
 // where y is the scaled rating, x is the original rating (0-100) and a and b are constants that can be adjusted to change the shape of the curve.
 func ScalingFunction(originalRating float64) float64 {
-	if originalRating > 100 {
+	normalizedRating := uint64(math.Round(originalRating))
+
+	if normalizedRating > 100 {
 		return 100
 	}
-	if originalRating <= 0 {
+
+	if normalizedRating <= 0 {
 		return 1
 	}
 
-	rating, ok := scalingRecords[originalRating]
+	rating, ok := scalingRecords[normalizedRating]
 	if !ok {
 		return 1
 	}
