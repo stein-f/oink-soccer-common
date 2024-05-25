@@ -91,7 +91,7 @@ func TestGetOverallRating(t *testing.T) {
 				SpeedRating:      80,
 				ControlRating:    21,
 			},
-			expected: 84,
+			expected: 85,
 		},
 		"df": {
 			gotPlayer: soccer.PlayerAttributes{

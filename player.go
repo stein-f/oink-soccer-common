@@ -28,13 +28,13 @@ func (p PlayerAttributes) IsInjuryProne() bool {
 // GetOverallRating returns the overall rating for a player based on their position
 func (p PlayerAttributes) GetOverallRating() int {
 	if p.Position == PlayerPositionGoalkeeper {
-		return (p.GoalkeeperRating*3 + p.SpeedRating) / 4
+		return (p.GoalkeeperRating*5 + p.SpeedRating) / 6
 	}
 	if p.Position == PlayerPositionDefense {
-		return (p.DefenseRating*3 + p.SpeedRating) / 4
+		return (p.DefenseRating*5 + p.SpeedRating) / 6
 	}
 	if p.Position == PlayerPositionMidfield {
-		return (p.ControlRating*3 + p.SpeedRating) / 4
+		return (p.ControlRating*4 + p.SpeedRating) / 5
 	}
 	if p.Position == PlayerPositionAttack {
 		return (p.AttackRating*3 + p.SpeedRating) / 4

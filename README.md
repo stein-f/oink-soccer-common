@@ -72,7 +72,7 @@ grep Salah cmd/allocation/s3/out/assigned_players.csv
 The player control score is a weighted sum of the `control` and `speed` attributes:
 
 ```text
-playerControlScore = (controlRating * 3 + speedRating) / 4
+playerControlScore = (controlRating * 4 + speedRating) / 5
 ```
 
 The team control score is the sum of the player control scores, weighted by position as follows:
@@ -96,7 +96,7 @@ The team defense score is the sum of the player defense scores, weighted by posi
 The average score is taken for a position where there are multiple players in that position. The individual defense score of a player is a function of the defense and speed attributes as follows:
 
 ```text
-playerDefenseScore = (defenseRating * 3 + speedRating) / 4
+playerDefenseScore = (defenseRating * 5 + speedRating) / 6
 ```
 
 ## Attack Score
