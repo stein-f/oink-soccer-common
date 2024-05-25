@@ -685,7 +685,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 29,
+			wantOverallTeamDefenseScore: 28,
 		},
 		"with 10% boost": {
 			gotTeam: soccer.GameLineup{
@@ -742,7 +742,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 32,
+			wantOverallTeamDefenseScore: 31,
 		},
 	}
 	for name, test := range tests {

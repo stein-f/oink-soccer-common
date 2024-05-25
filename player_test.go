@@ -21,7 +21,7 @@ func TestPlayerAttributes_GetControlRating(t *testing.T) {
 		"higher speed rating has small overall impact on score": {
 			gotPlayerSpeedRating:   90,
 			gotPlayerControlRating: 80,
-			wantPlayerControlScore: 83,
+			wantPlayerControlScore: 82,
 		},
 		"higher control rating has large overall impact on score": {
 			gotPlayerSpeedRating:   80,
