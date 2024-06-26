@@ -44,7 +44,7 @@ func (p PlayerAttributes) GetOverallRating() int {
 
 // GetControlScore returns the control score for a gotPlayer
 // It is calculated using the control and speed rating where control is weighted 3x more than speed
-// controlScore = (controlRating * 3 + speedRating) / 4
+// controlScore = (controlRating * 4 + speedRating) / 5
 func (p PlayerAttributes) GetControlScore() float64 {
 	return math.Round(float64(p.ControlRating*4+p.SpeedRating) / 5)
 }
@@ -58,7 +58,7 @@ func (p PlayerAttributes) GetAttackScore() float64 {
 
 // GetDefenseScore returns the defense score for a gotPlayer
 // It is calculated using the defense and speed rating where defense is weighted 3x more than speed
-// defenseScore = (defenseRating * 3 + speedRating) / 4
+// defenseScore = (defenseRating * 5 + speedRating) / 6
 func (p PlayerAttributes) GetDefenseScore() float64 {
 	rating := p.DefenseRating
 	if p.Position == PlayerPositionGoalkeeper {
