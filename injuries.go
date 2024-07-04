@@ -21,10 +21,10 @@ var injuryWeightsInjuryPronePlayers = []weightedrand.Choice{
 	{Item: true, Weight: 1},
 }
 
-func ApplyInjury(isInjuryProne bool, randSource *rand.Rand) (Injury, bool) {
-	choices := injuryWeightsDefaults
+func ApplyInjury(chancesDefaults []weightedrand.Choice, chancesInjuryProne []weightedrand.Choice, isInjuryProne bool, randSource *rand.Rand) (Injury, bool) {
+	choices := chancesDefaults
 	if isInjuryProne {
-		choices = injuryWeightsInjuryPronePlayers
+		choices = chancesInjuryProne
 	}
 	chooser, err := weightedrand.NewChooser(choices...)
 	if err != nil {

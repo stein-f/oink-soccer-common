@@ -169,7 +169,7 @@ func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, Injuries, e
 func GetInjuries(source *rand.Rand, lineup GameLineup) []InjuryEvent {
 	var injuries []InjuryEvent
 	for _, player := range lineup.Players {
-		injury, isInjured := ApplyInjury(player.Attributes.IsInjuryProne(), source)
+		injury, isInjured := ApplyInjury(injuryWeightsDefaults, injuryWeightsInjuryPronePlayers, player.Attributes.IsInjuryProne(), source)
 		if isInjured {
 			daysInjured := source.Intn(injury.MaxDays-injury.MinDays+1) + injury.MinDays
 			expires := time.Now().AddDate(0, 0, daysInjured).UTC()
