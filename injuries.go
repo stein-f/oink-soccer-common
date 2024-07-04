@@ -12,12 +12,12 @@ func GetAllInjuries() []Injury {
 }
 
 var injuryWeightsDefaults = []weightedrand.Choice{
-	{Item: false, Weight: 50},
+	{Item: false, Weight: 40},
 	{Item: true, Weight: 1},
 }
 
 var injuryWeightsInjuryPronePlayers = []weightedrand.Choice{
-	{Item: false, Weight: 25},
+	{Item: false, Weight: 20},
 	{Item: true, Weight: 1},
 }
 
