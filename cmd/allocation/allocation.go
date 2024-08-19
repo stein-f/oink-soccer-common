@@ -162,8 +162,8 @@ const (
 )
 
 type EligibleAsset struct {
+	PlayerID          string            `json:"player_id"`
 	Name              string            `json:"name"`
-	AssetID           uint64            `json:"id"`
 	EligibleAssetTier EligibleAssetTier `json:"tier"`
 }
 

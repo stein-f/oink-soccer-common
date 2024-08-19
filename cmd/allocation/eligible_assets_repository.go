@@ -28,7 +28,7 @@ func (f EligibleAssetsRepository) GetAllEligibleAssets(season int) ([]EligibleAs
 	for _, record := range records {
 		players = append(players, EligibleAsset{
 			Name:              record.Name,
-			AssetID:           record.AssetID,
+			PlayerID:          record.PlayerID,
 			EligibleAssetTier: record.Tier,
 		})
 	}
@@ -36,7 +36,7 @@ func (f EligibleAssetsRepository) GetAllEligibleAssets(season int) ([]EligibleAs
 }
 
 type csvRow struct {
-	Name    string            `csv:"name"`
-	AssetID uint64            `csv:"asset_id"`
-	Tier    EligibleAssetTier `csv:"tier"`
+	Name     string            `csv:"name"`
+	PlayerID string            `csv:"player_id"`
+	Tier     EligibleAssetTier `csv:"tier"`
 }

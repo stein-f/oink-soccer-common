@@ -34,6 +34,14 @@ const (
 	PlayerPositionAny        PlayerPosition = "Any"
 )
 
+var AllPositions = []PlayerPosition{
+	PlayerPositionGoalkeeper,
+	PlayerPositionDefense,
+	PlayerPositionMidfield,
+	PlayerPositionAttack,
+	PlayerPositionAny,
+}
+
 type FormationType string
 
 const (

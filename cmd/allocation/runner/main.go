@@ -85,10 +85,10 @@ func savePlayerAttributes(profiles []allocation.PlayerProfile, season int) error
 	var csvRows []outputRecordRow
 	for _, profile := range profiles {
 		csvRows = append(csvRows, outputRecordRow{
-			AssetID:    profile.Asset.AssetID,
-			Name:       profile.Asset.Name,
-			PlayerID:   profile.FifaPlayer.PlayerID,
-			PlayerName: profile.FifaPlayer.PlayerAttributes.BasedOnPlayer,
+			PlayerID:     profile.Asset.PlayerID,
+			Name:         profile.Asset.Name,
+			FifaPlayerID: profile.FifaPlayer.PlayerID,
+			PlayerName:   profile.FifaPlayer.PlayerAttributes.BasedOnPlayer,
 		})
 	}
 
@@ -100,8 +100,8 @@ func savePlayerAttributes(profiles []allocation.PlayerProfile, season int) error
 }
 
 type outputRecordRow struct {
-	AssetID    uint64 `csv:"asset_id"`
-	Name       string `csv:"asset_name"`
-	PlayerID   string `csv:"player_id"`
-	PlayerName string `csv:"player_name"`
+	PlayerID     string `csv:"player_id"`
+	Name         string `csv:"asset_name"`
+	FifaPlayerID string `csv:"fifa_player_id"`
+	PlayerName   string `csv:"player_name"`
 }
