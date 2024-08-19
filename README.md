@@ -131,7 +131,9 @@ Defensive formation
 
 Balanced formation
 
-- no boosts/penalties
+- 2.5% defense penalty
+- 2.5% attack penalty
+- 5% control boost
 
 ```
   5
