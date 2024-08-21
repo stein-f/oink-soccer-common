@@ -2,11 +2,10 @@ package soccer_test
 
 import (
 	"github.com/mroth/weightedrand"
-	"testing"
-
 	soccer "github.com/stein-f/oink-soccer-common"
 	"github.com/stein-f/oink-soccer-common/testdata"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 var injuryWeightsDefaults = []weightedrand.Choice{
@@ -28,4 +27,23 @@ func TestApplyInjuries_Injured(t *testing.T) {
 	injury, isInjured := soccer.ApplyInjury(injuryWeightsDefaults, injuryWeightsInjuryPronePlayers, false, testdata.FixedRandSource(83))
 	assert.Equal(t, true, isInjured)
 	assert.Equal(t, "Squirrel Scare", injury.Name)
+}
+
+func TestApplyInjuries_ExpectedFrequencyInRange(t *testing.T) {
+	iterations := 100_000
+	injuryCount := 0
+	randSource := testdata.FixedRandSource(42) // Fixed seed for deterministic test
+	for i := 0; i < iterations; i++ {
+		_, isInjured := soccer.ApplyInjury(injuryWeightsDefaults, injuryWeightsInjuryPronePlayers, false, randSource)
+		if isInjured {
+			injuryCount++
+		}
+	}
+
+	// Tightened range based on expected value and standard deviation
+	expectedMin := 1829
+	expectedMax := 2091
+
+	assert.GreaterOrEqual(t, injuryCount, expectedMin)
+	assert.LessOrEqual(t, injuryCount, expectedMax)
 }
