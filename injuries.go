@@ -17,7 +17,7 @@ var injuryWeightsDefaults = []weightedrand.Choice{
 }
 
 var injuryWeightsInjuryPronePlayers = []weightedrand.Choice{
-	{Item: false, Weight: 7},
+	{Item: false, Weight: 10},
 	{Item: true, Weight: 1},
 }
 
