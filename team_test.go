@@ -114,6 +114,56 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 			},
 			wantOverallTeamControlScore: 75,
 		},
+		"with box formation": {
+			gotTeam: soccer.GameLineup{
+				Team: soccer.Team{
+					Formation: soccer.FormationTypeBox,
+				},
+				Players: []soccer.SelectedPlayer{
+					{
+						SelectedPosition: soccer.PlayerPositionGoalkeeper,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionGoalkeeper,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionDefense,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionDefense,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionDefense,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionDefense,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionAttack,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionAttack,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+					{
+						SelectedPosition: soccer.PlayerPositionAttack,
+						Attributes: soccer.PlayerAttributes{
+							Position:      soccer.PlayerPositionAttack,
+							ControlRating: 80,
+							SpeedRating:   80,
+						},
+					},
+				},
+			},
+			wantOverallTeamControlScore: 76,
+		},
 		"with diamond control boost": {
 			gotTeam: soccer.GameLineup{
 				Team: soccer.Team{

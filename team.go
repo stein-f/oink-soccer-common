@@ -29,10 +29,22 @@ func CalculateTeamControlScore(source *rand.Rand, lineup GameLineup) float64 {
 		averageControlScoresByPosition[position] = getAverageControlScore(boost, players)
 	}
 
-	gkScore := averageControlScoresByPosition[PlayerPositionGoalkeeper] * 5 / 100
-	defScore := averageControlScoresByPosition[PlayerPositionDefense] * 15 / 100
-	midfieldScore := averageControlScoresByPosition[PlayerPositionMidfield] * 65 / 100
-	attackScore := averageControlScoresByPosition[PlayerPositionAttack] * 15 / 100
+	gkRatio := 0.05
+	defRatio := 0.15
+	midRatio := 0.65
+	attackRatio := 0.15
+
+	if len(playersByPosition[PlayerPositionMidfield]) == 0 {
+		gkRatio = 0.05
+		defRatio = 0.35
+		midRatio = 0
+		attackRatio = 0.6
+	}
+
+	gkScore := averageControlScoresByPosition[PlayerPositionGoalkeeper] * gkRatio
+	defScore := averageControlScoresByPosition[PlayerPositionDefense] * defRatio
+	midfieldScore := averageControlScoresByPosition[PlayerPositionMidfield] * midRatio
+	attackScore := averageControlScoresByPosition[PlayerPositionAttack] * attackRatio
 
 	controlScore := (gkScore + defScore + midfieldScore + attackScore) * getFormationControlBoost(lineup)
 
