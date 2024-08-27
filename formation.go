@@ -53,7 +53,9 @@ var ThePyramidFormation = FormationConfig{
 }
 
 // TheDiamondFormation (2-1-1) is a defensive formation
-// no modifiers
+// 2.5% defense penalty
+// 2.5% attack penalty
+// 5% control boost
 //
 //	     5
 //		3 4
@@ -71,4 +73,27 @@ var TheDiamondFormation = FormationConfig{
 	DefenseModifier: 0.975,
 	ControlModifier: 1.05,
 	AttackModifier:  0.975,
+}
+
+// TheBoxFormation (2-0-2) a balanced formation for direct play and counter-attacking
+// 2.5% defense penalty
+// 5% control penalty
+// 10% attack boost
+//
+//	    4 5
+//
+//		2 3
+//		 1
+var TheBoxFormation = FormationConfig{
+	FormationType: FormationTypeBox,
+	Slots: map[uint64]PlayerPosition{
+		1: PlayerPositionGoalkeeper,
+		2: PlayerPositionDefense,
+		3: PlayerPositionDefense,
+		4: PlayerPositionAttack,
+		5: PlayerPositionAttack,
+	},
+	DefenseModifier: 0.975,
+	ControlModifier: 0.95,
+	AttackModifier:  1.1,
 }

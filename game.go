@@ -290,6 +290,8 @@ func getFormationConfig(formationType FormationType) FormationConfig {
 		return ThePyramidFormation
 	case FormationTypeY:
 		return TheYFormation
+	case FormationTypeBox:
+		return TheBoxFormation
 	default:
 		return TheDiamondFormation
 	}

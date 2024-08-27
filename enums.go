@@ -48,6 +48,7 @@ const (
 	FormationTypePyramid FormationType = "The Pyramid"
 	FormationTypeDiamond FormationType = "The Diamond"
 	FormationTypeY       FormationType = "The Y"
+	FormationTypeBox     FormationType = "The Box"
 )
 
 func FormationTypeValues() []FormationType {
@@ -55,6 +56,7 @@ func FormationTypeValues() []FormationType {
 		FormationTypePyramid,
 		FormationTypeDiamond,
 		FormationTypeY,
+		FormationTypeBox,
 	}
 }
 
