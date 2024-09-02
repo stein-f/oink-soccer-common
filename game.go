@@ -298,31 +298,39 @@ func getFormationConfig(formationType FormationType) FormationConfig {
 // weighted rand based on gotPlayer position: 60% attack, 30% midfield, 10% defense
 func determinePositionOfAttackingTeamChance(randSource *rand.Rand, attackingTeamLineup GameLineup) (PlayerPosition, error) {
 	playerChoices := []weightedrand.Choice{}
+
+	positionWeights := map[PlayerPosition]uint{
+		PlayerPositionGoalkeeper: 2,
+		PlayerPositionDefense:    10,
+		PlayerPositionMidfield:   20,
+		PlayerPositionAttack:     70,
+	}
+
+	if attackingTeamLineup.Team.Formation == FormationTypeBox {
+		positionWeights = map[PlayerPosition]uint{
+			PlayerPositionGoalkeeper: 2,
+			PlayerPositionDefense:    10,
+			PlayerPositionMidfield:   0,
+			PlayerPositionAttack:     88,
+		}
+	}
+
 	for i := range attackingTeamLineup.Players {
-		var weight uint
-		switch attackingTeamLineup.Players[i].SelectedPosition {
-		case PlayerPositionGoalkeeper:
-			weight = uint(2)
-		case PlayerPositionDefense:
-			weight = uint(10)
-		case PlayerPositionAny:
-			weight = uint(10)
-		case PlayerPositionMidfield:
-			weight = uint(20)
-		case PlayerPositionAttack:
-			weight = uint(70)
-		default:
-			weight = uint(1)
+		weight, ok := positionWeights[attackingTeamLineup.Players[i].SelectedPosition]
+		if !ok {
+			weight = 1 // shouldn't happen
 		}
 		playerChoices = append(playerChoices, weightedrand.Choice{
 			Item:   attackingTeamLineup.Players[i],
 			Weight: weight,
 		})
 	}
+
 	chooser, err := weightedrand.NewChooser(playerChoices...)
 	if err != nil {
 		return "", fmt.Errorf("failed to create gotPlayer chooser. %w", err)
 	}
+
 	return chooser.PickSource(randSource).(SelectedPlayer).SelectedPosition, nil
 }
 
@@ -370,6 +378,11 @@ func DetermineTeamChances(randSource *rand.Rand, homeTeamPlayers GameLineup, awa
 func getFormationControlBoost(lineup GameLineup) float64 {
 	formationConfig := getFormationConfig(lineup.Team.Formation)
 	return formationConfig.ControlModifier
+}
+
+func getFormationDefenseBoost(lineup GameLineup) float64 {
+	formationConfig := getFormationConfig(lineup.Team.Formation)
+	return formationConfig.DefenseModifier
 }
 
 func getEventCount(randSource *rand.Rand) (int, error) {

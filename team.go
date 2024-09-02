@@ -34,7 +34,8 @@ func CalculateTeamControlScore(source *rand.Rand, lineup GameLineup) float64 {
 	midRatio := 0.65
 	attackRatio := 0.15
 
-	if len(playersByPosition[PlayerPositionMidfield]) == 0 {
+	// adjust values for the box formation which has no midfielders
+	if lineup.Team.Formation == FormationTypeBox {
 		gkRatio = 0.05
 		defRatio = 0.35
 		midRatio = 0
@@ -82,16 +83,33 @@ func CalculateTeamDefenseScore(source *rand.Rand, lineup GameLineup) float64 {
 		averageDefenseScoresByPosition[position] = getAverageDefenseScore(boost, players)
 	}
 
-	gkScore := averageDefenseScoresByPosition[PlayerPositionGoalkeeper] * 35 / 100
-	defScore := averageDefenseScoresByPosition[PlayerPositionDefense] * 40 / 100
-	midfieldScore := averageDefenseScoresByPosition[PlayerPositionMidfield] * 20 / 100
-	attackScore := averageDefenseScoresByPosition[PlayerPositionAttack] * 5 / 100
+	gkRatio := 0.35
+	defRatio := 0.40
+	midRatio := 0.20
+	attackRatio := 0.05
 
-	defenseScore := gkScore + defScore + midfieldScore + attackScore
+	// adjust values for the box formation which has no midfielders
+	if lineup.Team.Formation == FormationTypeBox {
+		gkRatio = 0.35
+		defRatio = 0.5
+		midRatio = 0
+		attackRatio = 0.15
+	}
+
+	gkScore := averageDefenseScoresByPosition[PlayerPositionGoalkeeper] * gkRatio
+	defScore := averageDefenseScoresByPosition[PlayerPositionDefense] * defRatio
+	midfieldScore := averageDefenseScoresByPosition[PlayerPositionMidfield] * midRatio
+	attackScore := averageDefenseScoresByPosition[PlayerPositionAttack] * attackRatio
+
+	defenseScore := (gkScore + defScore + midfieldScore + attackScore) * getFormationDefenseBoost(lineup)
 
 	itemBoost := GetTeamBoost(source, lineup)
 
-	return applyBoost(itemBoost, defenseScore)
+	resultBoosted := applyBoost(itemBoost, defenseScore)
+	if resultBoosted > 100 {
+		return 100
+	}
+	return resultBoosted
 }
 
 func getAverageDefenseScore(boost float64, players []SelectedPlayer) float64 {

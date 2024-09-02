@@ -1,0 +1,69 @@
+{
+  "team": {
+    "id": "4",
+    "custom_name": "Diamond Team",
+    "formation": "The Diamond"
+  },
+  "players": [
+    {
+      "id": "20",
+      "attributes": {
+        "goalkeeper_rating": 80,
+        "defense_rating": 80,
+        "speed_rating": 80,
+        "control_rating": 80,
+        "attack_rating": 80,
+        "position": "Goalkeeper"
+      },
+      "position": "Goalkeeper"
+    },
+    {
+      "id": "21",
+      "attributes": {
+        "goalkeeper_rating": 80,
+        "defense_rating": 80,
+        "speed_rating": 80,
+        "control_rating": 80,
+        "attack_rating": 80,
+        "position": "Defense"
+      },
+      "position": "Defense"
+    },
+    {
+      "id": "22",
+      "attributes": {
+        "goalkeeper_rating": 80,
+        "defense_rating": 80,
+        "speed_rating": 80,
+        "control_rating": 80,
+        "attack_rating": 80,
+        "position": "Midfield"
+      },
+      "position": "Midfield"
+    },
+    {
+      "id": "23",
+      "attributes": {
+        "goalkeeper_rating": 80,
+        "defense_rating": 80,
+        "speed_rating": 80,
+        "control_rating": 80,
+        "attack_rating": 80,
+        "position": "Midfield"
+      },
+      "position": "Midfield"
+    },
+    {
+      "id": "24",
+      "attributes": {
+        "goalkeeper_rating": 80,
+        "defense_rating": 80,
+        "speed_rating": 80,
+        "control_rating": 80,
+        "attack_rating": 80,
+        "position": "Attack"
+      },
+      "position": "Attack"
+    }
+  ]
+}
