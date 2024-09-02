@@ -118,6 +118,7 @@ Formations apply boosts and penalties to the team's attack and defense scores as
 Defensive formation
 
 - 10% defense boost
+- 2.5% control penalty
 - 10% attack penalty
 
 ```
@@ -131,9 +132,9 @@ Defensive formation
 
 Balanced formation
 
-- 2.5% defense penalty
-- 2.5% attack penalty
+- 5% defense penalty
 - 5% control boost
+- 5% attack penalty
 
 ```
   5
@@ -146,7 +147,8 @@ Balanced formation
 
 Attacking formation
 
-- 10% defense penalty
+- 5% defense penalty
+- 2% control boost
 - 10% attack boost
 
 ```
@@ -160,7 +162,7 @@ Attacking formation
 
 A balanced formation for direct play
 
-- 2.5% defense penalty
+- 10% defense boost
 - 5% control penalty
 - 10% attack boost
 

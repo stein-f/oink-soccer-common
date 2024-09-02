@@ -8,31 +8,7 @@ type FormationConfig struct {
 	AttackModifier  float64
 }
 
-// TheYFormation (1-1-2) is an attacking formation
-// 10% defense penalty
-// 10% attack boost
-// 4  5
-//
-//	3
-//	2
-//	1
-var TheYFormation = FormationConfig{
-	FormationType: FormationTypeY,
-	Slots: map[uint64]PlayerPosition{
-		1: PlayerPositionGoalkeeper,
-		2: PlayerPositionDefense,
-		3: PlayerPositionMidfield,
-		4: PlayerPositionAttack,
-		5: PlayerPositionAttack,
-	},
-	DefenseModifier: 0.95,
-	ControlModifier: 1.02,
-	AttackModifier:  1.1,
-}
-
 // ThePyramidFormation (2-1-1) is a defensive formation
-// 10% defense boost
-// 10% attack penalty
 //
 //	     5
 //		 4
@@ -53,9 +29,6 @@ var ThePyramidFormation = FormationConfig{
 }
 
 // TheDiamondFormation (2-1-1) is a defensive formation
-// 2.5% defense penalty
-// 2.5% attack penalty
-// 5% control boost
 //
 //	     5
 //		3 4
@@ -75,10 +48,27 @@ var TheDiamondFormation = FormationConfig{
 	AttackModifier:  0.95,
 }
 
+// TheYFormation (1-1-2) is an attacking formation
+// 4  5
+//
+//	3
+//	2
+//	1
+var TheYFormation = FormationConfig{
+	FormationType: FormationTypeY,
+	Slots: map[uint64]PlayerPosition{
+		1: PlayerPositionGoalkeeper,
+		2: PlayerPositionDefense,
+		3: PlayerPositionMidfield,
+		4: PlayerPositionAttack,
+		5: PlayerPositionAttack,
+	},
+	DefenseModifier: 0.95,
+	ControlModifier: 1.02,
+	AttackModifier:  1.1,
+}
+
 // TheBoxFormation (2-0-2) a balanced formation for direct play and counter-attacking
-// 2.5% defense penalty
-// 5% control penalty
-// 10% attack boost
 //
 //	    4 5
 //
