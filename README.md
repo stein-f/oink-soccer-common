@@ -155,3 +155,19 @@ Attacking formation
   2
   1
 ```
+
+### The Box (2-0-2)
+
+A balanced formation for direct play
+
+- 2.5% defense penalty
+- 5% control penalty
+- 10% attack boost
+
+```
+4 5
+ 
+2 3
+ 1
+```
+
