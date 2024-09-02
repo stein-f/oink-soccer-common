@@ -53,13 +53,10 @@ func (p SelectedPlayer) GetDefenseScore() float64 {
 }
 
 func (p SelectedPlayer) GetInjuryScaleFactor() float64 {
-	return 1
-
-	// TODO - uncomment this when injuries are enabled
-	//if p.Injury == nil || p.Injury.Injury.StatsReduction < StatsReductionHighSeverity {
-	//	return 1
-	//}
-	//return p.Injury.Injury.StatsReduction
+	if p.Injury == nil || p.Injury.Injury.StatsReduction < StatsReductionHighSeverity {
+		return 1
+	}
+	return p.Injury.Injury.StatsReduction
 }
 
 type GameLineup struct {
