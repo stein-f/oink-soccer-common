@@ -26,7 +26,7 @@ func TestApplyInjuries_NotInjured(t *testing.T) {
 func TestApplyInjuries_Injured(t *testing.T) {
 	injury, isInjured := soccer.ApplyInjury(injuryWeightsDefaults, injuryWeightsInjuryPronePlayers, false, testdata.FixedRandSource(83))
 	assert.Equal(t, true, isInjured)
-	assert.Equal(t, "Mascot Mishap", injury.Name)
+	assert.Equal(t, "Achilles Tendon Rupture", injury.Name)
 }
 
 func TestApplyInjuries_ExpectedFrequencyInRange(t *testing.T) {
