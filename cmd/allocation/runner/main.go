@@ -6,11 +6,8 @@ import (
 	"os"
 
 	"github.com/gocarina/gocsv"
-	"github.com/mroth/weightedrand"
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	soccer "github.com/stein-f/oink-soccer-common"
 	"github.com/stein-f/oink-soccer-common/cmd/allocation"
 )
 
@@ -51,7 +48,7 @@ func main() {
 func assignPlayersToEligibleAssets(r *rand.Rand, lookup *allocation.PlayersLookup, assets []allocation.EligibleAsset) ([]allocation.PlayerProfile, error) {
 	assetProfiles := []allocation.PlayerProfile{}
 	for _, asset := range assets {
-		position, err := GetRandomPosition(r)
+		position, err := allocation.GetRandomPosition(r)
 		if err != nil {
 			return nil, err
 		}
@@ -65,20 +62,6 @@ func assignPlayersToEligibleAssets(r *rand.Rand, lookup *allocation.PlayersLooku
 		})
 	}
 	return assetProfiles, nil
-}
-
-func GetRandomPosition(randSource *rand.Rand) (soccer.PlayerPosition, error) {
-	playerChoices := []weightedrand.Choice{
-		{Item: soccer.PlayerPositionGoalkeeper, Weight: 15},
-		{Item: soccer.PlayerPositionDefense, Weight: 20},
-		{Item: soccer.PlayerPositionMidfield, Weight: 20},
-		{Item: soccer.PlayerPositionAttack, Weight: 20},
-	}
-	chooser, err := weightedrand.NewChooser(playerChoices...)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to get player position")
-	}
-	return chooser.PickSource(randSource).(soccer.PlayerPosition), nil
 }
 
 func savePlayerAttributes(profiles []allocation.PlayerProfile, season int) error {

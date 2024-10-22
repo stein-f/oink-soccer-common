@@ -9,6 +9,8 @@ import (
 	soccer "github.com/stein-f/oink-soccer-common"
 )
 
+const useNpcPlayer = false
+
 type PlayerProfile struct {
 	Asset      EligibleAsset `json:"asset"`
 	FifaPlayer FifaPlayer    `json:"fifa_player"`
@@ -64,6 +66,10 @@ func getPlayerLevels(overallRating int) []soccer.PlayerLevel {
 }
 
 func (p *PlayersLookup) GetRandomPlayer(position soccer.PlayerPosition, asset EligibleAsset) (FifaPlayer, error) {
+	if useNpcPlayer {
+		return GetNpcPlayer(p.Rand)
+	}
+
 	levelProbabilities := tierToPlayerLevelProbability[asset.EligibleAssetTier]
 
 	// Extract keys and sort them
@@ -173,4 +179,41 @@ func (e EligibleAsset) GetOrigin() EligibleAssetOrigin {
 
 func randElementInSlice(r *rand.Rand, slice []FifaPlayer) FifaPlayer {
 	return slice[r.Intn(len(slice))]
+}
+
+func GetRandomPosition(randSource *rand.Rand) (soccer.PlayerPosition, error) {
+	playerChoices := []weightedrand.Choice{
+		{Item: soccer.PlayerPositionGoalkeeper, Weight: 15},
+		{Item: soccer.PlayerPositionDefense, Weight: 20},
+		{Item: soccer.PlayerPositionMidfield, Weight: 20},
+		{Item: soccer.PlayerPositionAttack, Weight: 20},
+	}
+	chooser, err := weightedrand.NewChooser(playerChoices...)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to get player position")
+	}
+	return chooser.PickSource(randSource).(soccer.PlayerPosition), nil
+}
+
+func GetNpcPlayer(randSource *rand.Rand) (FifaPlayer, error) {
+	position, err := GetRandomPosition(randSource)
+	if err != nil {
+		return FifaPlayer{}, err
+	}
+	return FifaPlayer{
+		PlayerID: "npc",
+		PlayerAttributes: soccer.PlayerAttributes{
+			GoalkeeperRating: 55,
+			DefenseRating:    55,
+			SpeedRating:      55,
+			ControlRating:    55,
+			AttackRating:     55,
+			OverallRating:    55,
+			PlayerLevel:      soccer.PlayerLevelProfessional,
+			Position:         position,
+			Tag:              nil,
+			BasedOnPlayer:    "NPC",
+			BasedOnPlayerURL: "",
+		},
+	}, nil
 }
