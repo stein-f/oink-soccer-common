@@ -1,5 +1,5 @@
 {
-  "current_season": 7,
+  "current_season": 8,
   "seasons": [
     {
       "season": 3,
@@ -30,6 +30,12 @@
       "collab": "Berds",
       "assets_path": "cmd/allocation/s7/eligible_assets.csv",
       "round": 43689021
+    },
+    {
+      "season": 8,
+      "collab": "SK",
+      "assets_path": "cmd/allocation/s8/eligible_assets.csv",
+      "round": 46241738
     }
   ]
 }
