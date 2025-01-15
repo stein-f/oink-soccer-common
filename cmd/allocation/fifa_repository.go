@@ -22,7 +22,7 @@ func (f FifaPlayersRepository) GetAllPlayers() ([]FifaPlayer, error) {
 	if err != nil {
 		return nil, err
 	}
-	var records []record
+	var records []Record
 	err = gocsv.UnmarshalBytes(file, &records)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func (f FifaPlayersRepository) GetAllPlayers() ([]FifaPlayer, error) {
 	return players, nil
 }
 
-type record struct {
+type Record struct {
 	SoFIFAID        string `csv:"sofifa_id"`
 	PlayerURL       string `csv:"player_url"`
 	ShortName       string `csv:"short_name"`
@@ -59,7 +59,7 @@ type FifaPlayer struct {
 	PlayerAttributes soccer.PlayerAttributes
 }
 
-func (r *record) ToDomain(randSource *rand.Rand) FifaPlayer {
+func (r *Record) ToDomain(randSource *rand.Rand) FifaPlayer {
 	var tags []string
 	if r.PlayerTags != "" {
 		tokens := strings.Split(r.PlayerTags, ",")
@@ -97,7 +97,7 @@ func (r *record) ToDomain(randSource *rand.Rand) FifaPlayer {
 	}
 }
 
-func (r *record) GetPosition() soccer.PlayerPosition {
+func (r *Record) GetPosition() soccer.PlayerPosition {
 	position := getPosition(r.ClubPosition)
 	if position != "" {
 		return position

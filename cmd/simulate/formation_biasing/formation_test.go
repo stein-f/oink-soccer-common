@@ -4,11 +4,15 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"github.com/stein-f/oink-soccer-common/testdata"
-	"log"
-	"testing"
-
+	"github.com/gocarina/gocsv"
 	soccer "github.com/stein-f/oink-soccer-common"
+	"github.com/stein-f/oink-soccer-common/cmd/allocation"
+	"github.com/stein-f/oink-soccer-common/testdata"
+	"github.com/stretchr/testify/assert"
+	"log"
+	"math/rand"
+	"os"
+	"testing"
 )
 
 // Embed formation JSON files
@@ -60,23 +64,29 @@ func TestShowAttackScores(t *testing.T) {
 }
 
 func TestShowWinRatios(t *testing.T) {
-	// Store results (wins, losses, draws, shots)
-	results := make(map[string][4]int) // [wins, losses, draws, total shots]
+	allPlayers, err := GetAllPlayers()
+	assert.NoError(t, err)
 
-	gameCount := 50_000
+	fmt.Println("Running simulation, this may take a while...")
+
+	// Store results (wins, losses, draws, shots)
+	results := make(map[soccer.FormationType][4]int) // [wins, losses, draws, total shots]
+
+	gameCount := 1000
 
 	// Run matches between each pair of formations
-	for formationA, configA := range formations {
-		for formationB, configB := range formations {
-			if formationA >= formationB {
+	formations := soccer.FormationTypeValues()
+	for _, formationA := range formations {
+		for _, formationB := range formations {
+			if formationA == formationB {
 				continue
 			}
 
 			winsA, winsB, draws, shotsA, shotsB := 0, 0, 0, 0, 0
-			lineupA := loadConfig(configA)
-			lineupB := loadConfig(configB)
-
 			for i := 0; i < gameCount; i++ {
+				lineupA := getLineup(allPlayers, formationA)
+				lineupB := getLineup(allPlayers, formationB)
+
 				gameEvents, _, err := soccer.RunGame(lineupA, lineupB)
 				if err != nil {
 					panic(err)
@@ -151,4 +161,106 @@ func getFormationConfig(formationType soccer.FormationType) soccer.FormationConf
 	default:
 		return soccer.TheDiamondFormation
 	}
+}
+
+func getLineup(allPlayers []allocation.FifaPlayer, formation soccer.FormationType) soccer.GameLineup {
+	players := []soccer.SelectedPlayer{}
+	if formation == soccer.FormationTypeBox {
+		addPlayer(allPlayers, &players, soccer.PlayerPositionGoalkeeper)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionDefense)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionDefense)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionAttack)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionAttack)
+	}
+	if formation == soccer.FormationTypeDiamond {
+		addPlayer(allPlayers, &players, soccer.PlayerPositionGoalkeeper)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionDefense)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionMidfield)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionMidfield)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionAttack)
+	}
+	if formation == soccer.FormationTypePyramid {
+		addPlayer(allPlayers, &players, soccer.PlayerPositionGoalkeeper)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionDefense)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionDefense)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionMidfield)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionAttack)
+	}
+	if formation == soccer.FormationTypeY {
+		addPlayer(allPlayers, &players, soccer.PlayerPositionGoalkeeper)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionDefense)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionMidfield)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionAttack)
+		addPlayer(allPlayers, &players, soccer.PlayerPositionAttack)
+	}
+	return soccer.GameLineup{
+		Team:    soccer.Team{Formation: formation},
+		Players: players,
+	}
+}
+
+func getDecentPlayer(allPlayers []allocation.FifaPlayer, position soccer.PlayerPosition) allocation.FifaPlayer {
+	rand.Shuffle(len(allPlayers), func(i, j int) {
+		allPlayers[i], allPlayers[j] = allPlayers[j], allPlayers[i]
+	})
+
+	for _, player := range allPlayers {
+		if player.PlayerAttributes.Position == position && player.PlayerAttributes.GetOverallRating() > 80 {
+			return player
+		}
+	}
+
+	panic("no decent player found")
+}
+
+func addPlayer(allPlayers []allocation.FifaPlayer, selectedPlayers *[]soccer.SelectedPlayer, position soccer.PlayerPosition) {
+	player := getDecentPlayer(allPlayers, position)
+	*selectedPlayers = append(*selectedPlayers, soccer.SelectedPlayer{
+		ID:               player.PlayerID,
+		Attributes:       player.PlayerAttributes,
+		SelectedPosition: position,
+	})
+}
+
+func GetAllPlayers() ([]allocation.FifaPlayer, error) {
+	file, err := os.ReadFile(fmt.Sprintf("%s/../../../cmd/allocation/fifa_players_22.csv", cwd()))
+	if err != nil {
+		return nil, err
+	}
+	var records []allocation.Record
+	err = gocsv.UnmarshalBytes(file, &records)
+	if err != nil {
+		return nil, err
+	}
+	var players []allocation.FifaPlayer
+	for _, record := range records {
+		players = append(players, record.ToDomain(testdata.TimeNowRandSource()))
+	}
+
+	// get 10 random players above 80 for each position
+	var fixedPlayers []allocation.FifaPlayer
+	for _, position := range soccer.AllPositions {
+		if position == soccer.PlayerPositionAny {
+			continue
+		}
+		var playersPerPosition []allocation.FifaPlayer
+		for {
+			player := getDecentPlayer(players, position)
+			playersPerPosition = append(playersPerPosition, player)
+			if len(playersPerPosition) == 100 {
+				fixedPlayers = append(fixedPlayers, playersPerPosition...)
+				break
+			}
+		}
+	}
+
+	return fixedPlayers, nil
+}
+
+func cwd() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		panic(fmt.Sprintf("failed to get working directory: %v", err))
+	}
+	return dir
 }

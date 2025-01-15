@@ -24,7 +24,7 @@ var ThePyramidFormation = FormationConfig{
 		5: PlayerPositionAttack,
 	},
 	DefenseModifier: 1.1,
-	ControlModifier: 0.975,
+	ControlModifier: 0.94,
 	AttackModifier:  0.9,
 }
 
@@ -43,9 +43,9 @@ var TheDiamondFormation = FormationConfig{
 		4: PlayerPositionMidfield,
 		5: PlayerPositionAttack,
 	},
-	DefenseModifier: 0.95,
-	ControlModifier: 1.05,
-	AttackModifier:  0.95,
+	DefenseModifier: 0.89,
+	ControlModifier: 1.02,
+	AttackModifier:  0.89,
 }
 
 // TheYFormation (1-1-2) is an attacking formation
@@ -63,9 +63,9 @@ var TheYFormation = FormationConfig{
 		4: PlayerPositionAttack,
 		5: PlayerPositionAttack,
 	},
-	DefenseModifier: 0.95,
-	ControlModifier: 1.02,
-	AttackModifier:  1.1,
+	DefenseModifier: 0.9,
+	ControlModifier: 0.98,
+	AttackModifier:  1.2,
 }
 
 // TheBoxFormation (2-0-2) a balanced formation for direct play and counter-attacking
@@ -83,7 +83,7 @@ var TheBoxFormation = FormationConfig{
 		4: PlayerPositionAttack,
 		5: PlayerPositionAttack,
 	},
-	DefenseModifier: 1.1,
+	DefenseModifier: 1.15,
 	ControlModifier: 0.95,
-	AttackModifier:  1.1,
+	AttackModifier:  1.15,
 }
