@@ -72,7 +72,7 @@ func TestShowWinRatios(t *testing.T) {
 	// Store results (wins, losses, draws, shots)
 	results := make(map[soccer.FormationType][4]int) // [wins, losses, draws, total shots]
 
-	gameCount := 10000
+	gameCount := 1000
 
 	// Run matches between each pair of formations
 	formations := soccer.FormationTypeValues()
