@@ -63,9 +63,9 @@ var TheYFormation = FormationConfig{
 		4: PlayerPositionAttack,
 		5: PlayerPositionAttack,
 	},
-	DefenseModifier: 0.9,
+	DefenseModifier: 0.93,
 	ControlModifier: 0.98,
-	AttackModifier:  1.2,
+	AttackModifier:  1.15,
 }
 
 // TheBoxFormation (2-0-2) a balanced formation for direct play and counter-attacking
