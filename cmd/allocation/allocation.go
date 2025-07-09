@@ -110,21 +110,28 @@ func (p *PlayersLookup) GetRandomPlayer(position soccer.PlayerPosition, asset El
 }
 
 var tierToPlayerLevelProbability = map[EligibleAssetTier]map[soccer.PlayerLevel]int{
-	EligibleAssetTier1: {
+	EligibleAssetTierS: {
 		soccer.PlayerLevelLegendary:        3,
-		soccer.PlayerLevelWorldClass:       30,
-		soccer.PlayerLevelProfessional:     67,
+		soccer.PlayerLevelWorldClass:       50,
+		soccer.PlayerLevelProfessional:     47,
 		soccer.PlayerLevelSemiProfessional: 0,
 		soccer.PlayerLevelAmateur:          0,
 	},
-	EligibleAssetTier2: {
+	EligibleAssetTierA: {
+		soccer.PlayerLevelLegendary:        3,
+		soccer.PlayerLevelWorldClass:       40,
+		soccer.PlayerLevelProfessional:     57,
+		soccer.PlayerLevelSemiProfessional: 0,
+		soccer.PlayerLevelAmateur:          0,
+	},
+	EligibleAssetTierB: {
 		soccer.PlayerLevelLegendary:        0,
 		soccer.PlayerLevelWorldClass:       8,
-		soccer.PlayerLevelProfessional:     43,
+		soccer.PlayerLevelProfessional:     42,
 		soccer.PlayerLevelSemiProfessional: 40,
 		soccer.PlayerLevelAmateur:          10,
 	},
-	EligibleAssetTier3: {
+	EligibleAssetTierC: {
 		soccer.PlayerLevelLegendary:        0,
 		soccer.PlayerLevelWorldClass:       4,
 		soccer.PlayerLevelProfessional:     30,
@@ -156,9 +163,10 @@ func BuildPlayersLookup(randSource *rand.Rand, repository FifaPlayerRepository) 
 type EligibleAssetTier string
 
 const (
-	EligibleAssetTier1 EligibleAssetTier = "Tier 1" // Pigs and custom bots
-	EligibleAssetTier2 EligibleAssetTier = "Tier 2" // Activated bots
-	EligibleAssetTier3 EligibleAssetTier = "Tier 3" // Build/Enhanced bots
+	EligibleAssetTierS EligibleAssetTier = "Tier S" // Pigs and custom bots
+	EligibleAssetTierA EligibleAssetTier = "Tier A" // Pigs and custom bots
+	EligibleAssetTierB EligibleAssetTier = "Tier B" // Activated bots
+	EligibleAssetTierC EligibleAssetTier = "Tier C" // Build/Enhanced bots
 )
 
 type EligibleAssetOrigin string

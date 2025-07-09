@@ -1,5 +1,5 @@
 {
-  "current_season": 10,
+  "current_season": 11,
   "seasons": [
     {
       "season": 3,
@@ -47,6 +47,12 @@
       "season": 10,
       "collab": "akpepe",
       "assets_path": "cmd/allocation/s10/eligible_assets.csv",
+      "round": 49870116
+    },
+    {
+      "season": 11,
+      "collab": "basic",
+      "assets_path": "cmd/allocation/s11/eligible_assets.csv",
       "round": 49870116
     }
   ]
