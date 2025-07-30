@@ -1,7 +1,6 @@
 package soccer
 
 import (
-	"math"
 	"math/rand"
 	"time"
 
@@ -45,10 +44,12 @@ func adjustInjuryWeightsByAggression(originalChoices []weightedrand.Choice, oppo
 
 	// Calculate the adjustment factor based on aggression
 	// Higher aggression means more likely to cause injury
-	// We use a non-linear scale to make high aggression more impactful
-	// Using a higher exponent (3.0) creates a steeper curve at high aggression values
+	// We use the scaling function from scaling.go to get a non-linear scale
+	// This ensures consistency with the rest of the game's scaling
 	// The maximum reduction is still 50% of the original weight when aggression is 100
-	adjustmentFactor := 1.0 - (math.Pow(float64(opponentAggression)/100.0, 3.0) * 0.5)
+	scaledValue := ScalingFunction(float64(opponentAggression))
+	// Convert the scaled value (1-100) to an adjustment factor (0.5-1.0)
+	adjustmentFactor := 1.0 - ((scaledValue - 1) / (100 - 1)) * 0.5
 
 	// Apply the adjustment to the "false" choice (no injury)
 	// This effectively increases the relative probability of injury
