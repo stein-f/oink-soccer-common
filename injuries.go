@@ -49,7 +49,7 @@ func adjustInjuryWeightsByAggression(originalChoices []weightedrand.Choice, oppo
 	// The maximum reduction is still 50% of the original weight when aggression is 100
 	scaledValue := ScalingFunction(float64(opponentAggression))
 	// Convert the scaled value (1-100) to an adjustment factor (0.5-1.0)
-	adjustmentFactor := 1.0 - ((scaledValue - 1) / (100 - 1)) * 0.5
+	adjustmentFactor := 1.0 - ((scaledValue-1)/(100-1))*0.5
 
 	// Apply the adjustment to the "false" choice (no injury)
 	// This effectively increases the relative probability of injury
