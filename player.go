@@ -8,6 +8,7 @@ type PlayerAttributes struct {
 	SpeedRating      int            `json:"speed_rating"`
 	ControlRating    int            `json:"control_rating"`
 	AttackRating     int            `json:"attack_rating"`
+	AggressionRating int            `json:"aggression_rating"`
 	OverallRating    int            `json:"overall_rating"`
 	PlayerLevel      PlayerLevel    `json:"player_level"`
 	Position         PlayerPosition `json:"position"`

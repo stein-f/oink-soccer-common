@@ -1,6 +1,7 @@
 package soccer
 
 import (
+	"math"
 	"math/rand"
 	"time"
 
@@ -21,12 +22,60 @@ var injuryWeightsInjuryPronePlayers = []weightedrand.Choice{
 	{Item: true, Weight: 1},
 }
 
-func ApplyInjury(chancesDefaults []weightedrand.Choice, chancesInjuryProne []weightedrand.Choice, isInjuryProne bool, randSource *rand.Rand) (Injury, bool) {
+// adjustInjuryWeightsByAggression modifies the injury probability based on opponent aggression
+// Higher aggression increases the chance of injury by reducing the weight of the "false" choice
+// The aggression rating is expected to be between 0-100
+func adjustInjuryWeightsByAggression(originalChoices []weightedrand.Choice, opponentAggression int) []weightedrand.Choice {
+	// If aggression is 0 or negative, return original weights
+	if opponentAggression <= 0 {
+		return originalChoices
+	}
+
+	// Create a copy of the original choices to avoid modifying the original
+	adjustedChoices := make([]weightedrand.Choice, len(originalChoices))
+	copy(adjustedChoices, originalChoices)
+
+	// Find the "false" choice (no injury)
+	var falseChoiceIndex int
+	for i, choice := range adjustedChoices {
+		if choice.Item == false {
+			falseChoiceIndex = i
+		}
+	}
+
+	// Calculate the adjustment factor based on aggression
+	// Higher aggression means more likely to cause injury
+	// We use a non-linear scale to make high aggression more impactful
+	// Using a higher exponent (3.0) creates a steeper curve at high aggression values
+	// The maximum reduction is still 50% of the original weight when aggression is 100
+	adjustmentFactor := 1.0 - (math.Pow(float64(opponentAggression)/100.0, 3.0) * 0.5)
+
+	// Apply the adjustment to the "false" choice (no injury)
+	// This effectively increases the relative probability of injury
+	adjustedWeight := uint(float64(adjustedChoices[falseChoiceIndex].Weight) * adjustmentFactor)
+
+	// Ensure the weight doesn't go below 1
+	if adjustedWeight < 1 {
+		adjustedWeight = 1
+	}
+
+	adjustedChoices[falseChoiceIndex].Weight = adjustedWeight
+
+	return adjustedChoices
+}
+
+func ApplyInjury(chancesDefaults []weightedrand.Choice, chancesInjuryProne []weightedrand.Choice, isInjuryProne bool, opponentAggression int, randSource *rand.Rand) (Injury, bool) {
+	// Start with the base chances based on whether the player is injury prone
 	choices := chancesDefaults
 	if isInjuryProne {
 		choices = chancesInjuryProne
 	}
-	chooser, err := weightedrand.NewChooser(choices...)
+
+	// Adjust the injury probability based on opponent aggression
+	// Higher aggression increases the chance of injury
+	adjustedChoices := adjustInjuryWeightsByAggression(choices, opponentAggression)
+
+	chooser, err := weightedrand.NewChooser(adjustedChoices...)
 	if err != nil {
 		return Injury{}, false
 	}

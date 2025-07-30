@@ -142,8 +142,14 @@ func RunGameWithSeed(randSource *rand.Rand, homeTeam GameLineup, awayTeam GameLi
 		events = append(events, event)
 	}
 
-	homeTeamInjuries := GetInjuries(randSource, homeTeam)
-	awayTeamInjuries := GetInjuries(randSource, awayTeam)
+	// Calculate average aggression for both teams
+	homeTeamAggression := CalculateTeamAverageAggression(homeTeam)
+	awayTeamAggression := CalculateTeamAverageAggression(awayTeam)
+
+	// Apply injuries based on opponent's aggression
+	homeTeamInjuries := GetInjuries(randSource, homeTeam, awayTeamAggression)
+	awayTeamInjuries := GetInjuries(randSource, awayTeam, homeTeamAggression)
+
 	injuries := Injuries{
 		HomeTeamInjuries: homeTeamInjuries,
 		AwayTeamInjuries: awayTeamInjuries,
@@ -163,10 +169,12 @@ func RunGame(homeTeam GameLineup, awayTeam GameLineup) ([]GameEvent, Injuries, e
 	return RunGameWithSeed(randSource, homeTeam, awayTeam)
 }
 
-func GetInjuries(source *rand.Rand, lineup GameLineup) []InjuryEvent {
+// GetInjuries determines injuries for players in a lineup based on opponent aggression
+// opponentAggression is the average aggression rating of the opponent team
+func GetInjuries(source *rand.Rand, lineup GameLineup, opponentAggression int) []InjuryEvent {
 	var injuries []InjuryEvent
 	for _, player := range lineup.Players {
-		injury, isInjured := ApplyInjury(injuryWeightsDefaults, injuryWeightsInjuryPronePlayers, player.Attributes.IsInjuryProne(), source)
+		injury, isInjured := ApplyInjury(injuryWeightsDefaults, injuryWeightsInjuryPronePlayers, player.Attributes.IsInjuryProne(), opponentAggression, source)
 		if isInjured {
 			daysInjured := source.Intn(injury.MaxDays-injury.MinDays+1) + injury.MinDays
 			expires := time.Now().UTC().AddDate(0, 0, daysInjured)
@@ -180,6 +188,20 @@ func GetInjuries(source *rand.Rand, lineup GameLineup) []InjuryEvent {
 		}
 	}
 	return injuries
+}
+
+// CalculateTeamAverageAggression calculates the average aggression rating of a team
+func CalculateTeamAverageAggression(lineup GameLineup) int {
+	if len(lineup.Players) == 0 {
+		return 0
+	}
+
+	totalAggression := 0
+	for _, player := range lineup.Players {
+		totalAggression += player.Attributes.AggressionRating
+	}
+
+	return totalAggression / len(lineup.Players)
 }
 
 func GetTeamBoost(source *rand.Rand, lineup GameLineup) float64 {

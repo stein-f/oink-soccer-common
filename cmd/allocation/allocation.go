@@ -10,6 +10,7 @@ import (
 )
 
 const useNpcPlayer = false
+const aggressionThreshold = 80
 
 type PlayerProfile struct {
 	Asset      EligibleAsset `json:"asset"`
@@ -25,11 +26,12 @@ var PlayerLevelBands = map[soccer.PlayerLevel][]int{
 }
 
 type PlayersLookup struct {
-	Goalkeepers map[soccer.PlayerLevel][]FifaPlayer
-	Defenders   map[soccer.PlayerLevel][]FifaPlayer
-	Midfielders map[soccer.PlayerLevel][]FifaPlayer
-	Attackers   map[soccer.PlayerLevel][]FifaPlayer
-	Rand        *rand.Rand
+	Goalkeepers       map[soccer.PlayerLevel][]FifaPlayer
+	Defenders         map[soccer.PlayerLevel][]FifaPlayer
+	Midfielders       map[soccer.PlayerLevel][]FifaPlayer
+	Attackers         map[soccer.PlayerLevel][]FifaPlayer
+	AggressivePlayers []FifaPlayer
+	Rand              *rand.Rand
 }
 
 func (p *PlayersLookup) AddPlayers(profiles []FifaPlayer) {
@@ -53,6 +55,9 @@ func (p *PlayersLookup) AddPlayer(profile FifaPlayer) {
 			p.Attackers[tier] = append(p.Attackers[tier], profile)
 		}
 	}
+	if profile.PlayerAttributes.AggressionRating >= aggressionThreshold {
+		p.AggressivePlayers = append(p.AggressivePlayers, profile)
+	}
 }
 
 func getPlayerLevels(overallRating int) []soccer.PlayerLevel {
@@ -68,6 +73,10 @@ func getPlayerLevels(overallRating int) []soccer.PlayerLevel {
 func (p *PlayersLookup) GetRandomPlayer(position soccer.PlayerPosition, asset EligibleAsset) (FifaPlayer, error) {
 	if useNpcPlayer {
 		return GetNpcPlayer(p.Rand)
+	}
+
+	if asset.EligibleAssetTier == EligibleAssetTierAggressive {
+		return randElementInSlice(p.Rand, p.AggressivePlayers), nil
 	}
 
 	levelProbabilities := tierToPlayerLevelProbability[asset.EligibleAssetTier]
@@ -163,10 +172,11 @@ func BuildPlayersLookup(randSource *rand.Rand, repository FifaPlayerRepository) 
 type EligibleAssetTier string
 
 const (
-	EligibleAssetTierS EligibleAssetTier = "Tier S" // Pigs and custom bots
-	EligibleAssetTierA EligibleAssetTier = "Tier A" // Pigs and custom bots
-	EligibleAssetTierB EligibleAssetTier = "Tier B" // Activated bots
-	EligibleAssetTierC EligibleAssetTier = "Tier C" // Build/Enhanced bots
+	EligibleAssetTierS          EligibleAssetTier = "Tier S"
+	EligibleAssetTierA          EligibleAssetTier = "Tier A"
+	EligibleAssetTierB          EligibleAssetTier = "Tier B"
+	EligibleAssetTierC          EligibleAssetTier = "Tier C"
+	EligibleAssetTierAggressive EligibleAssetTier = "Tier Aggressive"
 )
 
 type EligibleAssetOrigin string
@@ -217,6 +227,7 @@ func GetNpcPlayer(randSource *rand.Rand) (FifaPlayer, error) {
 			ControlRating:    55,
 			AttackRating:     55,
 			OverallRating:    55,
+			AggressionRating: 55,
 			PlayerLevel:      soccer.PlayerLevelProfessional,
 			Position:         position,
 			Tag:              nil,

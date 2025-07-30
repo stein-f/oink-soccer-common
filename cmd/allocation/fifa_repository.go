@@ -35,23 +35,24 @@ func (f FifaPlayersRepository) GetAllPlayers() ([]FifaPlayer, error) {
 }
 
 type Record struct {
-	SoFIFAID        string `csv:"sofifa_id"`
-	PlayerURL       string `csv:"player_url"`
-	ShortName       string `csv:"short_name"`
-	LongName        string `csv:"long_name"`
-	ClubPosition    string `csv:"club_position"`
-	PlayerPositions string `csv:"player_positions"`
-	SkillMoves      string `csv:"skill_moves"`
-	WorkRate        string `csv:"work_rate"`
-	PlayerTags      string `csv:"player_tags"`
-	PlayerTraits    string `csv:"player_traits"`
-	Pace            int    `csv:"pace"`
-	Shooting        int    `csv:"shooting"`
-	Passing         int    `csv:"passing"`
-	Defending       int    `csv:"defending"`
-	Goalkeeping     int    `csv:"goalkeeping_handling"`
-	Mentality       int    `csv:"mentality_composure"`
-	Overall         int    `csv:"overall"`
+	SoFIFAID            string `csv:"sofifa_id"`
+	PlayerURL           string `csv:"player_url"`
+	ShortName           string `csv:"short_name"`
+	LongName            string `csv:"long_name"`
+	ClubPosition        string `csv:"club_position"`
+	PlayerPositions     string `csv:"player_positions"`
+	SkillMoves          string `csv:"skill_moves"`
+	WorkRate            string `csv:"work_rate"`
+	PlayerTags          string `csv:"player_tags"`
+	PlayerTraits        string `csv:"player_traits"`
+	Pace                int    `csv:"pace"`
+	Shooting            int    `csv:"shooting"`
+	Passing             int    `csv:"passing"`
+	Defending           int    `csv:"defending"`
+	Goalkeeping         int    `csv:"goalkeeping_handling"`
+	Mentality           int    `csv:"mentality_composure"`
+	MentalityAggression int    `csv:"mentality_aggression"`
+	Overall             int    `csv:"overall"`
 }
 
 type FifaPlayer struct {
@@ -83,6 +84,7 @@ func (r *Record) ToDomain(randSource *rand.Rand) FifaPlayer {
 		DefenseRating:    normalizeRating(randSource, r.Defending),
 		ControlRating:    normalizeRating(randSource, r.Passing),
 		AttackRating:     normalizeRating(randSource, r.Shooting),
+		AggressionRating: normalizeRating(randSource, r.MentalityAggression),
 		Position:         r.GetPosition(),
 		Tag:              tags,
 		BasedOnPlayer:    r.ShortName,
