@@ -371,7 +371,7 @@ func getRandomPlayerByPosition(randSource *rand.Rand, position PlayerPosition, p
 
 // DetermineTeamChances determines the chances of each team to score a goal. It is based on the control score of each team.
 func DetermineTeamChances(randSource *rand.Rand, homeTeamPlayers GameLineup, awayTeamPlayers GameLineup) ([]TeamType, error) {
-	eventCount, err := getEventCount(randSource)
+	eventCount, err := getEventCountTruthTable(randSource, homeTeamPlayers, awayTeamPlayers)
 	if err != nil {
 		return nil, err
 	}
@@ -470,6 +470,50 @@ var eventCountWeights = []weightedrand.Choice{
 	{Item: 8, Weight: 3},
 	{Item: 9, Weight: 2},
 	{Item: 10, Weight: 1},
+}
+
+type chanceRange struct{ Min, Max int }
+
+func formationStyle(ft FormationType) string {
+	switch ft {
+	case FormationTypePyramid:
+		return "DEF"
+	case FormationTypeDiamond:
+		return "BAL"
+	case FormationTypeBox, FormationTypeY:
+		return "ATT"
+	default:
+		return "BAL"
+	}
+}
+
+func stylePair(a, b string) string {
+	if a < b {
+		return a + "|" + b
+	}
+	return b + "|" + a
+}
+
+var formationChanceRanges = map[string]chanceRange{
+	"ATT|ATT": {Min: 6, Max: 12},
+	"ATT|BAL": {Min: 5, Max: 11},
+	"ATT|DEF": {Min: 4, Max: 9},
+	"BAL|BAL": {Min: 4, Max: 9},
+	"BAL|DEF": {Min: 3, Max: 8},
+	"DEF|DEF": {Min: 1, Max: 6},
+}
+
+func getEventCountTruthTable(randSource *rand.Rand, homeTeamPlayers GameLineup, awayTeamPlayers GameLineup) (int, error) {
+	h := formationStyle(homeTeamPlayers.Team.Formation)
+	a := formationStyle(awayTeamPlayers.Team.Formation)
+	key := stylePair(h, a)
+	r, ok := formationChanceRanges[key]
+	if !ok {
+		// sensible fallback
+		r = chanceRange{Min: 3, Max: 10}
+	}
+	// uniform in [Min, Max]
+	return randSource.Intn(r.Max-r.Min+1) + r.Min, nil
 }
 
 type eventMinuteRange struct {
