@@ -494,10 +494,10 @@ func formationKey(homeStyle, awayStyle string) string {
 // formationChanceRangesDirectional contains home/away-aware chance ranges (inclusive)
 // for each combination of home and away tactical styles. These ranges are chosen to be
 // realistic and reflect that:
-//  - ATT vs ATT tends to be open (more chances)
-//  - DEF vs DEF tends to be cagey (fewer chances)
-//  - Away playing ATT is unusual and can lead to higher volatility (slightly higher range)
-//  - Home advantage makes ATT at home also slightly more open than balanced
+//   - ATT vs ATT tends to be open (more chances)
+//   - DEF vs DEF tends to be cagey (fewer chances)
+//   - Away playing ATT is unusual and can lead to higher volatility (slightly higher range)
+//   - Home advantage makes ATT at home also slightly more open than balanced
 var formationChanceRangesDirectional = map[string]chanceRange{
 	"HOME:ATT|AWAY:ATT": {Min: 7, Max: 12},
 	"HOME:ATT|AWAY:BAL": {Min: 6, Max: 12},
