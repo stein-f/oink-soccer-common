@@ -1,6 +1,8 @@
 package soccer_test
 
 import (
+	"github.com/stretchr/testify/assert"
+	"math"
 	"math/rand"
 	"testing"
 	"time"
@@ -23,6 +25,46 @@ func TestGetBoost(t *testing.T) {
 			if got < tt.boost.MinBoost || got > tt.boost.MaxBoost {
 				t.Errorf("GetBoost() = %v, want range [%v, %v]", got, tt.boost.MinBoost, tt.boost.MaxBoost)
 			}
+		})
+	}
+}
+
+func TestGetBoost_Applications(t *testing.T) {
+	minVal, maxVal := 1.0, 3.0
+
+	cases := []struct {
+		name string
+		apps int
+	}{
+		{"first_use_no_penalty", 0},
+		{"second_use_decay", 1},
+		{"deep_decay_clamped_to_floor", 50},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			b := soccer.Boost{
+				MinBoost:     minVal,
+				MaxBoost:     maxVal,
+				Applications: tc.apps,
+			}
+
+			// Use two RNGs with the same seed so we can compute the expected base roll
+			seed := int64(123456789)
+			rExp := rand.New(rand.NewSource(seed))
+			rGot := rand.New(rand.NewSource(seed))
+
+			base := minVal + rExp.Float64()*(maxVal-minVal)
+
+			// Multiplier = maxVal(DRMinMultiplier, DRDecayPerApplication^apps)
+			m := math.Pow(soccer.DRDecayPerApplication, float64(tc.apps))
+			if m < soccer.DRMinMultiplier {
+				m = soccer.DRMinMultiplier
+			}
+			expected := base * m
+
+			got := b.GetBoost(rGot)
+			assert.InDelta(t, expected, got, 1e-12)
 		})
 	}
 }
