@@ -121,15 +121,15 @@ func (p *PlayersLookup) GetRandomPlayer(position soccer.PlayerPosition, asset El
 var tierToPlayerLevelProbability = map[EligibleAssetTier]map[soccer.PlayerLevel]int{
 	EligibleAssetTierS: {
 		soccer.PlayerLevelLegendary:        3,
-		soccer.PlayerLevelWorldClass:       50,
-		soccer.PlayerLevelProfessional:     47,
+		soccer.PlayerLevelWorldClass:       45,
+		soccer.PlayerLevelProfessional:     52,
 		soccer.PlayerLevelSemiProfessional: 0,
 		soccer.PlayerLevelAmateur:          0,
 	},
 	EligibleAssetTierA: {
 		soccer.PlayerLevelLegendary:        3,
-		soccer.PlayerLevelWorldClass:       40,
-		soccer.PlayerLevelProfessional:     57,
+		soccer.PlayerLevelWorldClass:       37,
+		soccer.PlayerLevelProfessional:     60,
 		soccer.PlayerLevelSemiProfessional: 0,
 		soccer.PlayerLevelAmateur:          0,
 	},

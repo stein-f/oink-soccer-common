@@ -69,10 +69,10 @@ grep Salah cmd/allocation/s3/out/assigned_players.csv
 
 ## Control Score
 
-The player control score is a weighted sum of the `control` and `speed` attributes:
+The player control score is a weighted sum of the `control` and `physical` attributes:
 
 ```text
-playerControlScore = (controlRating * 4 + speedRating) / 5
+playerControlScore = (controlRating * 5 + physicalRating) / 6
 ```
 
 The team control score is the sum of the player control scores, weighted by position as follows:
@@ -93,19 +93,18 @@ The team defense score is the sum of the player defense scores, weighted by posi
 - Midfield: 20%
 - Attack: 5%
 
-The average score is taken for a position where there are multiple players in that position. The individual defense score of a player is a function of the defense and speed attributes as follows:
+The average score is taken for a position where there are multiple players in that position. The individual defense score of a player is a function of the defense and physical attributes as follows:
 
 ```text
-playerDefenseScore = (defenseRating * 5 + speedRating) / 6
+playerDefenseScore = (defenseRating * 5 + physicalRating) / 6
 ```
 
 ## Attack Score
 
 Attack score works slightly differently to defense and control scores (which are weighted averages of the overall team capabilities). A random player is chosen for the scoring chance, which is a weighted random choice based on the player position. Attackers are more likely to get the chance than midfielders, who are more likely to get the chance than defenders.
 
-The selected player's attack score is then used to determine the event outcome. The score is a weighted sum of the `attack` and `speed` attributes:
+The selected player's attack score is then used to determine the event outcome. The score is a weighted sum of the `attack` and `physical` attributes:
 
 ```text
-playerAttackScore = (attackRating * 3 + speedRating) / 4
+playerAttackScore = (attackRating * 5 + physicalRating) / 4
 ```
-
