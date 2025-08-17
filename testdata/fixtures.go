@@ -14,7 +14,7 @@ func StrongTeam() []soccer.SelectedPlayer {
 			Name: "1",
 			Attributes: soccer.PlayerAttributes{
 				GoalkeeperRating: 88,
-				SpeedRating:      74,
+				PhysicalRating:   74,
 				DefenseRating:    33,
 				ControlRating:    21,
 				AttackRating:     37,
@@ -27,7 +27,7 @@ func StrongTeam() []soccer.SelectedPlayer {
 			Name: "2",
 			Attributes: soccer.PlayerAttributes{
 				GoalkeeperRating: 14,
-				SpeedRating:      80,
+				PhysicalRating:   80,
 				DefenseRating:    90,
 				ControlRating:    81,
 				AttackRating:     37,
@@ -40,7 +40,7 @@ func StrongTeam() []soccer.SelectedPlayer {
 			Name: "3",
 			Attributes: soccer.PlayerAttributes{
 				GoalkeeperRating: 14,
-				SpeedRating:      80,
+				PhysicalRating:   80,
 				DefenseRating:    55,
 				ControlRating:    85,
 				AttackRating:     91,
@@ -53,7 +53,7 @@ func StrongTeam() []soccer.SelectedPlayer {
 			Name: "4",
 			Attributes: soccer.PlayerAttributes{
 				GoalkeeperRating: 11,
-				SpeedRating:      81,
+				PhysicalRating:   81,
 				DefenseRating:    75,
 				ControlRating:    81,
 				AttackRating:     71,
@@ -66,7 +66,7 @@ func StrongTeam() []soccer.SelectedPlayer {
 			Name: "5",
 			Attributes: soccer.PlayerAttributes{
 				GoalkeeperRating: 14,
-				SpeedRating:      80,
+				PhysicalRating:   80,
 				DefenseRating:    22,
 				ControlRating:    85,
 				AttackRating:     93,
@@ -93,7 +93,7 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 		Name: "6",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 65,
-			SpeedRating:      55,
+			PhysicalRating:   55,
 			DefenseRating:    12,
 			ControlRating:    33,
 			AttackRating:     2,
@@ -106,7 +106,7 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 		Name: "7",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 14,
-			SpeedRating:      56,
+			PhysicalRating:   56,
 			DefenseRating:    75,
 			ControlRating:    81,
 			AttackRating:     11,
@@ -119,7 +119,7 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 		Name: "8",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 14,
-			SpeedRating:      68,
+			PhysicalRating:   68,
 			DefenseRating:    65,
 			ControlRating:    76,
 			AttackRating:     72,
@@ -132,7 +132,7 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 		Name: "9",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 11,
-			SpeedRating:      71,
+			PhysicalRating:   71,
 			DefenseRating:    67,
 			ControlRating:    71,
 			AttackRating:     55,
@@ -145,7 +145,7 @@ var WeakTeamPlayers = []soccer.SelectedPlayer{
 		Name: "10",
 		Attributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 14,
-			SpeedRating:      68,
+			PhysicalRating:   68,
 			DefenseRating:    22,
 			ControlRating:    67,
 			AttackRating:     74,

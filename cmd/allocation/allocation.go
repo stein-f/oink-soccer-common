@@ -223,7 +223,7 @@ func GetNpcPlayer(randSource *rand.Rand) (FifaPlayer, error) {
 		PlayerAttributes: soccer.PlayerAttributes{
 			GoalkeeperRating: 55,
 			DefenseRating:    55,
-			SpeedRating:      55,
+			PhysicalRating:   55,
 			ControlRating:    55,
 			AttackRating:     55,
 			OverallRating:    55,
