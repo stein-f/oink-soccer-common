@@ -57,7 +57,7 @@ func TestPlayerAttributes_GetAttackRating(t *testing.T) {
 		"higher speed rating has small overall impact on score": {
 			gotPlayerPhysical:     90,
 			gotPlayerAttackRating: 80,
-			wantPlayerAttackScore: 83,
+			wantPlayerAttackScore: 82,
 		},
 		"higher attack rating has large overall impact on score": {
 			gotPlayerPhysical:     80,
