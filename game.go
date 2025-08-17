@@ -487,27 +487,36 @@ func formationStyle(ft FormationType) string {
 	}
 }
 
-func stylePair(a, b string) string {
-	if a < b {
-		return a + "|" + b
-	}
-	return b + "|" + a
+func formationKey(homeStyle, awayStyle string) string {
+	return "HOME:" + homeStyle + "|AWAY:" + awayStyle
 }
 
-var formationChanceRanges = map[string]chanceRange{
-	"ATT|ATT": {Min: 6, Max: 12},
-	"ATT|BAL": {Min: 5, Max: 11},
-	"ATT|DEF": {Min: 4, Max: 9},
-	"BAL|BAL": {Min: 4, Max: 9},
-	"BAL|DEF": {Min: 3, Max: 8},
-	"DEF|DEF": {Min: 1, Max: 6},
+// formationChanceRangesDirectional contains home/away-aware chance ranges (inclusive)
+// for each combination of home and away tactical styles. These ranges are chosen to be
+// realistic and reflect that:
+//  - ATT vs ATT tends to be open (more chances)
+//  - DEF vs DEF tends to be cagey (fewer chances)
+//  - Away playing ATT is unusual and can lead to higher volatility (slightly higher range)
+//  - Home advantage makes ATT at home also slightly more open than balanced
+var formationChanceRangesDirectional = map[string]chanceRange{
+	"HOME:ATT|AWAY:ATT": {Min: 7, Max: 12},
+	"HOME:ATT|AWAY:BAL": {Min: 6, Max: 12},
+	"HOME:ATT|AWAY:DEF": {Min: 5, Max: 11},
+
+	"HOME:BAL|AWAY:ATT": {Min: 7, Max: 12}, // away ATT => more open
+	"HOME:BAL|AWAY:BAL": {Min: 4, Max: 9},
+	"HOME:BAL|AWAY:DEF": {Min: 3, Max: 8},
+
+	"HOME:DEF|AWAY:ATT": {Min: 6, Max: 11},
+	"HOME:DEF|AWAY:BAL": {Min: 3, Max: 8},
+	"HOME:DEF|AWAY:DEF": {Min: 1, Max: 6},
 }
 
 func getEventCountTruthTable(randSource *rand.Rand, homeTeamPlayers GameLineup, awayTeamPlayers GameLineup) (int, error) {
 	h := formationStyle(homeTeamPlayers.Team.Formation)
 	a := formationStyle(awayTeamPlayers.Team.Formation)
-	key := stylePair(h, a)
-	r, ok := formationChanceRanges[key]
+	key := formationKey(h, a)
+	r, ok := formationChanceRangesDirectional[key]
 	if !ok {
 		// sensible fallback
 		r = chanceRange{Min: 3, Max: 10}

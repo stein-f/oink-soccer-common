@@ -80,7 +80,7 @@ func TestGetTeamBoost_HandlesNoBoosts(t *testing.T) {
 }
 
 func TestDetermineTeamChances_RespectsFormationTruthTableRanges(t *testing.T) {
-	// mapping of style pairs to expected inclusive ranges
+	// mapping of directional HOME/AWAY style pairs to expected inclusive ranges
 	type rng struct{ min, max int }
 
 	// style resolution here mirrors formationStyle in the production code:
@@ -97,21 +97,22 @@ func TestDetermineTeamChances_RespectsFormationTruthTableRanges(t *testing.T) {
 		}
 	}
 
-	// return canonical key where order does not matter (A|B sorted lexicographically)
-	styleKey := func(a, b string) string {
-		if a < b {
-			return a + "|" + b
-		}
-		return b + "|" + a
+	styleKey := func(homeStyle, awayStyle string) string {
+		return "HOME:" + homeStyle + "|AWAY:" + awayStyle
 	}
 
 	ranges := map[string]rng{
-		"ATT|ATT": {min: 6, max: 12},
-		"ATT|BAL": {min: 5, max: 11},
-		"ATT|DEF": {min: 4, max: 9},
-		"BAL|BAL": {min: 4, max: 9},
-		"BAL|DEF": {min: 3, max: 8},
-		"DEF|DEF": {min: 1, max: 6},
+		"HOME:ATT|AWAY:ATT": {min: 7, max: 12},
+		"HOME:ATT|AWAY:BAL": {min: 6, max: 12},
+		"HOME:ATT|AWAY:DEF": {min: 5, max: 11},
+
+		"HOME:BAL|AWAY:ATT": {min: 7, max: 12},
+		"HOME:BAL|AWAY:BAL": {min: 4, max: 9},
+		"HOME:BAL|AWAY:DEF": {min: 3, max: 8},
+
+		"HOME:DEF|AWAY:ATT": {min: 6, max: 11},
+		"HOME:DEF|AWAY:BAL": {min: 3, max: 8},
+		"HOME:DEF|AWAY:DEF": {min: 1, max: 6},
 	}
 
 	formations := []soccer.FormationType{
