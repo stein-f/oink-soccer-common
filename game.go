@@ -407,14 +407,6 @@ func getFormationDefenseBoost(lineup GameLineup) float64 {
 	return formationConfig.DefenseModifier
 }
 
-func getEventCount(randSource *rand.Rand) (int, error) {
-	chooser, err := weightedrand.NewChooser(eventCountWeights...)
-	if err != nil {
-		return 0, fmt.Errorf("failed to create event count chooser. %w", err)
-	}
-	return chooser.PickSource(randSource).(int), nil
-}
-
 func GetRandomMinutes(randSource *rand.Rand, count int) ([]int, error) {
 	var minutes []int
 	for i := 0; i < count; i++ {
@@ -459,17 +451,6 @@ func CreateGameStats(events []GameEvent) GameStats {
 		HomeTeamStats: homeTeamStats,
 		AwayTeamStats: awayTeamStats,
 	}
-}
-
-var eventCountWeights = []weightedrand.Choice{
-	{Item: 3, Weight: 1},
-	{Item: 4, Weight: 2},
-	{Item: 5, Weight: 3},
-	{Item: 6, Weight: 5},
-	{Item: 7, Weight: 5},
-	{Item: 8, Weight: 3},
-	{Item: 9, Weight: 2},
-	{Item: 10, Weight: 1},
 }
 
 type chanceRange struct{ Min, Max int }
