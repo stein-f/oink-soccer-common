@@ -480,7 +480,7 @@ func formationKey(homeStyle, awayStyle string) string {
 //   - Away playing ATT is unusual and can lead to higher volatility (slightly higher range)
 //   - Home advantage makes ATT at home also slightly more open than balanced
 var formationChanceRangesDirectional = map[string]chanceRange{
-	"HOME:ATT|AWAY:ATT": {Min: 7, Max: 12},
+	"HOME:ATT|AWAY:ATT": {Min: 7, Max: 15},
 	"HOME:ATT|AWAY:BAL": {Min: 6, Max: 12},
 	"HOME:ATT|AWAY:DEF": {Min: 5, Max: 11},
 
@@ -490,7 +490,7 @@ var formationChanceRangesDirectional = map[string]chanceRange{
 
 	"HOME:DEF|AWAY:ATT": {Min: 6, Max: 11},
 	"HOME:DEF|AWAY:BAL": {Min: 3, Max: 8},
-	"HOME:DEF|AWAY:DEF": {Min: 1, Max: 6},
+	"HOME:DEF|AWAY:DEF": {Min: 2, Max: 6},
 }
 
 func getEventCountTruthTable(randSource *rand.Rand, homeTeamPlayers GameLineup, awayTeamPlayers GameLineup) (int, error) {
