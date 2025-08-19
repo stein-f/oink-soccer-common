@@ -459,9 +459,9 @@ func formationStyle(ft FormationType) string {
 	switch ft {
 	case FormationTypePyramid:
 		return "DEF"
-	case FormationTypeDiamond:
+	case FormationTypeDiamond, FormationTypeBox:
 		return "BAL"
-	case FormationTypeBox, FormationTypeY:
+	case FormationTypeY:
 		return "ATT"
 	default:
 		return "BAL"

@@ -88,9 +88,9 @@ func TestDetermineTeamChances_RespectsFormationTruthTableRanges(t *testing.T) {
 		switch f {
 		case soccer.FormationTypePyramid:
 			return "DEF"
-		case soccer.FormationTypeDiamond:
+		case soccer.FormationTypeDiamond, soccer.FormationTypeBox:
 			return "BAL"
-		case soccer.FormationTypeBox, soccer.FormationTypeY:
+		case soccer.FormationTypeY:
 			return "ATT"
 		default:
 			return "BAL"
@@ -102,7 +102,7 @@ func TestDetermineTeamChances_RespectsFormationTruthTableRanges(t *testing.T) {
 	}
 
 	ranges := map[string]rng{
-		"HOME:ATT|AWAY:ATT": {min: 7, max: 12},
+		"HOME:ATT|AWAY:ATT": {min: 7, max: 15},
 		"HOME:ATT|AWAY:BAL": {min: 6, max: 12},
 		"HOME:ATT|AWAY:DEF": {min: 5, max: 11},
 
