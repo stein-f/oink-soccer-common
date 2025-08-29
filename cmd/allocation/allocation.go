@@ -9,8 +9,10 @@ import (
 	soccer "github.com/stein-f/oink-soccer-common"
 )
 
-const useNpcPlayer = false
-const aggressionThreshold = 80
+const (
+	aggressionThreshold         = 80
+	aggressivePlayersUpperBound = 85
+)
 
 type PlayerProfile struct {
 	Asset      EligibleAsset `json:"asset"`
@@ -55,7 +57,8 @@ func (p *PlayersLookup) AddPlayer(profile FifaPlayer) {
 			p.Attackers[tier] = append(p.Attackers[tier], profile)
 		}
 	}
-	if profile.PlayerAttributes.AggressionRating >= aggressionThreshold {
+	if profile.PlayerAttributes.AggressionRating >= aggressionThreshold &&
+		profile.PlayerAttributes.GetOverallRating() <= aggressivePlayersUpperBound {
 		p.AggressivePlayers = append(p.AggressivePlayers, profile)
 	}
 }
@@ -71,10 +74,6 @@ func getPlayerLevels(overallRating int) []soccer.PlayerLevel {
 }
 
 func (p *PlayersLookup) GetRandomPlayer(position soccer.PlayerPosition, asset EligibleAsset) (FifaPlayer, error) {
-	if useNpcPlayer {
-		return GetNpcPlayer(p.Rand)
-	}
-
 	if asset.EligibleAssetTier == EligibleAssetTierAggressive {
 		return randElementInSlice(p.Rand, p.AggressivePlayers), nil
 	}
@@ -211,28 +210,4 @@ func GetRandomPosition(randSource *rand.Rand) (soccer.PlayerPosition, error) {
 		return "", errors.Wrap(err, "failed to get player position")
 	}
 	return chooser.PickSource(randSource).(soccer.PlayerPosition), nil
-}
-
-func GetNpcPlayer(randSource *rand.Rand) (FifaPlayer, error) {
-	position, err := GetRandomPosition(randSource)
-	if err != nil {
-		return FifaPlayer{}, err
-	}
-	return FifaPlayer{
-		PlayerID: "npc",
-		PlayerAttributes: soccer.PlayerAttributes{
-			GoalkeeperRating: 55,
-			DefenseRating:    55,
-			PhysicalRating:   55,
-			ControlRating:    55,
-			AttackRating:     55,
-			OverallRating:    55,
-			AggressionRating: 55,
-			PlayerLevel:      soccer.PlayerLevelProfessional,
-			Position:         position,
-			Tag:              nil,
-			BasedOnPlayer:    "NPC",
-			BasedOnPlayerURL: "",
-		},
-	}, nil
 }

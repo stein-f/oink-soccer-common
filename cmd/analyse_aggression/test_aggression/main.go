@@ -60,16 +60,16 @@ func main() {
 	fmt.Println("\nFocusing on the difference between aggression 80 and 90:")
 
 	// Reset the random sources
-	randSource80 := rand.New(rand.NewSource(42))
+	randSource60 := rand.New(rand.NewSource(42))
 	randSource90 := rand.New(rand.NewSource(42))
 
-	injuries80 := 0
+	injuries60 := 0
 	injuries90 := 0
 
 	for i := 0; i < iterations; i++ {
-		_, isInjured80 := soccer.ApplyInjury(injuryWeightsDefaults, injuryWeightsInjuryPronePlayers, false, 80, randSource80)
+		_, isInjured80 := soccer.ApplyInjury(injuryWeightsDefaults, injuryWeightsInjuryPronePlayers, false, 60, randSource60)
 		if isInjured80 {
-			injuries80++
+			injuries60++
 		}
 
 		_, isInjured90 := soccer.ApplyInjury(injuryWeightsDefaults, injuryWeightsInjuryPronePlayers, false, 90, randSource90)
@@ -78,10 +78,10 @@ func main() {
 		}
 	}
 
-	percentIncrease := (float64(injuries90) - float64(injuries80)) / float64(injuries80) * 100
+	percentIncrease := (float64(injuries90) - float64(injuries60)) / float64(injuries60) * 100
 
-	fmt.Printf("Aggression 80: %d injuries\n", injuries80)
+	fmt.Printf("Aggression 60: %d injuries\n", injuries60)
 	fmt.Printf("Aggression 90: %d injuries\n", injuries90)
-	fmt.Printf("Difference: %d injuries\n", injuries90-injuries80)
+	fmt.Printf("Difference: %d injuries\n", injuries90-injuries60)
 	fmt.Printf("Percent increase: %.2f%%\n", percentIncrease)
 }
