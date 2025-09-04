@@ -11,7 +11,7 @@ import (
 
 const (
 	aggressionThreshold         = 80
-	aggressivePlayersUpperBound = 85
+	aggressivePlayersUpperBound = 86
 )
 
 type PlayerProfile struct {
