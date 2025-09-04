@@ -29,7 +29,7 @@ func init() {
 }
 
 // ScalingFunction is a function that aims to give higher rated players a more significant advantage over lower rated players.
-// If we took the raw player ratings, then a lower skilled player on 80 would have almost the same ability as a higher skilled player 84, given the random nature of the game.
+// If we took the raw gotPlayer ratings, then a lower skilled gotPlayer on 80 would have almost the same ability as a higher skilled gotPlayer 84, given the random nature of the game.
 // This function aims to give higher rated players a more significant advantage over lower rated players.
 // We use a function that grows more rapidly as the input increases.
 // y = ax^b
