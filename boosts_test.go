@@ -68,3 +68,40 @@ func TestGetBoost_Applications(t *testing.T) {
 		})
 	}
 }
+
+func TestDiminishingMultiplier(t *testing.T) {
+	type tc struct {
+		name     string
+		apps     int
+		expected float64
+		floored  bool
+	}
+
+	cases := []tc{
+		{name: "apps_0_is_1", apps: 0, expected: 1.0},
+		{name: "apps_1_is_decay", apps: 1, expected: soccer.DRDecayPerApplication},
+		{name: "apps_2_is_decay_sq", apps: 2, expected: math.Pow(soccer.DRDecayPerApplication, 2)},
+		{name: "apps_5_above_floor", apps: 5, expected: math.Pow(soccer.DRDecayPerApplication, 5)},
+		{name: "apps_38_stuck_at_floor", apps: 38, expected: soccer.DRMinMultiplier, floored: true},
+	}
+
+	const eps = 1e-12
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := soccer.DiminishingMultiplier(c.apps)
+
+			// If expected is floored, ensure raw value is indeed below the floor
+			if c.floored {
+				raw := math.Pow(soccer.DRDecayPerApplication, float64(c.apps))
+				if raw >= soccer.DRMinMultiplier {
+					t.Fatalf("expected raw multiplier to be below floor for apps=%d; raw=%v floor=%v", c.apps, raw, soccer.DRMinMultiplier)
+				}
+			}
+
+			if math.Abs(got-c.expected) > eps {
+				t.Fatalf("DiminishingMultiplier(%d) = %v, want %v", c.apps, got, c.expected)
+			}
+		})
+	}
+}
