@@ -66,8 +66,3 @@ grep Salah cmd/allocation/s3/out/assigned_players.csv
 2. For each event, determine which team is the attacking and defensive team. It is a weighted random choice based on the team's `control score`.
 3. Determine which attacking player will have the team chance. It is a weighted random choice based on the player's position and control score. Attackers are more likely to get the chance than midfielders, who are more likely to get the chance than defenders.
 4. Determine the event outcome. It is a weighted random choice based on the player's `attack score`. The higher the attack score, the more likely the player is to score a goal. This is offset by defending team's overall `defense score`.
-
-
-```text
-playerAttackScore = (attackRating * 5 + physicalRating) / 4
-```
