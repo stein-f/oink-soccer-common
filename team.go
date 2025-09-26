@@ -2,6 +2,8 @@ package soccer
 
 import "math/rand"
 
+const defenseBiasMultiplier = 1.05
+
 type Team struct {
 	ID         string        `json:"id"`
 	CustomName string        `json:"custom_name"`
@@ -102,6 +104,7 @@ func CalculateTeamDefenseScore(source *rand.Rand, lineup GameLineup) float64 {
 	attackScore := averageDefenseScoresByPosition[PlayerPositionAttack] * attackRatio
 
 	defenseScore := (gkScore + defScore + midfieldScore + attackScore) * getFormationDefenseBoost(lineup)
+	defenseScore = defenseScore * defenseBiasMultiplier
 
 	itemBoost := GetTeamBoost(source, lineup)
 

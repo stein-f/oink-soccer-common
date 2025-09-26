@@ -589,7 +589,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 						},
 					},
 				}},
-			wantOverallTeamDefenseScore: 89,
+			wantOverallTeamDefenseScore: 94,
 		},
 		"low scoring defenders has smaller overall impact on team defense": {
 			gotTeam: soccer.GameLineup{
@@ -639,7 +639,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 71,
+			wantOverallTeamDefenseScore: 75,
 		},
 		"with max score": {
 			gotTeam: soccer.GameLineup{
@@ -739,7 +739,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 29,
+			wantOverallTeamDefenseScore: 31,
 		},
 		"with 10% boost": {
 			gotTeam: soccer.GameLineup{
@@ -796,7 +796,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 32,
+			wantOverallTeamDefenseScore: 34,
 		},
 	}
 	for name, test := range tests {

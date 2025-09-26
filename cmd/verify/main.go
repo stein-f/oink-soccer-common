@@ -16,7 +16,7 @@ import (
 
 // gameKey is the unique id for a game. It's the last path segment in the highlights.
 // https://www.thelostpigs.com/oink-soccer/player/TC0yLTYtMS05
-const gameKey = "TC0yLTctMS0x"
+const gameKey = "TC0xMi0yMC0xLTY="
 
 type GameEventArchiveRecord struct {
 	HomeTeamLineup soccer.GameLineup `json:"home_team_lineup"`

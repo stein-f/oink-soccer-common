@@ -32,5 +32,18 @@ func DiminishingMultiplier(apps int) float64 {
 
 func (b Boost) GetBoost(source *rand.Rand) float64 {
 	base := b.MinBoost + source.Float64()*(b.MaxBoost-b.MinBoost)
-	return base * DiminishingMultiplier(b.Applications)
+
+	// Only apply diminishing when applications are more than 1.
+	if b.Applications <= 1 {
+		return base
+	}
+
+	m := DiminishingMultiplier(b.Applications)
+
+	// Apply diminishing returns to the excess over 1.0 only so positive boosts never become nerfs.
+	if base >= 1.0 {
+		return 1.0 + (base-1.0)*m
+	}
+	// For debuffs (base < 1.0), keep existing behavior of scaling the whole value.
+	return base * m
 }

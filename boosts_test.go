@@ -37,7 +37,7 @@ func TestGetBoost_Applications(t *testing.T) {
 		apps int
 	}{
 		{"first_use_no_penalty", 0},
-		{"second_use_decay", 1},
+		{"second_use_no_decay", 1},
 		{"deep_decay_clamped_to_floor", 50},
 	}
 
@@ -56,12 +56,19 @@ func TestGetBoost_Applications(t *testing.T) {
 
 			base := minVal + rExp.Float64()*(maxVal-minVal)
 
-			// Multiplier = maxVal(DRMinMultiplier, DRDecayPerApplication^apps)
+			// Multiplier = max(DRMinMultiplier, DRDecayPerApplication^apps)
 			m := math.Pow(soccer.DRDecayPerApplication, float64(tc.apps))
 			if m < soccer.DRMinMultiplier {
 				m = soccer.DRMinMultiplier
 			}
-			expected := base * m
+			var expected float64
+			if tc.apps <= 1 {
+				expected = base
+			} else if base >= 1.0 {
+				expected = 1.0 + (base-1.0)*m
+			} else {
+				expected = base * m
+			}
 
 			got := b.GetBoost(rGot)
 			assert.InDelta(t, expected, got, 1e-12)
@@ -103,5 +110,60 @@ func TestDiminishingMultiplier(t *testing.T) {
 				t.Fatalf("DiminishingMultiplier(%d) = %v, want %v", c.apps, got, c.expected)
 			}
 		})
+	}
+}
+
+// TestGetBoost_SampleOutputs logs a small, deterministic table of base, multiplier and effective boost
+// for a few application counts and seeds. Run with `go test -run TestGetBoost_SampleOutputs -v` to see the table.
+func TestGetBoost_SampleOutputs(t *testing.T) {
+	posMin, posMax := 1.05, 1.15
+	negMin, negMax := 0.90, 0.95
+	appsCases := []int{0, 1, 5, 20, 50}
+	seeds := []int64{1, 42, 123456789}
+
+	t.Log("Positive boost samples (base in [1.05,1.15])")
+	for _, apps := range appsCases {
+		b := soccer.Boost{MinBoost: posMin, MaxBoost: posMax, Applications: apps}
+		for _, seed := range seeds {
+			rExp := rand.New(rand.NewSource(seed))
+			rGot := rand.New(rand.NewSource(seed))
+			base := posMin + rExp.Float64()*(posMax-posMin)
+			m := math.Pow(soccer.DRDecayPerApplication, float64(apps))
+			if m < soccer.DRMinMultiplier {
+				m = soccer.DRMinMultiplier
+			}
+			var expected float64
+			if apps <= 1 {
+				expected = base
+			} else {
+				expected = 1.0 + (base-1.0)*m
+			}
+			got := b.GetBoost(rGot)
+			t.Logf("apps=%2d seed=%9d base=%0.6f m=%0.6f eff_expected=%0.6f eff_get=%0.6f", apps, seed, base, m, expected, got)
+			assert.InDelta(t, expected, got, 1e-12)
+		}
+	}
+
+	t.Log("Debuff samples (base in [0.90,0.95])")
+	for _, apps := range appsCases {
+		b := soccer.Boost{MinBoost: negMin, MaxBoost: negMax, Applications: apps}
+		for _, seed := range seeds {
+			rExp := rand.New(rand.NewSource(seed))
+			rGot := rand.New(rand.NewSource(seed))
+			base := negMin + rExp.Float64()*(negMax-negMin)
+			m := math.Pow(soccer.DRDecayPerApplication, float64(apps))
+			if m < soccer.DRMinMultiplier {
+				m = soccer.DRMinMultiplier
+			}
+			var expected float64
+			if apps <= 1 {
+				expected = base
+			} else {
+				expected = base * m
+			}
+			got := b.GetBoost(rGot)
+			t.Logf("apps=%2d seed=%9d base=%0.6f m=%0.6f eff_expected=%0.6f eff_get=%0.6f", apps, seed, base, m, expected, got)
+			assert.InDelta(t, expected, got, 1e-12)
+		}
 	}
 }
