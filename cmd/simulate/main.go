@@ -9,10 +9,10 @@ import (
 	soccer "github.com/stein-f/oink-soccer-common"
 )
 
-//go:embed home_team.json
+//go:embed home_team_diamond.json
 var homeTeamConfig []byte
 
-//go:embed away_team.json
+//go:embed away_team_diamond.json
 var awayTeamConfig []byte
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 	scorerByPosition := make(map[soccer.PlayerPosition]int)
 
 	homeLineup := loadConfig(homeTeamConfig)
-	awayLineup := loadConfig(awayTeamConfig)
+	awayLineup := loadConfig(homeTeamConfig)
 
 	for i := 0; i < gameCount; i++ {
 		gameEvents, injuries, err := soccer.RunGame(homeLineup, awayLineup)

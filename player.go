@@ -14,7 +14,7 @@ type PlayerAttributes struct {
 	AggressionRating int              `json:"aggression_rating"`
 	OverallRating    int              `json:"overall_rating"`
 	PlayerLevel      PlayerLevel      `json:"player_level"`
-	PrimaryPosition  PlayerPosition   `json:"primary_position"`
+	PrimaryPosition  PlayerPosition   `json:"position"`
 	Positions        []PlayerPosition `json:"positions"`
 	Tag              []string         `json:"tags"`
 	BasedOnPlayer    string           `json:"based_on_player"`

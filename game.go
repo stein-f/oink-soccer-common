@@ -30,7 +30,8 @@ func (p SelectedPlayer) IsOutOfPosition() bool {
 		slices.Contains(p.Attributes.Positions, PlayerPositionAny) {
 		return false
 	}
-	return !slices.Contains(p.Attributes.Positions, p.SelectedPosition)
+	positions := p.GetPlayablePositions()
+	return !slices.Contains(positions, p.SelectedPosition)
 }
 
 func (p SelectedPlayer) GetPlayablePositions() []PlayerPosition {

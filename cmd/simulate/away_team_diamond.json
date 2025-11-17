@@ -1,66 +1,71 @@
 {
   "team": {
     "id": "2",
-    "custom_name": "WeakTeam",
+    "custom_name": "StrongTeam 2",
     "formation": "The Diamond"
   },
   "players": [
     {
       "id": "6",
+      "name": "1",
       "attributes": {
-        "goalkeeper_rating": 65,
-        "defense_rating": 12,
-        "speed_rating": 55,
-        "control_rating": 33,
-        "attack_rating": 2,
+        "goalkeeper_rating": 90,
+        "defense_rating": 33,
+        "speed_rating": 74,
+        "control_rating": 21,
+        "attack_rating": 37,
         "position": "Goalkeeper"
       },
       "position": "Goalkeeper"
     },
     {
       "id": "7",
+      "name": "2",
       "attributes": {
         "goalkeeper_rating": 14,
-        "defense_rating": 68,
-        "speed_rating": 56,
+        "defense_rating": 90,
+        "speed_rating": 80,
         "control_rating": 81,
-        "attack_rating": 11,
+        "attack_rating": 37,
         "position": "Defense"
       },
       "position": "Defense"
     },
     {
       "id": "8",
+      "name": "3",
       "attributes": {
         "goalkeeper_rating": 14,
-        "defense_rating": 65,
-        "speed_rating": 68,
-        "control_rating": 76,
-        "attack_rating": 72,
+        "defense_rating": 55,
+        "speed_rating": 80,
+        "control_rating": 85,
+        "attack_rating": 91,
         "position": "Midfield"
       },
       "position": "Midfield"
     },
     {
       "id": "9",
+      "name": "4",
       "attributes": {
         "goalkeeper_rating": 11,
-        "defense_rating": 67,
-        "speed_rating": 71,
-        "control_rating": 71,
-        "attack_rating": 55,
+        "defense_rating": 75,
+        "speed_rating": 81,
+        "control_rating": 88,
+        "attack_rating": 71,
         "position": "Midfield"
       },
       "position": "Midfield"
     },
     {
       "id": "10",
+      "name": "5",
       "attributes": {
         "goalkeeper_rating": 14,
         "defense_rating": 22,
-        "speed_rating": 68,
-        "control_rating": 67,
-        "attack_rating": 70,
+        "speed_rating": 80,
+        "control_rating": 85,
+        "attack_rating": 93,
         "position": "Attack"
       },
       "position": "Attack"
