@@ -85,7 +85,8 @@ func (r *Record) ToDomain(randSource *rand.Rand) FifaPlayer {
 		ControlRating:    normalizeRating(randSource, r.Passing),
 		AttackRating:     normalizeRating(randSource, r.Shooting),
 		AggressionRating: normalizeRating(randSource, r.MentalityAggression),
-		Position:         r.GetPosition(),
+		PrimaryPosition:  r.GetPosition(),
+		Positions:        r.GetPositions(),
 		Tag:              tags,
 		BasedOnPlayer:    r.ShortName,
 		BasedOnPlayerURL: r.PlayerURL,
@@ -107,6 +108,19 @@ func (r *Record) GetPosition() soccer.PlayerPosition {
 
 	playerPositions := strings.Split(r.PlayerPositions, ",")
 	return getPosition(playerPositions[0])
+}
+
+func (r *Record) GetPositions() []soccer.PlayerPosition {
+	positions := make(map[soccer.PlayerPosition]struct{})
+	positions[getPosition(r.ClubPosition)] = struct{}{}
+	for _, position := range strings.Split(r.PlayerPositions, ",") {
+		positions[getPosition(position)] = struct{}{}
+	}
+	result := make([]soccer.PlayerPosition, 0, len(positions))
+	for position := range positions {
+		result = append(result, position)
+	}
+	return result
 }
 
 func findPlayerLevel(overallRating int) soccer.PlayerLevel {

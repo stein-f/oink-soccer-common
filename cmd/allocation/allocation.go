@@ -46,7 +46,7 @@ func (p *PlayersLookup) AddPlayer(profile FifaPlayer) {
 	overallRating := profile.PlayerAttributes.GetOverallRating()
 	tiers := getPlayerLevels(overallRating)
 	for _, tier := range tiers {
-		switch profile.PlayerAttributes.Position {
+		switch profile.PlayerAttributes.PrimaryPosition {
 		case soccer.PlayerPositionGoalkeeper:
 			p.Goalkeepers[tier] = append(p.Goalkeepers[tier], profile)
 		case soccer.PlayerPositionDefense:

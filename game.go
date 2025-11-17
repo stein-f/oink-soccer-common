@@ -3,6 +3,7 @@ package soccer
 import (
 	"fmt"
 	"math/rand"
+	"slices"
 	"sort"
 	"time"
 
@@ -25,10 +26,19 @@ type SelectedPlayer struct {
 }
 
 func (p SelectedPlayer) IsOutOfPosition() bool {
-	if p.Attributes.Position == PlayerPositionAny {
+	if p.Attributes.PrimaryPosition == PlayerPositionAny ||
+		slices.Contains(p.Attributes.Positions, PlayerPositionAny) {
 		return false
 	}
-	return p.SelectedPosition != p.Attributes.Position
+	return !slices.Contains(p.Attributes.Positions, p.SelectedPosition)
+}
+
+func (p SelectedPlayer) GetPlayablePositions() []PlayerPosition {
+	// merge positions and primary position for backwards compatability (in future just return positions)
+	var positions []PlayerPosition
+	positions = append(positions, p.Attributes.Positions...)
+	positions = append(positions, p.Attributes.PrimaryPosition)
+	return positions
 }
 
 func (p SelectedPlayer) GetControlScore() float64 {

@@ -4,15 +4,16 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	"math/rand"
+	"os"
+	"testing"
+
 	"github.com/gocarina/gocsv"
 	soccer "github.com/stein-f/oink-soccer-common"
 	"github.com/stein-f/oink-soccer-common/cmd/allocation"
 	"github.com/stein-f/oink-soccer-common/testdata"
 	"github.com/stretchr/testify/assert"
-	"log"
-	"math/rand"
-	"os"
-	"testing"
 )
 
 // Embed formation JSON files
@@ -205,7 +206,7 @@ func getDecentPlayer(allPlayers []allocation.FifaPlayer, position soccer.PlayerP
 	})
 
 	for _, player := range allPlayers {
-		if player.PlayerAttributes.Position == position && player.PlayerAttributes.GetOverallRating() > 80 {
+		if player.PlayerAttributes.PrimaryPosition == position && player.PlayerAttributes.GetOverallRating() > 80 {
 			return player
 		}
 	}
