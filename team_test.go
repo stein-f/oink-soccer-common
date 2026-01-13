@@ -640,7 +640,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 						},
 					},
 				}},
-			wantOverallTeamDefenseScore: 94,
+			wantOverallTeamDefenseScore: 95,
 		},
 		"low scoring defenders has smaller overall impact on team defense": {
 			gotTeam: soccer.GameLineup{
@@ -695,7 +695,7 @@ func TestTeam_GetOverallTeamDefenseScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamDefenseScore: 75,
+			wantOverallTeamDefenseScore: 76,
 		},
 		"with max score": {
 			gotTeam: soccer.GameLineup{

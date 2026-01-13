@@ -3,6 +3,7 @@ package soccer
 import (
 	"math"
 	"slices"
+	"strings"
 )
 
 type PlayerAttributes struct {
@@ -33,7 +34,7 @@ func (p PlayerAttributes) IsInjuryProne() bool {
 // GetOverallRating returns the overall rating for a player based on their position
 // this is presentational only and isn't used in the actual game logic
 func (p PlayerAttributes) GetOverallRating() int {
-	firstPosition := p.Positions[0]
+	firstPosition := p.getFirstPosition()
 	if firstPosition == PlayerPositionGoalkeeper {
 		return (p.GoalkeeperRating*5 + p.SpeedRating) / 6
 	}
@@ -47,6 +48,15 @@ func (p PlayerAttributes) GetOverallRating() int {
 		return (p.AttackRating*3 + p.SpeedRating) / 4
 	}
 	return p.OverallRating
+}
+
+func (p PlayerAttributes) getFirstPosition() PlayerPosition {
+	for _, position := range p.Positions {
+		if position != "" {
+			return PlayerPosition(strings.TrimSpace(string(position)))
+		}
+	}
+	return p.Positions[0]
 }
 
 // GetControlScore returns the control score for a gotPlayer
