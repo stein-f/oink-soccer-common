@@ -120,6 +120,12 @@ func (r *Record) GetPositions() []soccer.PlayerPosition {
 	for position := range positions {
 		result = append(result, position)
 	}
+
+	if len(result) == 0 {
+		// for backwards compatability fall back to primary position
+		return []soccer.PlayerPosition{r.GetPosition()}
+	}
+
 	return result
 }
 

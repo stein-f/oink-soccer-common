@@ -1,5 +1,5 @@
 {
-  "current_season": 13,
+  "current_season": 14,
   "seasons": [
     {
       "season": 3,
@@ -66,6 +66,12 @@
       "collab": "dc-purp",
       "assets_path": "cmd/allocation/s13/eligible_assets.csv",
       "round": 55098787
+    },
+    {
+      "season": 14,
+      "collab": "donks",
+      "assets_path": "cmd/allocation/s14/eligible_assets.csv",
+      "round": 57408178
     }
   ]
 }
