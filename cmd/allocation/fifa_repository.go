@@ -3,6 +3,7 @@ package allocation
 import (
 	"math/rand"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/gocarina/gocsv"
@@ -126,11 +127,24 @@ func (r *Record) GetPositions() []soccer.PlayerPosition {
 		return []soccer.PlayerPosition{r.GetPosition()}
 	}
 
+	// Sort deterministically by string value so callers see stable ordering
+	sort.Slice(result, func(i, j int) bool {
+		return string(result[i]) < string(result[j])
+	})
+
 	return result
 }
 
 func findPlayerLevel(overallRating int) soccer.PlayerLevel {
-	for level, rng := range PlayerLevelBands {
+	// Iterate PlayerLevelBands deterministically by sorting keys
+	var keys []string
+	for k := range PlayerLevelBands {
+		keys = append(keys, string(k))
+	}
+	sort.Strings(keys)
+	for _, ks := range keys {
+		level := soccer.PlayerLevel(ks)
+		rng := PlayerLevelBands[level]
 		if overallRating >= rng[0] && overallRating <= rng[1] {
 			return level
 		}

@@ -118,3 +118,15 @@ type PlayerTag string
 const (
 	PlayerTagInjuryProne PlayerTag = "Injury Prone"
 )
+
+type ChanceType string
+
+const (
+	ChanceTypeCorner         ChanceType = "Corner"
+	ChanceTypeCross          ChanceType = "Cross"
+	ChanceTypeOpenPlay       ChanceType = "Open Play"
+	ChanceTypeGoalKeeperShot ChanceType = "Goalkeeper Shot"
+	ChanceTypeLongRange      ChanceType = "Long Range"
+	ChanceTypeFreeKick       ChanceType = "Free Kick"
+	ChanceTypePenalty        ChanceType = "Penalty"
+)

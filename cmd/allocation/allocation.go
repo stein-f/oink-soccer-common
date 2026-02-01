@@ -63,9 +63,76 @@ func (p *PlayersLookup) AddPlayer(profile FifaPlayer) {
 	}
 }
 
+// Normalize sorts all internal player slices to a deterministic order so selections
+// from these slices are reproducible. Sorting key: OverallRating (desc), then PlayerID (asc).
+func (p *PlayersLookup) Normalize() {
+	sortPlayerSlice := func(s []FifaPlayer) {
+		sort.Slice(s, func(i, j int) bool {
+			a := s[i]
+			b := s[j]
+			if a.PlayerAttributes.OverallRating != b.PlayerAttributes.OverallRating {
+				return a.PlayerAttributes.OverallRating > b.PlayerAttributes.OverallRating
+			}
+			return a.PlayerID < b.PlayerID
+		})
+	}
+
+	// iterate and sort deterministically by sorting the map keys first
+	var gkKeys []string
+	for k := range p.Goalkeepers {
+		gkKeys = append(gkKeys, string(k))
+	}
+	sort.Strings(gkKeys)
+	for _, ks := range gkKeys {
+		lvl := soccer.PlayerLevel(ks)
+		sortPlayerSlice(p.Goalkeepers[lvl])
+	}
+
+	var defKeys []string
+	for k := range p.Defenders {
+		defKeys = append(defKeys, string(k))
+	}
+	sort.Strings(defKeys)
+	for _, ks := range defKeys {
+		lvl := soccer.PlayerLevel(ks)
+		sortPlayerSlice(p.Defenders[lvl])
+	}
+
+	var midKeys []string
+	for k := range p.Midfielders {
+		midKeys = append(midKeys, string(k))
+	}
+	sort.Strings(midKeys)
+	for _, ks := range midKeys {
+		lvl := soccer.PlayerLevel(ks)
+		sortPlayerSlice(p.Midfielders[lvl])
+	}
+
+	var attKeys []string
+	for k := range p.Attackers {
+		attKeys = append(attKeys, string(k))
+	}
+	sort.Strings(attKeys)
+	for _, ks := range attKeys {
+		lvl := soccer.PlayerLevel(ks)
+		sortPlayerSlice(p.Attackers[lvl])
+	}
+
+	// also sort aggressive players list for determinism
+	sortPlayerSlice(p.AggressivePlayers)
+}
+
 func getPlayerLevels(overallRating int) []soccer.PlayerLevel {
+	// Extract keys and sort deterministically so behaviour is reproducible
 	var levels []soccer.PlayerLevel
-	for tier, rnge := range PlayerLevelBands {
+	var keys []string
+	for k := range PlayerLevelBands {
+		keys = append(keys, string(k))
+	}
+	sort.Strings(keys)
+	for _, ks := range keys {
+		tier := soccer.PlayerLevel(ks)
+		rnge := PlayerLevelBands[tier]
 		if overallRating >= rnge[0] && overallRating <= rnge[1] {
 			levels = append(levels, tier)
 		}
@@ -80,23 +147,13 @@ func (p *PlayersLookup) GetRandomPlayer(position soccer.PlayerPosition, asset El
 
 	levelProbabilities := tierToPlayerLevelProbability[asset.EligibleAssetTier]
 
-	// Extract keys and sort them
-	var levels []soccer.PlayerLevel
-	for level := range levelProbabilities {
-		levels = append(levels, level)
-	}
-	sort.Slice(levels, func(i, j int) bool {
-		return levels[i] < levels[j]
-	})
-
-	// Create weighted choices with sorted levels
-	levelChoices := []weightedrand.Choice{}
-	for _, level := range levels {
-		probability := levelProbabilities[level]
-		levelChoices = append(levelChoices, weightedrand.Choice{
-			Item:   level,
-			Weight: uint(probability),
-		})
+	// Build deterministic weighted choices from the map of level probabilities
+	levelChoicesRaw := soccer.BuildChoicesFromMapNumberKeys(levelProbabilities)
+	// Convert items in the raw choices back to soccer.PlayerLevel type
+	levelChoices := make([]weightedrand.Choice, 0, len(levelChoicesRaw))
+	for _, c := range levelChoicesRaw {
+		// c.Item was stored as the original key type (soccer.PlayerLevel)
+		levelChoices = append(levelChoices, weightedrand.Choice{Item: c.Item.(soccer.PlayerLevel), Weight: c.Weight})
 	}
 
 	chooser, err := weightedrand.NewChooser(levelChoices...)
@@ -157,6 +214,8 @@ func NewPlayersLookup(randSource *rand.Rand, players []FifaPlayer) *PlayersLooku
 		Rand:        randSource,
 	}
 	lookup.AddPlayers(players)
+	// ensure deterministic ordering within buckets
+	lookup.Normalize()
 	return lookup
 }
 
@@ -195,6 +254,9 @@ func (e EligibleAsset) GetOrigin() EligibleAssetOrigin {
 }
 
 func randElementInSlice(r *rand.Rand, slice []FifaPlayer) FifaPlayer {
+	if len(slice) == 0 {
+		return FifaPlayer{}
+	}
 	return slice[r.Intn(len(slice))]
 }
 
