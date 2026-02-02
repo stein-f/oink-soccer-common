@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	soccer "github.com/stein-f/oink-soccer-common"
+	"github.com/stein-f/oink-soccer-common/lang"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,19 +13,19 @@ func TestDetermineChangeType(t *testing.T) {
 	randSource := rand.NewSource(1)
 
 	cases := map[string]struct {
-		gotPreviousChanceType soccer.ChanceType
+		gotPreviousChanceType *soccer.ChanceType
 		gotRandSource         *rand.Rand
 		wantChanceType        soccer.ChanceType
 	}{
 		"selects a change type": {
-			gotPreviousChanceType: soccer.ChanceTypeCross,
+			gotPreviousChanceType: lang.ToPtr(soccer.ChanceTypeCross),
 			gotRandSource:         rand.New(randSource),
 			wantChanceType:        soccer.ChanceTypeOpenPlay,
 		},
 		"selects a different change type if same as previous": {
-			gotPreviousChanceType: soccer.ChanceTypeOpenPlay,
+			gotPreviousChanceType: lang.ToPtr(soccer.ChanceTypeOpenPlay),
 			gotRandSource:         rand.New(randSource),
-			wantChanceType:        soccer.ChanceTypeFreeKick,
+			wantChanceType:        soccer.ChanceTypeLongRange,
 		},
 	}
 

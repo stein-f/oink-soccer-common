@@ -8,10 +8,10 @@ import (
 
 var chanceTypeWeights = map[ChanceType]uint{
 	ChanceTypeCorner:         3,
-	ChanceTypeCross:          5,
-	ChanceTypeOpenPlay:       8,
-	ChanceTypeGoalKeeperShot: 2,
-	ChanceTypeLongRange:      3,
+	ChanceTypeCross:          4,
+	ChanceTypeOpenPlay:       7,
+	ChanceTypeGoalKeeperShot: 1,
+	ChanceTypeLongRange:      4,
 	ChanceTypeFreeKick:       3,
 	ChanceTypePenalty:        2,
 }
@@ -27,7 +27,7 @@ var chanceTypeOrder = []ChanceType{
 	ChanceTypePenalty,
 }
 
-func DetermineChanceType(previousChanceType ChanceType, randSource *rand.Rand) (ChanceType, error) {
+func DetermineChanceType(previousChanceType *ChanceType, randSource *rand.Rand) (ChanceType, error) {
 	var choices []weightedrand.Choice
 	for _, chanceType := range chanceTypeOrder {
 		if weight, ok := chanceTypeWeights[chanceType]; ok {
@@ -37,6 +37,7 @@ func DetermineChanceType(previousChanceType ChanceType, randSource *rand.Rand) (
 			})
 		}
 	}
+
 	chooser, err := weightedrand.NewChooser(choices...)
 	if err != nil {
 		return "", err
@@ -44,14 +45,14 @@ func DetermineChanceType(previousChanceType ChanceType, randSource *rand.Rand) (
 
 	chanceType := chooser.PickSource(randSource).(ChanceType)
 
-	if chanceType == previousChanceType {
-		return pickChangeTypeDifferentToPrevious(previousChanceType, randSource, choices, chooser)
+	if previousChanceType != nil && chanceType == *previousChanceType {
+		return pickChanceTypeDifferentToPrevious(*previousChanceType, randSource, choices, chooser)
 	}
 
 	return chanceType, nil
 }
 
-func pickChangeTypeDifferentToPrevious(previousChanceType ChanceType, randSource *rand.Rand, choices []weightedrand.Choice, chooser *weightedrand.Chooser) (ChanceType, error) {
+func pickChanceTypeDifferentToPrevious(previousChanceType ChanceType, randSource *rand.Rand, choices []weightedrand.Choice, chooser *weightedrand.Chooser) (ChanceType, error) {
 	choicesWithoutPrevious := []weightedrand.Choice{}
 	for _, choice := range choices {
 		if choice.Item != previousChanceType {

@@ -44,7 +44,7 @@ var TheDiamondFormation = FormationConfig{
 		5: PlayerPositionAttack,
 	},
 	DefenseModifier: 0.94,
-	ControlModifier: 1.015,
+	ControlModifier: 1.02,
 	AttackModifier:  0.94,
 }
 
