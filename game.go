@@ -17,11 +17,6 @@ const (
 	StatsReductionHighSeverity = 0.85
 )
 
-type TeamChance struct {
-	TeamType   TeamType   `json:"team_type"`
-	ChanceType ChanceType `json:"chance_type"`
-}
-
 type SelectedPlayer struct {
 	ID               string           `json:"id"`
 	Name             string           `json:"name"`
@@ -116,15 +111,13 @@ func (g GameEvent) GetMissEvent() MissEvent {
 }
 
 type GoalEvent struct {
-	PlayerID   string     `json:"player_id"`
-	TeamType   TeamType   `json:"team_type"`
-	ChanceType ChanceType `json:"chance_type"`
+	PlayerID string   `json:"player_id"`
+	TeamType TeamType `json:"team_type"`
 }
 
 type MissEvent struct {
-	PlayerID   string     `json:"player_id"`
-	TeamType   TeamType   `json:"team_type"`
-	ChanceType ChanceType `json:"chance_type"`
+	PlayerID string   `json:"player_id"`
+	TeamType TeamType `json:"team_type"`
 }
 
 type GameStats struct {
@@ -241,7 +234,7 @@ func getPositionItemBoost(source *rand.Rand, boosts []Boost, position PlayerPosi
 	return 1
 }
 
-func runTeamChance(randSource *rand.Rand, attackingTeamType TeamChance, homeTeamLineup GameLineup, awayTeamLineup GameLineup, minuteOfEvent int) (GameEvent, error) {
+func runTeamChance(randSource *rand.Rand, attackingTeamType TeamType, homeTeamLineup GameLineup, awayTeamLineup GameLineup, minuteOfEvent int) (GameEvent, error) {
 	attackingTeamLineup := homeTeamLineup
 	defensiveTeamLineup := awayTeamLineup
 
@@ -249,7 +242,7 @@ func runTeamChance(randSource *rand.Rand, attackingTeamType TeamChance, homeTeam
 	attackFormationBoost := getAttackFormationBoost(homeTeamLineup)
 	defenseFormationBoost := getDefenseFormationBoost(awayTeamLineup)
 
-	if attackingTeamType.TeamType == TeamTypeAway {
+	if attackingTeamType == TeamTypeAway {
 		attackingTeamLineup = awayTeamLineup
 		defensiveTeamLineup = homeTeamLineup
 
@@ -290,9 +283,8 @@ func runTeamChance(randSource *rand.Rand, attackingTeamType TeamChance, homeTeam
 		return GameEvent{
 			Type: GameEventTypeGoal,
 			Event: GoalEvent{
-				PlayerID:   attackPlayer.ID,
-				TeamType:   attackingTeamType.TeamType,
-				ChanceType: attackingTeamType.ChanceType,
+				PlayerID: attackPlayer.ID,
+				TeamType: attackingTeamType,
 			},
 			Minute: minuteOfEvent,
 		}, nil
@@ -301,9 +293,8 @@ func runTeamChance(randSource *rand.Rand, attackingTeamType TeamChance, homeTeam
 	return GameEvent{
 		Type: GameEventTypeMiss,
 		Event: MissEvent{
-			PlayerID:   attackPlayer.ID,
-			TeamType:   attackingTeamType.TeamType,
-			ChanceType: attackingTeamType.ChanceType,
+			PlayerID: attackPlayer.ID,
+			TeamType: attackingTeamType,
 		},
 		Minute: minuteOfEvent,
 	}, nil
@@ -390,7 +381,7 @@ func getRandomPlayerByPosition(randSource *rand.Rand, position PlayerPosition, p
 }
 
 // DetermineTeamChances determines the chances of each team to score a goal. It is based on the control score of each team.
-func DetermineTeamChances(randSource *rand.Rand, homeTeamPlayers GameLineup, awayTeamPlayers GameLineup) ([]TeamChance, error) {
+func DetermineTeamChances(randSource *rand.Rand, homeTeamPlayers GameLineup, awayTeamPlayers GameLineup) ([]TeamType, error) {
 	eventCount, err := getEventCountTruthTable(randSource, homeTeamPlayers, awayTeamPlayers)
 	if err != nil {
 		return nil, err
@@ -408,25 +399,10 @@ func DetermineTeamChances(randSource *rand.Rand, homeTeamPlayers GameLineup, awa
 		return nil, fmt.Errorf("failed to create team chances chooser. %w", err)
 	}
 
-	var teamChances []TeamChance
-
+	var teamChances []TeamType
 	for i := 0; i < eventCount; i++ {
 		teamType := chooser.PickSource(randSource).(TeamType)
-
-		var previousChanceType *ChanceType
-		if len(teamChances) > 0 {
-			previousChanceType = &teamChances[len(teamChances)-1].ChanceType
-		}
-
-		chanceType, err := DetermineChanceType(previousChanceType, randSource)
-		if err != nil {
-			return nil, fmt.Errorf("failed to determine chance type. %w", err)
-		}
-
-		teamChances = append(teamChances, TeamChance{
-			TeamType:   teamType,
-			ChanceType: chanceType,
-		})
+		teamChances = append(teamChances, teamType)
 	}
 
 	return teamChances, nil

@@ -232,7 +232,7 @@ func TestTeam_GetOverallTeamControlScore(t *testing.T) {
 					},
 				},
 			},
-			wantOverallTeamControlScore: 77,
+			wantOverallTeamControlScore: 76,
 		},
 		"with max score": {
 			gotTeam: soccer.GameLineup{
