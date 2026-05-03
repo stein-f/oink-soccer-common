@@ -1,0 +1,146 @@
+{
+  "input": {
+    "seed": 42,
+    "home_formation": "The Y",
+    "away_formation": "The Y",
+    "home_tag": "strong",
+    "away_tag": "strong"
+  },
+  "events": [
+    {
+      "type": "Goal",
+      "chance_type": "Open Play",
+      "minute": 3,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Cross",
+      "minute": 13,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Long Range",
+      "minute": 20,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Free Kick",
+      "minute": 20,
+      "player_id": "4",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Long Range",
+      "minute": 38,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Penalty",
+      "minute": 38,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Long Range",
+      "minute": 46,
+      "player_id": "3",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Open Play",
+      "minute": 48,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Long Range",
+      "minute": 50,
+      "player_id": "3",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Open Play",
+      "minute": 51,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Free Kick",
+      "minute": 58,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Cross",
+      "minute": 69,
+      "player_id": "3",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Open Play",
+      "minute": 74,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Long Range",
+      "minute": 94,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Open Play",
+      "minute": 96,
+      "player_id": "5",
+      "team_type": "Home"
+    }
+  ],
+  "injuries": {
+    "home": [
+      {
+        "player_id": "1",
+        "severity": "Low Severity",
+        "name": "Squirrel Scare",
+        "duration_days": 1
+      }
+    ],
+    "away": [
+      {
+        "player_id": "5",
+        "severity": "Low Severity",
+        "name": "Pepper Spray Incident",
+        "duration_days": 1
+      }
+    ]
+  },
+  "stats": {
+    "home_team_stats": {
+      "team_type": "Home",
+      "shots": 5,
+      "goals": 4
+    },
+    "away_team_stats": {
+      "team_type": "Away",
+      "shots": 10,
+      "goals": 8
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "input": {
+    "seed": 42,
+    "home_formation": "The Y",
+    "away_formation": "The Box",
+    "home_players_tag": "strong",
+    "away_players_tag": "strong"
+  },
+  "events": [
+    {
+      "type": "Goal",
+      "minute": 4,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "minute": 20,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "minute": 27,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "minute": 27,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 29,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "minute": 48,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "minute": 55,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 61,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 75,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "minute": 78,
+      "player_id": "4",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 79,
+      "player_id": "5",
+      "team_type": "Home"
+    }
+  ],
+  "injuries": {
+    "home": null,
+    "away": null
+  }
+}

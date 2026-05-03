@@ -1,68 +1,96 @@
 # oink-soccer-common
 
-The purpose of this repository is to publish the algorithm used to determine the outcome of an oink soccer match.
+The deterministic soccer match-simulation engine that powers Oink Soccer.
 
-## Run the example
+This repository contains two engines:
 
-You must have Go installed to run the example. https://go.dev/doc/install
+- **v1** (root of the module) — original engine, frozen for bug fixes only.
+- **v2** (`v2/` subdirectory, separate Go module) — clean-room rebuild with a phase-based simulation, balanced formation profiles, specialist player attributes, and explicit manager tactics.
 
-```shell
-go run cmd/simulate/main.go
+New work should target v2.
+
+## Documentation
+
+- **[Manager's Guide](docs/manager-guide.md)** — start here if you want to understand how to build a team. Covers attributes, chance types, tactics, formations, and worked examples.
+- **[v1 → v2 differences](docs/v1-vs-v2.md)** — what changed between engines and why we rebuilt.
+- **[Architecture](docs/architecture.md)** — technical deep-dive on the v2 simulation flow.
+- **[Public API](docs/api.md)** — the locked public surface for consumers.
+- **[Rebuild plan](docs/rebuild-plan.md)** — internal changelog and decision history.
+
+## Using v2
+
+```go
+import (
+    "math/rand"
+    soccer "github.com/stein-f/oink-soccer-common/v2"
+)
+
+src := rand.New(rand.NewSource(seed))
+events, injuries, err := soccer.RunGameWithSeed(src, homeLineup, awayLineup)
 ```
 
-The following will output to the console.
+The full public API is documented in [`docs/api.md`](docs/api.md).
 
-```text
-Games played: 10000
-StrongTeam wins: 9021
-StrongTeam chances/game: 4.442100
-WeakTeam wins: 284
-WeakTeam chances/game: 2.078500
-Draws: 695
-Goals/game: 3.928200
-Attacker goals: 25642 (65.276717%)
-Midfielder goals: 12903 (32.847106%)
-Defender goals: 631 (1.606334%)
-Goalkeeper goals: 106 (0.269844%)
+To re-derive `seed` from an Algorand block hash:
+
+```go
+import "github.com/stein-f/oink-soccer-common/v2/algorand"
+
+client := algorand.NewClient(nil)
+bs, err := client.FetchBlockSeed(ctx, round)
+events, injuries, err := soccer.RunGameWithSeed(bs.Source, home, away)
 ```
 
-## Verify a game
+## Engine model (v2 in one paragraph)
 
-The random number generator used in the engine is seeded with a round from the blockchain. This means that the outcome of a game can be verified by running the engine with the same seed.
-Running the simulation with the same seed will produce the same outcome.
+Each match runs in five phases: **tempo** (how many chances), **schedule** (when), **possession** (which team gets each chance), **resolve** (chance type + attacker + goal/miss), **injuries**. Every formation has a 5-axis trade-off profile (Possession / ChanceCreation / ChanceQuality / DefSolidity / InjuryRisk) — none strictly dominates another. Player attributes split physical ratings into Pace / Recovery / WorkRate, plus specialist attributes (Heading / Composure / Technique / Finishing / Tackling) that drive specific chance types — a target man with high Heading owns corners, a clutch finisher with high Composure owns penalties. Each `ChanceType` runs its own scoring formula referencing the right attributes. Optional `Tactics` (press, tempo, line height, set-piece taker) and `PlayerRole` (captain, target man, playmaker, ball winner) let managers shape outcomes; press and line height also shift which player attributes are most valuable. A skill curve `(rating/100)^4` amplifies player-quality differentials. The whole thing is a pure function of `(seed, lineups)`.
 
-Edit the game key in `cmd/verify/main.go` to verify a the game of your choice. The game key is the last path segment of the game's highlights URL. For example, the highlights URL `https://www.thelostpigs.com/oink-soccer/player/TC0yLTYtMS05` has a game key of `TC0yLTYtMS05`.
+## Allocation
 
-Then run the following command:
+Season-start NFT allocation lives in `v2/allocation`:
 
-```shell
-go run cmd/verify/main.go
+```go
+import "github.com/stein-f/oink-soccer-common/v2/allocation"
+
+pool := allocation.NewPool(candidates, allocation.DefaultRules())
+assignments, err := allocation.Allocate(rand, pool, assets)
 ```
 
-which will print the result to the console.
+Same `(seed, candidates, assets)` always produces the same allocation, so anyone can re-verify the result from just the Algorand block hash.
 
-```text
-Round: 35323350, Block hash: TMUTUFAKGCDT4VHG2QJCIRR26ATBIWDOKDGDLDEQTGLAY34ZKDTA
-Team1 FC 2 - 2 Team2 FC
+## Running the v1 examples
+
+The v1 examples still work for historical reference:
+
+```sh
+go run cmd/simulate/main.go        # 10k-game distribution stats
+go run cmd/verify/main.go          # re-verify a specific historical game
+go run cmd/allocation/runner/main.go  # season allocation (CSV output)
 ```
 
-## Run player allocation
+## Testing
 
-The player allocation algorithm is used to allocate players to assets. We use the block hash of a round from the Algorand blockchain to seed the random number generator. This means that the player allocation can be verified by running the engine with the same seed (block hash) to produce repeatable results. It is a tamper proof way to allocate players to teams that can be verified by anyone, ensuring that the allocation is fair, open, verifiable and transparent.
+v1 and v2 are separate Go modules and test independently:
 
-```shell
-go run cmd/allocation/runner/main.go
+```sh
+make test          # v1 (root)
+cd v2 && make test # v2
 ```
 
-This will generate a csv file with the allocations in `cmd/allocation/s3/out/assigned_players.csv`. You can search the file using grep as follows:
+v2 includes a balance harness that runs 5,000 trials per (home × away) formation pair to measure win-rate spread:
 
-```shell
-grep Salah cmd/allocation/s3/out/assigned_players.csv
+```sh
+cd v2 && go test -v -run TestFormationBalance ./...
 ```
 
-## algorithm
+Set `RUN_BALANCE_STRICT=1` to fail the test when the spread exceeds the ±3% target (the engine currently sits at ~2.98% spread, which is under target; the gate stays in place so per-trial noise doesn't randomly trip CI).
 
-1. Choose the number of events (goal|miss) in the game. It is a weighted random number between 1 and 12.
-2. For each event, determine which team is the attacking and defensive team. It is a weighted random choice based on the team's `control score`.
-3. Determine which attacking player will have the team chance. It is a weighted random choice based on the player's position and control score. Attackers are more likely to get the chance than midfielders, who are more likely to get the chance than defenders.
-4. Determine the event outcome. It is a weighted random choice based on the player's `attack score`. The higher the attack score, the more likely the player is to score a goal. This is offset by defending team's overall `defense score`.
+## Snapshots
+
+v2 commits 20 golden JSON snapshots at `v2/testdata/golden/v2/` as a regression guard. Regenerate with:
+
+```sh
+cd v2 && go run ./cmd/snapshot
+```
+
+A code change that diffs the snapshots is either intentional (regenerate + explain in the PR) or a regression (fix it). See `v2/testdata/golden/README.md`.

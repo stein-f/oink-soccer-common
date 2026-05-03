@@ -1,0 +1,77 @@
+{
+  "input": {
+    "seed": 99,
+    "home_formation": "The Diamond",
+    "away_formation": "The Diamond",
+    "home_players_tag": "strong",
+    "away_players_tag": "weak"
+  },
+  "events": [
+    {
+      "type": "Goal",
+      "minute": 24,
+      "player_id": "2",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 33,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 39,
+      "player_id": "3",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 44,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 46,
+      "player_id": "6",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "minute": 47,
+      "player_id": "2",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 60,
+      "player_id": "3",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 60,
+      "player_id": "10",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "minute": 98,
+      "player_id": "10",
+      "team_type": "Away"
+    }
+  ],
+  "injuries": {
+    "home": null,
+    "away": [
+      {
+        "player_id": "10",
+        "severity": "Low Severity",
+        "name": "Pepper Spray Incident",
+        "min_days": 1,
+        "max_days": 1
+      }
+    ]
+  }
+}

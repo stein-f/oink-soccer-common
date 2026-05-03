@@ -1,0 +1,75 @@
+{
+  "input": {
+    "seed": 42,
+    "home_formation": "The Pyramid",
+    "away_formation": "The Pyramid",
+    "home_tag": "strong",
+    "away_tag": "strong"
+  },
+  "events": [
+    {
+      "type": "Miss",
+      "chance_type": "Corner",
+      "minute": 13,
+      "player_id": "3",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Penalty",
+      "minute": 20,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Cross",
+      "minute": 69,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Open Play",
+      "minute": 74,
+      "player_id": "3",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Free Kick",
+      "minute": 94,
+      "player_id": "3",
+      "team_type": "Home"
+    }
+  ],
+  "injuries": {
+    "home": [
+      {
+        "player_id": "3",
+        "severity": "Low Severity",
+        "name": "Laugh Attack",
+        "duration_days": 1
+      },
+      {
+        "player_id": "4",
+        "severity": "Low Severity",
+        "name": "Selfie Slip",
+        "duration_days": 1
+      }
+    ],
+    "away": null
+  },
+  "stats": {
+    "home_team_stats": {
+      "team_type": "Home",
+      "shots": 4,
+      "goals": 1
+    },
+    "away_team_stats": {
+      "team_type": "Away",
+      "shots": 1,
+      "goals": 1
+    }
+  }
+}

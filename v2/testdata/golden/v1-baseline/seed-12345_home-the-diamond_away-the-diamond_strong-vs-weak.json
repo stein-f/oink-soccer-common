@@ -1,0 +1,69 @@
+{
+  "input": {
+    "seed": 12345,
+    "home_formation": "The Diamond",
+    "away_formation": "The Diamond",
+    "home_players_tag": "strong",
+    "away_players_tag": "weak"
+  },
+  "events": [
+    {
+      "type": "Goal",
+      "minute": 3,
+      "player_id": "3",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 20,
+      "player_id": "10",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "minute": 32,
+      "player_id": "2",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 44,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 47,
+      "player_id": "2",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 48,
+      "player_id": "10",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "minute": 76,
+      "player_id": "1",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 78,
+      "player_id": "10",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "minute": 85,
+      "player_id": "5",
+      "team_type": "Home"
+    }
+  ],
+  "injuries": {
+    "home": null,
+    "away": null
+  }
+}

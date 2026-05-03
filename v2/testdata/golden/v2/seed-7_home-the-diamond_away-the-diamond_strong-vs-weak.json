@@ -1,0 +1,83 @@
+{
+  "input": {
+    "seed": 7,
+    "home_formation": "The Diamond",
+    "away_formation": "The Diamond",
+    "home_tag": "strong",
+    "away_tag": "weak"
+  },
+  "events": [
+    {
+      "type": "Miss",
+      "chance_type": "Cross",
+      "minute": 33,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Corner",
+      "minute": 47,
+      "player_id": "4",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Cross",
+      "minute": 49,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Free Kick",
+      "minute": 51,
+      "player_id": "8",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Long Range",
+      "minute": 68,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Open Play",
+      "minute": 68,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Cross",
+      "minute": 69,
+      "player_id": "5",
+      "team_type": "Home"
+    }
+  ],
+  "injuries": {
+    "home": null,
+    "away": [
+      {
+        "player_id": "6",
+        "severity": "Low Severity",
+        "name": "Dance-Off Defeat",
+        "duration_days": 1
+      }
+    ]
+  },
+  "stats": {
+    "home_team_stats": {
+      "team_type": "Home",
+      "shots": 6,
+      "goals": 3
+    },
+    "away_team_stats": {
+      "team_type": "Away",
+      "shots": 1,
+      "goals": 0
+    }
+  }
+}

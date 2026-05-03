@@ -20,6 +20,18 @@ type PlayerAttributes struct {
 	Tag              []string         `json:"tags"`
 	BasedOnPlayer    string           `json:"based_on_player"`
 	BasedOnPlayerURL string           `json:"based_on_player_url"`
+
+	// v2-only fields, populated by the allocation pipeline so v2's engine
+	// can read richer player builds. v1's engine ignores them entirely; the
+	// `omitempty` tag keeps existing JSON output identical for legacy data.
+	Pace      int `json:"pace,omitempty"`
+	Recovery  int `json:"recovery,omitempty"`
+	WorkRate  int `json:"work_rate,omitempty"`
+	Finishing int `json:"finishing,omitempty"`
+	Heading   int `json:"heading,omitempty"`
+	Technique int `json:"technique,omitempty"`
+	Composure int `json:"composure,omitempty"`
+	Tackling  int `json:"tackling,omitempty"`
 }
 
 func (p PlayerAttributes) IsInjuryProne() bool {

@@ -1,0 +1,104 @@
+{
+  "input": {
+    "seed": 42,
+    "home_formation": "The Pyramid",
+    "away_formation": "The Y",
+    "home_tag": "strong",
+    "away_tag": "strong"
+  },
+  "events": [
+    {
+      "type": "Miss",
+      "chance_type": "Open Play",
+      "minute": 13,
+      "player_id": "3",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Free Kick",
+      "minute": 20,
+      "player_id": "3",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Long Range",
+      "minute": 20,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Free Kick",
+      "minute": 38,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Goalkeeper Shot",
+      "minute": 46,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Cross",
+      "minute": 48,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Open Play",
+      "minute": 51,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Goalkeeper Shot",
+      "minute": 69,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Long Range",
+      "minute": 74,
+      "player_id": "3",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Open Play",
+      "minute": 94,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Long Range",
+      "minute": 96,
+      "player_id": "3",
+      "team_type": "Away"
+    }
+  ],
+  "injuries": {
+    "home": null,
+    "away": null
+  },
+  "stats": {
+    "home_team_stats": {
+      "team_type": "Home",
+      "shots": 6,
+      "goals": 4
+    },
+    "away_team_stats": {
+      "team_type": "Away",
+      "shots": 5,
+      "goals": 5
+    }
+  }
+}

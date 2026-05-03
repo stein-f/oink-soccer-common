@@ -1,0 +1,97 @@
+{
+  "input": {
+    "seed": 12345,
+    "home_formation": "The Diamond",
+    "away_formation": "The Diamond",
+    "home_tag": "strong",
+    "away_tag": "weak"
+  },
+  "events": [
+    {
+      "type": "Miss",
+      "chance_type": "Long Range",
+      "minute": 15,
+      "player_id": "4",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Corner",
+      "minute": 28,
+      "player_id": "10",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Cross",
+      "minute": 32,
+      "player_id": "10",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Open Play",
+      "minute": 56,
+      "player_id": "8",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Cross",
+      "minute": 65,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Long Range",
+      "minute": 67,
+      "player_id": "3",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Goalkeeper Shot",
+      "minute": 69,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Cross",
+      "minute": 80,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Open Play",
+      "minute": 87,
+      "player_id": "10",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Long Range",
+      "minute": 87,
+      "player_id": "9",
+      "team_type": "Away"
+    }
+  ],
+  "injuries": {
+    "home": null,
+    "away": null
+  },
+  "stats": {
+    "home_team_stats": {
+      "team_type": "Home",
+      "shots": 5,
+      "goals": 2
+    },
+    "away_team_stats": {
+      "team_type": "Away",
+      "shots": 5,
+      "goals": 2
+    }
+  }
+}

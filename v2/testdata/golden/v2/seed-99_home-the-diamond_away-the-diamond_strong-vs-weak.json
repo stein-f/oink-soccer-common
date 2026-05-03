@@ -1,0 +1,111 @@
+{
+  "input": {
+    "seed": 99,
+    "home_formation": "The Diamond",
+    "away_formation": "The Diamond",
+    "home_tag": "strong",
+    "away_tag": "weak"
+  },
+  "events": [
+    {
+      "type": "Goal",
+      "chance_type": "Open Play",
+      "minute": 1,
+      "player_id": "3",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Cross",
+      "minute": 11,
+      "player_id": "9",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Open Play",
+      "minute": 18,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Penalty",
+      "minute": 25,
+      "player_id": "10",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Open Play",
+      "minute": 25,
+      "player_id": "3",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Cross",
+      "minute": 41,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Free Kick",
+      "minute": 46,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Cross",
+      "minute": 46,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "chance_type": "Goalkeeper Shot",
+      "minute": 50,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "chance_type": "Open Play",
+      "minute": 84,
+      "player_id": "5",
+      "team_type": "Home"
+    }
+  ],
+  "injuries": {
+    "home": [
+      {
+        "player_id": "1",
+        "severity": "Low Severity",
+        "name": "Selfie Slip",
+        "duration_days": 1
+      }
+    ],
+    "away": [
+      {
+        "player_id": "6",
+        "severity": "Mid Severity",
+        "name": "Overenthusiastic Headbutt",
+        "duration_days": 2
+      }
+    ]
+  },
+  "stats": {
+    "home_team_stats": {
+      "team_type": "Home",
+      "shots": 8,
+      "goals": 6
+    },
+    "away_team_stats": {
+      "team_type": "Away",
+      "shots": 2,
+      "goals": 1
+    }
+  }
+}

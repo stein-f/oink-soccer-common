@@ -1,0 +1,77 @@
+{
+  "input": {
+    "seed": 42,
+    "home_formation": "The Diamond",
+    "away_formation": "The Diamond",
+    "home_players_tag": "strong",
+    "away_players_tag": "strong"
+  },
+  "events": [
+    {
+      "type": "Goal",
+      "minute": 4,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 18,
+      "player_id": "4",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 20,
+      "player_id": "2",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 27,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 27,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 29,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 55,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Goal",
+      "minute": 61,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 78,
+      "player_id": "5",
+      "team_type": "Home"
+    }
+  ],
+  "injuries": {
+    "home": null,
+    "away": [
+      {
+        "player_id": "5",
+        "severity": "High Severity",
+        "name": "Ballistic Banana Slip",
+        "min_days": 3,
+        "max_days": 5
+      }
+    ]
+  }
+}

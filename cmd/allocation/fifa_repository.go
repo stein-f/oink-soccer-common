@@ -54,6 +54,23 @@ type Record struct {
 	Mentality           int    `csv:"mentality_composure"`
 	MentalityAggression int    `csv:"mentality_aggression"`
 	Overall             int    `csv:"overall"`
+
+	// Specialist columns — feed v2's per-chance attributes (Heading, Composure,
+	// Technique, Finishing, Tackling). Each is consumed by ToDomain and lost
+	// here for v1 (which ignores the resulting fields on PlayerAttributes).
+	AttackingFinishing       int `csv:"attacking_finishing"`
+	AttackingHeadingAccuracy int `csv:"attacking_heading_accuracy"`
+	AttackingCrossing        int `csv:"attacking_crossing"`
+	PowerJumping             int `csv:"power_jumping"`
+	PowerStamina             int `csv:"power_stamina"`
+	PowerLongShots           int `csv:"power_long_shots"`
+	SkillCurve               int `csv:"skill_curve"`
+	SkillFKAccuracy          int `csv:"skill_fk_accuracy"`
+	MovementAcceleration     int `csv:"movement_acceleration"`
+	MovementSprintSpeed      int `csv:"movement_sprint_speed"`
+	DefendingStandingTackle  int `csv:"defending_standing_tackle"`
+	DefendingSlidingTackle   int `csv:"defending_sliding_tackle"`
+	MentalityInterceptions   int `csv:"mentality_interceptions"`
 }
 
 type FifaPlayer struct {
@@ -91,6 +108,18 @@ func (r *Record) ToDomain(randSource *rand.Rand) FifaPlayer {
 		Tag:              tags,
 		BasedOnPlayer:    r.ShortName,
 		BasedOnPlayerURL: r.PlayerURL,
+
+		// v2 specialist attributes. Stored on the JSON output so v2's engine
+		// can resolve corners by Heading, penalties by Composure, etc. v1's
+		// engine sees these as inert.
+		Pace:      r.Pace,
+		Recovery:  averagePositive(r.PowerStamina, r.MentalityInterceptions),
+		WorkRate:  r.PowerStamina,
+		Finishing: r.AttackingFinishing,
+		Heading:   averagePositive(r.AttackingHeadingAccuracy, r.PowerJumping),
+		Technique: averagePositive(r.SkillCurve, r.SkillFKAccuracy, r.PowerLongShots),
+		Composure: r.Mentality, // mentality_composure
+		Tackling:  averagePositive(r.DefendingStandingTackle, r.DefendingSlidingTackle, r.MentalityInterceptions),
 	}
 	overallRating := attributes.GetOverallRating()
 	attributes.OverallRating = overallRating
@@ -167,6 +196,24 @@ func normalizePace(pace int, overall int) int {
 		return overall
 	}
 	return pace
+}
+
+// averagePositive averages the supplied values, ignoring zeros (FIFA leaves
+// many specialist columns at 0 for players outside the relevant role — e.g.
+// goalkeepers have no `attacking_heading_accuracy`). Returns 0 if every input
+// is 0, which lets the v2 Effective* accessors fall back to their composite.
+func averagePositive(values ...int) int {
+	var sum, n int
+	for _, v := range values {
+		if v > 0 {
+			sum += v
+			n++
+		}
+	}
+	if n == 0 {
+		return 0
+	}
+	return sum / n
 }
 
 func getPosition(position string) soccer.PlayerPosition {

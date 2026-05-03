@@ -1,0 +1,83 @@
+{
+  "input": {
+    "seed": 42,
+    "home_formation": "The Y",
+    "away_formation": "The Pyramid",
+    "home_players_tag": "strong",
+    "away_players_tag": "strong"
+  },
+  "events": [
+    {
+      "type": "Miss",
+      "minute": 3,
+      "player_id": "4",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 23,
+      "player_id": "2",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 23,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 35,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 61,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 63,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 65,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "minute": 66,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 73,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "minute": 96,
+      "player_id": "5",
+      "team_type": "Away"
+    }
+  ],
+  "injuries": {
+    "home": [
+      {
+        "player_id": "4",
+        "severity": "High Severity",
+        "name": "Ballistic Banana Slip",
+        "min_days": 3,
+        "max_days": 5
+      }
+    ],
+    "away": null
+  }
+}

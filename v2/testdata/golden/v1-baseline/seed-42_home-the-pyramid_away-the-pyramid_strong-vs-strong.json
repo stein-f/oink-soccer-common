@@ -1,0 +1,27 @@
+{
+  "input": {
+    "seed": 42,
+    "home_formation": "The Pyramid",
+    "away_formation": "The Pyramid",
+    "home_players_tag": "strong",
+    "away_players_tag": "strong"
+  },
+  "events": [
+    {
+      "type": "Miss",
+      "minute": 13,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 59,
+      "player_id": "4",
+      "team_type": "Home"
+    }
+  ],
+  "injuries": {
+    "home": null,
+    "away": null
+  }
+}

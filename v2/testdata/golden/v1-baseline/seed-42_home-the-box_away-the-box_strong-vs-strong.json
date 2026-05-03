@@ -1,0 +1,77 @@
+{
+  "input": {
+    "seed": 42,
+    "home_formation": "The Box",
+    "away_formation": "The Box",
+    "home_players_tag": "strong",
+    "away_players_tag": "strong"
+  },
+  "events": [
+    {
+      "type": "Miss",
+      "minute": 4,
+      "player_id": "2",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 18,
+      "player_id": "2",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 20,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 27,
+      "player_id": "5",
+      "team_type": "Away"
+    },
+    {
+      "type": "Miss",
+      "minute": 27,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 29,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Goal",
+      "minute": 55,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 61,
+      "player_id": "5",
+      "team_type": "Home"
+    },
+    {
+      "type": "Miss",
+      "minute": 78,
+      "player_id": "2",
+      "team_type": "Home"
+    }
+  ],
+  "injuries": {
+    "home": null,
+    "away": [
+      {
+        "player_id": "5",
+        "severity": "High Severity",
+        "name": "Ballistic Banana Slip",
+        "min_days": 3,
+        "max_days": 5
+      }
+    ]
+  }
+}
