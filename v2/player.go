@@ -4,18 +4,15 @@ import "slices"
 
 // PlayerAttributes is the canonical bundle of ratings for a player.
 //
-// v1 had a single SpeedRating field that the engine folded into all three
-// of control, attack, and defense — silently triple-counting it. v2 splits
-// that into three orthogonal physical ratings:
+// SpeedRating is the single physical rating used by both attacking and
+// defensive actions. Earlier v2 also exposed Pace and Recovery as separate
+// fields for attack/defense; those were consolidated back into SpeedRating
+// to keep the attribute model simple — the game leans arcade-style and the
+// extra granularity created clutter without enabling new tactic mechanics.
 //
-//   - Pace      — used by attacking actions
-//   - Recovery  — used by defensive actions
-//   - WorkRate  — used by midfield / control actions
-//
-// All three are optional. When a value is zero (e.g. legacy data not yet
-// migrated), the EffectivePace / EffectiveRecovery / EffectiveWorkRate
-// accessors fall back to SpeedRating so existing rosters keep behaving the
-// same as before. New code should populate the explicit fields.
+// WorkRate remains separate: it drives midfield / control actions (the
+// Press tactic shifts its weight). When zero, EffectiveWorkRate falls back
+// to SpeedRating so legacy rosters keep behaving as before.
 type PlayerAttributes struct {
 	GoalkeeperRating int              `json:"goalkeeper_rating"`
 	DefenseRating    int              `json:"defense_rating"`
@@ -31,9 +28,9 @@ type PlayerAttributes struct {
 	BasedOnPlayer    string           `json:"based_on_player"`
 	BasedOnPlayerURL string           `json:"based_on_player_url"`
 
-	// New in v2 — optional, fall back to SpeedRating when zero.
-	Pace     int `json:"pace,omitempty"`
-	Recovery int `json:"recovery,omitempty"`
+	// WorkRate is the only optional physical attribute kept separate from
+	// SpeedRating. Drives midfield / control scoring under the Press tactic.
+	// Falls back to SpeedRating when zero.
 	WorkRate int `json:"work_rate,omitempty"`
 
 	// Per-chance-type attributes — each one specialises the player on a kind
@@ -51,22 +48,6 @@ type PlayerAttributes struct {
 	Technique int `json:"technique,omitempty"`
 	Composure int `json:"composure,omitempty"`
 	Tackling  int `json:"tackling,omitempty"`
-}
-
-// EffectivePace returns Pace if set, otherwise SpeedRating.
-func (p PlayerAttributes) EffectivePace() int {
-	if p.Pace > 0 {
-		return p.Pace
-	}
-	return p.SpeedRating
-}
-
-// EffectiveRecovery returns Recovery if set, otherwise SpeedRating.
-func (p PlayerAttributes) EffectiveRecovery() int {
-	if p.Recovery > 0 {
-		return p.Recovery
-	}
-	return p.SpeedRating
 }
 
 // EffectiveWorkRate returns WorkRate if set, otherwise SpeedRating.

@@ -60,9 +60,7 @@ type PlayerAttributes struct {
     BasedOnPlayer     string
     BasedOnPlayerURL  string
 
-    // New in v2 — optional. Backfill from SpeedRating when zero.
-    Pace     int
-    Recovery int
+    // Optional. Backfill from SpeedRating when zero.
     WorkRate int
 }
 ```
@@ -133,7 +131,7 @@ type Tactics struct {
     Press         PressLevel    // "" | low | medium | high
     Tempo         TempoLevel    // "" | slow | normal | fast
     LineHeight    LineHeight    // "" | deep | normal | high
-    SetPieceTaker string        // PlayerID
+    SetPieceTaker string        // PlayerID — takes FK + Penalty directly; delivers Corners (Technique scales conversion, finisher still picked by Heading)
 }
 
 type PlayerRole string  // "" | captain | target_man | playmaker | ball_winner

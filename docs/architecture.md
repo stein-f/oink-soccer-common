@@ -73,17 +73,20 @@ Every randomness draw uses the supplied `*rand.Rand`. There are no clocks, no gl
 
 ## Attribute model
 
-v1 folded `SpeedRating` into all three of control, attack, and defense — silently triple-counting it. v2 splits the physical dimension into three orthogonal attributes, then layers a set of optional specialist attributes on top.
+> Per-attribute reference with every formula and tactic interaction: [attributes.md](attributes.md). The section below is the high-level rationale.
 
-### Physicals (replace `SpeedRating`)
+v1 folded `SpeedRating` into all three of control, attack, and defense — silently triple-counting it. v2 originally split the physical dimension into three orthogonal attributes (Pace / Recovery / WorkRate); Pace and Recovery were later consolidated back into a single `SpeedRating` for simpler UX, leaving `WorkRate` as the only separate physical (it drives midfield control under the Press tactic).
+
+### Physicals
 
 ```
-control_default  = (controlRating * 4 + workRate)  / 5
-defense_outfield = (defenseRating * 5 + tackling*2 + recovery) / 8
-defense_keeper   = (goalkeeperRating * 5 + recovery) / 6
+control_default  = (controlRating * 4 + workRate)    / 5
+defense_outfield = (defenseRating * 5 + tackling*2 + speedRating) / 8
+defense_keeper   = (goalkeeperRating * 5 + speedRating) / 6
+attack_default   = (attackRating * 3 + speedRating)  / 4
 ```
 
-`Pace`, `Recovery`, `WorkRate` are optional new fields on `PlayerAttributes`. When zero, `EffectivePace()` / `EffectiveRecovery()` / `EffectiveWorkRate()` fall back to `SpeedRating` so legacy rosters work unchanged.
+`WorkRate` is the only optional physical field on `PlayerAttributes`. When zero, `EffectiveWorkRate()` falls back to `SpeedRating` so legacy rosters work unchanged.
 
 ### Specialist attributes (chance-type-specific)
 
@@ -91,13 +94,13 @@ Each chance type's attacker score uses a dedicated formula that reads a speciali
 
 | Chance type | Attacker score formula |
 |-------------|------------------------|
-| OpenPlay | `(atk*2 + finishing + pace) / 4` |
-| Cross | `(atk*2 + heading*2 + pace) / 5` |
+| OpenPlay | `(atk*2 + finishing + speed) / 4` |
+| Cross | `(atk*2 + heading*2 + speed) / 5` |
 | Corner | `(atk*2 + heading*3) / 5` |
 | LongRange | `(atk*2 + technique*3) / 5` |
 | FreeKick | `(atk + technique*3) / 4` |
 | Penalty | `(atk*2 + composure*3) / 5` |
-| GoalkeeperShot | `(atk + finishing + pace*3) / 5` |
+| GoalkeeperShot | `(atk + finishing + speed*3) / 5` |
 
 Backfills: `Heading→AttackRating`, `Finishing→AttackRating`, `Technique→ControlRating`, `Composure→ControlRating`, `Tackling→DefenseRating`.
 
@@ -114,9 +117,9 @@ The `default` formulas above apply when `Tactics` is the zero value. Press shift
 | `Press: low` | `(ctrl*5 + workRate) / 6` | (unaffected) |
 | `Press: medium / none` | `(ctrl*4 + workRate) / 5` (legacy) | (unaffected) |
 | `Press: high` | `(ctrl*3 + workRate*2) / 5` | (unaffected) |
-| `LineHeight: deep` | (unaffected) | `(def*6 + tackling*2 + recovery*0) / 8` |
-| `LineHeight: normal / none` | (unaffected) | `(def*5 + tackling*2 + recovery) / 8` (legacy) |
-| `LineHeight: high` | (unaffected) | `(def*3 + tackling*2 + recovery*3) / 8` |
+| `LineHeight: deep` | (unaffected) | `(def*6 + tackling*2 + speed*0) / 8` |
+| `LineHeight: normal / none` | (unaffected) | `(def*5 + tackling*2 + speed) / 8` (legacy) |
+| `LineHeight: high` | (unaffected) | `(def*3 + tackling*2 + speed*3) / 8` |
 
 Goalkeeper defense is tactic-invariant.
 
@@ -129,10 +132,10 @@ After the curve, every player score has these modifiers applied:
 
 ### Role bonuses
 
-- **Playmaker** → ×1.10 to that player's control
-- **BallWinner** → ×1.10 to that player's defense
+- **Playmaker** → focal-point weighting in `teamControl` aggregation. Within their position group's mean, the Playmaker contributes with `tuning.PlaymakerControlWeight` (= 2.0) vs everyone else's 1.0. Drags the group mean toward the Playmaker's score — boosts team control if they're the strongest controller, lowers it if they're weak. Not a per-player ×1.10 (a previous implementation, since corrected because it gave even poor players a free lift).
+- **BallWinner** → focal-point weighting in `teamDefense` aggregation, mirror of Playmaker. `tuning.BallWinnerDefenseWeight` (= 2.0) drags the position group's defense mean toward the Ball Winner's score. Same correction as Playmaker; not a per-player ×1.10.
 - **TargetMan** → ×2.0 selection weight on corners + crosses (selection only, not score)
-- **Captain** → ×1.03 team-wide on control + defense
+- **Captain** → quality-scaled. Quality `q = (primarySkill + EffectiveComposure) / 2` (primarySkill = `GoalkeeperRating` for keepers, `ControlRating` otherwise). Two small effects, both via `tuning`: (1) `CaptainTeamBoost(q)` is the team-wide multiplier on control + defense, ≈ 1 + (q-60)/100 × 0.06 (range ≈ [0.964, 1.024]); (2) `CaptainSelfBoost(q)` is the per-action multiplier on the captain's own scores, applied in `adjustForState`. Replaced an earlier flat ×1.03 that was identity-agnostic.
 
 ## Formation profiles
 
@@ -155,13 +158,13 @@ Every event carries a `ChanceType`. v1 emitted these but never used them; v2 mak
 
 | Type | AttackBoost | DefenseScale | Position bias | Score formula |
 |------|-------------|--------------|---------------|---------------|
-| OpenPlay | 1.00 | 1.00 | default (ATK 70 / MID 20 / DEF 10 / GK 2) | `(atk*2 + finishing + pace) / 4` |
-| Cross | 0.95 | 1.05 | ATK heavy | `(atk*2 + heading*2 + pace) / 5` |
+| OpenPlay | 1.00 | 1.00 | default (ATK 70 / MID 20 / DEF 10 / GK 2) | `(atk*2 + finishing + speed) / 4` |
+| Cross | 0.95 | 1.05 | ATK heavy | `(atk*2 + heading*2 + speed) / 5` |
 | Corner | 0.90 | 1.10 | ATK + MID + some DEF (defenders go up) | `(atk*2 + heading*3) / 5` |
 | LongRange | 0.70 | 1.20 | MID heavy | `(atk*2 + technique*3) / 5` |
 | FreeKick | 0.85 | 1.10 | MID + ATK split | `(atk + technique*3) / 4` |
 | Penalty | 1.50 | 0.50 | ATK heavy | `(atk*2 + composure*3) / 5` |
-| GoalkeeperShot | 1.20 | 0.70 | ATK only (1-on-1 / breakaway) | `(atk + finishing + pace*3) / 5` |
+| GoalkeeperShot | 1.20 | 0.70 | ATK only (1-on-1 / breakaway) | `(atk + finishing + speed*3) / 5` |
 
 `pickChanceType` bans the immediately-previous type so commentary doesn't repeat ("CORNER. CORNER. CORNER.").
 
@@ -173,8 +176,8 @@ Each lever shifts a specific multiplier. Defaults (zero value) mean "no effect".
 |-------|-------------------|----------------------------|
 | `Press: low/medium/high` | Opponent control × 1.02 / 0.98 / 0.94. Own injury risk × 0.95 / 1.0 / 1.10. **High press also triggers in-match fatigue** — own attack quality × 0.90 in 60-74min, × 0.82 in 75+min. Without this, the only cost of high press would be the next-game injury bump (mitigatable with recovery items), making it a free lunch. | Shifts control formula's skill ↔ workrate balance (see Attribute model). |
 | `Tempo: slow/normal/fast` | Total chances × 0.92 / 1.0 / 1.10. Own chance quality × 1.05 / 1.0 / 0.96 (faster = rushed). | (no attribute shift) |
-| `LineHeight: deep/normal/high` | Opponent control × 1.03 / 1.0 / 0.97 (deep cedes the midfield; high compresses the pitch). Own defense × 1.05 / 1.0 / 0.96 (deep is compact; high is brittle to balls in behind). | Shifts outfield defense formula's positioning ↔ recovery balance. |
-| `SetPieceTaker: PlayerID` | Named player receives every Free Kick / Corner / Penalty. | (no attribute shift) |
+| `LineHeight: deep/normal/high` | Opponent control × 1.03 / 1.0 / 0.97 (deep cedes the midfield; high compresses the pitch). Own defense × 1.05 / 1.0 / 0.96 (deep is compact; high is brittle to balls in behind). | Shifts outfield defense formula's positioning ↔ speed balance. |
+| `SetPieceTaker: PlayerID` | Named player takes every Free Kick + Penalty (taker = scorer). On Corners the named player *delivers* — they're excluded from the finisher pool, and their `Technique` scales the chance's AttackBoost via `tuning.CornerDeliveryFactor` (≈ ×0.84 at technique=20, ×1.16 at technique=100). The corner finisher is still picked normally by Heading + position. | (no attribute shift) |
 
 ## Determinism contract
 

@@ -132,8 +132,6 @@ func uniformTeam(id string, rating int, formation soccer.FormationType) soccer.G
 				ControlRating:    rating,
 				AttackRating:     rating,
 				SpeedRating:      rating,
-				Pace:             rating,
-				Recovery:         rating,
 				WorkRate:         rating,
 				OverallRating:    rating,
 				PrimaryPosition:  pos,

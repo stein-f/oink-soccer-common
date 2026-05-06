@@ -33,7 +33,7 @@ type chanceTypeProfile struct {
 // defaultAttackScore is v1's (skill*3 + pace*1) / 4 formula. Used for chance
 // types that don't declare their own AttackScore.
 func defaultAttackScore(p PlayerAttributes) float64 {
-	return weightedScore(p.AttackRating*3+p.EffectivePace()*1, 4)
+	return weightedScore(p.AttackRating*3+p.SpeedRating*1, 4)
 }
 
 // weightedScore divides a numerator by a divisor and rounds — mirrors the
@@ -79,7 +79,7 @@ var chanceTypeProfiles = map[ChanceType]chanceTypeProfile{
 		DefenseScale: 1.00,
 		AttackScore: func(p PlayerAttributes) float64 {
 			// (atk*2 + finishing + pace) / 4 — well-rounded forward play.
-			return weightedScore(p.AttackRating*2+p.EffectiveFinishing()+p.EffectivePace(), 4)
+			return weightedScore(p.AttackRating*2+p.EffectiveFinishing()+p.SpeedRating, 4)
 		},
 	},
 	ChanceTypeCross: {
@@ -93,7 +93,7 @@ var chanceTypeProfiles = map[ChanceType]chanceTypeProfile{
 		DefenseScale: 1.05,
 		AttackScore: func(p PlayerAttributes) float64 {
 			// (atk*2 + heading*2 + pace) / 5 — striker arriving on a delivery.
-			return weightedScore(p.AttackRating*2+p.EffectiveHeading()*2+p.EffectivePace(), 5)
+			return weightedScore(p.AttackRating*2+p.EffectiveHeading()*2+p.SpeedRating, 5)
 		},
 	},
 	ChanceTypeCorner: {
@@ -162,7 +162,7 @@ var chanceTypeProfiles = map[ChanceType]chanceTypeProfile{
 		DefenseScale: 0.70,
 		AttackScore: func(p PlayerAttributes) float64 {
 			// (atk + finishing + pace*3) / 5 — speed wins the chase, then convert.
-			return weightedScore(p.AttackRating+p.EffectiveFinishing()+p.EffectivePace()*3, 5)
+			return weightedScore(p.AttackRating+p.EffectiveFinishing()+p.SpeedRating*3, 5)
 		},
 	},
 }
@@ -216,7 +216,11 @@ func pickChanceType(rand *rand.Rand, previous ChanceType) ChanceType {
 // (attackers more likely than mids more likely than defenders) to dominate,
 // but a 95-rated attacker should be more likely to get the chance than a
 // 70-rated one in the same position.
-func pickAttacker(rand *rand.Rand, lineup GameLineup, ct ChanceType) SelectedPlayer {
+//
+// excludeID, if non-empty, removes the player with that ID from the pool.
+// Used for corners, where the named SetPieceTaker is delivering the ball and
+// can't also be the one heading it home.
+func pickAttacker(rand *rand.Rand, lineup GameLineup, ct ChanceType, excludeID string) SelectedPlayer {
 	posWeights := defaultPositionPickWeights
 	if profile, ok := chanceTypeProfiles[ct]; ok && profile.PositionWeights != nil {
 		posWeights = profile.PositionWeights
@@ -230,6 +234,9 @@ func pickAttacker(rand *rand.Rand, lineup GameLineup, ct ChanceType) SelectedPla
 	weights := make([]float64, len(players))
 	var total float64
 	for i, p := range players {
+		if excludeID != "" && p.ID == excludeID {
+			continue
+		}
 		posW := float64(posWeights[p.SelectedPosition])
 		if posW == 0 {
 			continue
@@ -247,6 +254,12 @@ func pickAttacker(rand *rand.Rand, lineup GameLineup, ct ChanceType) SelectedPla
 		total += w
 	}
 	if total == 0 {
+		// Fallback: pick any player not on the exclude list.
+		for _, p := range players {
+			if excludeID == "" || p.ID != excludeID {
+				return p
+			}
+		}
 		return players[rand.Intn(len(players))]
 	}
 	pick := rand.Float64() * total

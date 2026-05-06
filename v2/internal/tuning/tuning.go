@@ -232,6 +232,108 @@ var AttackerPickWeights = map[string]uint{
 	"Attack":     70,
 }
 
+// --- Role focal-point weighting ---------------------------------------------
+
+// PlaymakerControlWeight / BallWinnerDefenseWeight set the relative weight a
+// Playmaker (in teamControl) or Ball Winner (in teamDefense) carries within
+// their position group when computing the team's score. Other players in
+// the same group carry weight 1.0.
+//
+// Mechanics: aggregation is mean-within-position, then position-weighted.
+// Bumping the role-holder's intra-group weight to 2.0 drags the group's
+// mean toward their score. Net swing for a 3-player position group: ≈
+// ±3.3 points on the group mean depending on whether the role-holder rates
+// above or below the position average.
+//
+// This replaced earlier flat per-player ×1.10 boosts, which gave even
+// poorly-rated role-holders a free lift. The weighting model makes both
+// roles a real focal-point choice — tag your best and gain, tag your
+// worst and lose.
+const (
+	PlaymakerControlWeight  = 2.0
+	BallWinnerDefenseWeight = 2.0
+)
+
+// --- Captain quality scaling ------------------------------------------------
+
+// A captain's quality drives two effects, both small:
+//
+//  1. CaptainTeamBoost — multiplier applied to the team's control + defense.
+//     A quality captain lifts the team's average performance; a poor
+//     captain (low game-reading + low composure) drags it down.
+//  2. CaptainSelfBoost — multiplier applied to the captain's own per-action
+//     scores. Wearing the armband motivates a quality leader to play above
+//     themselves; a poor captain feels the burden and underperforms.
+//
+// Both effects scale around `CaptainNeutralQuality` (q=60 ⇒ multiplier 1.0)
+// using the same gain so the magnitudes are symmetric and easy to reason
+// about. Range for q in [0, 100]: roughly [0.964, 1.024] — small.
+//
+// This replaced an earlier flat ×1.03 team-wide boost that was identity-
+// agnostic (any player tagged gave the same lift). The quality-scaled
+// model makes captain identity matter without dominating the balance.
+const (
+	CaptainNeutralQuality = 60
+	CaptainTeamBoostGain  = 0.06
+	CaptainSelfBoostGain  = 0.06
+)
+
+// CaptainTeamBoost returns the team-wide multiplier (control + defense)
+// driven by a captain of the given quality. quality is on a 0-100 scale.
+func CaptainTeamBoost(quality int) float64 {
+	return 1.0 + float64(quality-CaptainNeutralQuality)/100.0*CaptainTeamBoostGain
+}
+
+// CaptainSelfBoost returns the per-action multiplier on the captain's own
+// score. Same shape as CaptainTeamBoost — a poor captain is a real drag on
+// their own play, a strong captain plays above themselves.
+func CaptainSelfBoost(quality int) float64 {
+	return 1.0 + float64(quality-CaptainNeutralQuality)/100.0*CaptainSelfBoostGain
+}
+
+// --- Corner delivery quality (named SetPieceTaker) --------------------------
+
+// Corner finisher selection is independent of who delivers the corner — the
+// finisher is picked by Heading via the standard chance-type selection (see
+// chance.go). What a named SetPieceTaker contributes on a corner is *delivery
+// quality*: a great taker produces a more dangerous ball into the box,
+// raising the chance of any header converting; a poor taker reduces it.
+//
+// CornerDeliveryFactor scales the corner's effective AttackBoost using the
+// taker's EffectiveTechnique. Reference points:
+//
+//	technique  factor
+//	    100    1.16
+//	     85    1.10
+//	     60    1.00 (neutral baseline — average pro)
+//	     40    0.92
+//	     20    0.84
+//
+// Neutral=60 means a backfilled midfielder (no explicit Technique → falls back
+// to ControlRating, typically 70-85) still delivers above-neutral, while a
+// deliberately-named poor taker is a real penalty (no free lunch). Values
+// outside [0.80, 1.20] are clamped to bound the swing.
+const (
+	CornerDeliveryNeutralTechnique = 60
+	CornerDeliveryGain             = 0.40
+	CornerDeliveryMinFactor        = 0.80
+	CornerDeliveryMaxFactor        = 1.20
+)
+
+// CornerDeliveryFactor returns the multiplier applied to a corner's AttackBoost
+// when a SetPieceTaker is named. technique should be the taker's
+// EffectiveTechnique (Technique attribute, falling back to ControlRating).
+func CornerDeliveryFactor(technique int) float64 {
+	f := 1.0 + float64(technique-CornerDeliveryNeutralTechnique)/100.0*CornerDeliveryGain
+	if f < CornerDeliveryMinFactor {
+		return CornerDeliveryMinFactor
+	}
+	if f > CornerDeliveryMaxFactor {
+		return CornerDeliveryMaxFactor
+	}
+	return f
+}
+
 // --- Match-tempo (number of chances) ----------------------------------------
 
 // ChanceRange describes the inclusive [Min, Max] number of chances a match

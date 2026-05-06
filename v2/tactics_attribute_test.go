@@ -8,9 +8,9 @@ import (
 
 // tactics_attribute_test.go pins the invariant that team Tactics changes
 // which player attributes are most valuable on the pitch. Press shifts
-// control toward work rate; line height shifts defense toward recovery.
-// This is what makes a high-press Y-formation lineup *want* different
-// midfielders than a possession-style Diamond.
+// control toward work rate; line height shifts defense toward speed (the
+// "recovery" axis). This is what makes a high-press Y-formation lineup
+// *want* different midfielders than a possession-style Diamond.
 
 // A high-press team values a high-WorkRate midfielder more than a passive
 // team does. Same player, same rating, two different tactical contexts.
@@ -42,20 +42,20 @@ func TestRawControl_PressShiftsValueOfWorkRate(t *testing.T) {
 }
 
 // A high defensive line punishes a positionally-strong but slow defender
-// (low Recovery) and rewards a fast one. Deep line is the opposite — a
-// recovery-poor but well-positioned defender holds up fine.
-func TestRawDefense_LineHeightShiftsValueOfRecovery(t *testing.T) {
+// (low SpeedRating) and rewards a fast one. Deep line is the opposite — a
+// slow but well-positioned defender holds up fine.
+func TestRawDefense_LineHeightShiftsValueOfSpeed(t *testing.T) {
 	libero := PlayerAttributes{
 		DefenseRating:   92,
 		Tackling:        80,
-		Recovery:        55, // slow but reads the game
+		SpeedRating:     55, // slow but reads the game
 		PrimaryPosition: PlayerPositionDefense,
 		Positions:       []PlayerPosition{PlayerPositionDefense},
 	}
 	chaser := PlayerAttributes{
 		DefenseRating:   75,
 		Tackling:        80,
-		Recovery:        95, // fast, average reader
+		SpeedRating:     95, // fast, average reader
 		PrimaryPosition: PlayerPositionDefense,
 		Positions:       []PlayerPosition{PlayerPositionDefense},
 	}
@@ -67,12 +67,12 @@ func TestRawDefense_LineHeightShiftsValueOfRecovery(t *testing.T) {
 	assert.Greater(t, liberoDeep, chaserDeep,
 		"deep line should favour the positionally-strong libero")
 
-	// High line: chaser overtakes — recovery becomes the load-bearing attribute.
+	// High line: chaser overtakes — speed becomes the load-bearing attribute.
 	high := Tactics{LineHeight: LineHeightHigh}
 	liberoHigh := rawDefense(libero, high)
 	chaserHigh := rawDefense(chaser, high)
 	assert.Greater(t, chaserHigh, liberoHigh,
-		"high line should favour the fast chaser — recovery matters more than positioning")
+		"high line should favour the fast chaser — speed matters more than positioning")
 }
 
 // Goalkeepers shouldn't be affected by line height — they're not the ones
@@ -81,7 +81,7 @@ func TestRawDefense_LineHeightShiftsValueOfRecovery(t *testing.T) {
 func TestRawDefense_GoalkeeperIgnoresLineHeight(t *testing.T) {
 	gk := PlayerAttributes{
 		GoalkeeperRating: 88,
-		Recovery:         70,
+		SpeedRating:      70,
 		PrimaryPosition:  PlayerPositionGoalkeeper,
 		Positions:        []PlayerPosition{PlayerPositionGoalkeeper},
 	}
@@ -101,7 +101,7 @@ func TestRawScores_NeutralTacticsMatchLegacyWeights(t *testing.T) {
 	def := PlayerAttributes{
 		DefenseRating:   80,
 		Tackling:        80,
-		Recovery:        70,
+		SpeedRating:     70,
 		PrimaryPosition: PlayerPositionDefense,
 		Positions:       []PlayerPosition{PlayerPositionDefense},
 	}

@@ -83,7 +83,8 @@ func simulateMatch(r *rand.Rand, home, away GameLineup) ([]GameEvent, Injuries) 
 		prevType = ct
 
 		ap := pickAttackerWithTactics(r, attackingLineup, ct, attackingTactics)
-		ev := resolveChance(r, ap, attacker, ct, attackingProfile, attackingTactics, defendingDefense, minutes[i])
+		deliveryFactor := cornerDeliveryFactor(attackingLineup, ct, attackingTactics)
+		ev := resolveChance(r, ap, attacker, ct, attackingProfile, attackingTactics, defendingDefense, deliveryFactor, minutes[i])
 		events = append(events, ev)
 	}
 
@@ -194,13 +195,16 @@ func pickAttackingTeam(r *rand.Rand, homeWeight, awayWeight float64) TeamType {
 }
 
 // resolveChance rolls the goal/miss outcome and assembles the GameEvent.
-// Tactics affect chance quality (faster tempo ⇒ rushed shots).
-func resolveChance(r *rand.Rand, attacker SelectedPlayer, team TeamType, ct ChanceType, attackingProfile FormationProfile, attackingTactics Tactics, defendingDefense float64, minute int) GameEvent {
+// Tactics affect chance quality (faster tempo ⇒ rushed shots). deliveryFactor
+// scales the chance's effective attack — currently used by corners to bake in
+// the named SetPieceTaker's delivery quality (1.0 = neutral / no taker).
+func resolveChance(r *rand.Rand, attacker SelectedPlayer, team TeamType, ct ChanceType, attackingProfile FormationProfile, attackingTactics Tactics, defendingDefense, deliveryFactor float64, minute int) GameEvent {
 	atk := playerAttackForChance(attacker, ct)
 	atk *= attackingProfile.ChanceCreation * attackingProfile.ChanceQuality
 	atk *= chanceTypeAttackBoost(ct)
 	atk *= tempoQualityFactor(attackingTactics.Tempo)
 	atk *= pressFatigueFactor(attackingTactics.Press, minute)
+	atk *= deliveryFactor
 
 	def := defendingDefense * chanceTypeDefenseScale(ct)
 
@@ -228,8 +232,15 @@ func resolveChance(r *rand.Rand, attacker SelectedPlayer, team TeamType, ct Chan
 }
 
 // pickAttackerWithTactics picks an attacker honoring tactical overrides:
-// a SetPieceTaker is preferred for free kicks / corners / penalties, and
-// a TargetMan gets a selection-weight bonus on corners + crosses.
+//
+//   - For *direct* set pieces (free kicks + penalties), the named SetPieceTaker
+//     IS the attacker — they take the shot themselves.
+//   - For corners, the SetPieceTaker delivers but doesn't head their own ball,
+//     so they're excluded from the attacker pool. The corner finisher is
+//     picked normally (Heading-driven, see chance.go). The taker's Technique
+//     instead boosts the chance via cornerDeliveryFactor in resolveChance.
+//   - TargetMan gets a selection-weight bonus on corners + crosses (handled
+//     inside pickAttacker).
 func pickAttackerWithTactics(r *rand.Rand, lineup GameLineup, ct ChanceType, tactics Tactics) SelectedPlayer {
 	if tactics.SetPieceTaker != "" && isSetPieceChance(ct) {
 		for _, p := range lineup.Players {
@@ -238,12 +249,21 @@ func pickAttackerWithTactics(r *rand.Rand, lineup GameLineup, ct ChanceType, tac
 			}
 		}
 	}
-	return pickAttacker(r, lineup, ct)
+	excludeID := ""
+	if ct == ChanceTypeCorner {
+		// Corner taker delivers; can't also be the header.
+		excludeID = tactics.SetPieceTaker
+	}
+	return pickAttacker(r, lineup, ct, excludeID)
 }
 
+// isSetPieceChance reports whether the named SetPieceTaker is the *attacker*
+// (the one whose shot is rolled). Corners are excluded — for a corner the
+// taker delivers and a different player heads it home; see
+// pickAttackerWithTactics + cornerDeliveryFactor.
 func isSetPieceChance(ct ChanceType) bool {
 	switch ct {
-	case ChanceTypeFreeKick, ChanceTypeCorner, ChanceTypePenalty:
+	case ChanceTypeFreeKick, ChanceTypePenalty:
 		return true
 	}
 	return false

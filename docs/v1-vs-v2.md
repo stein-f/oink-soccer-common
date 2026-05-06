@@ -44,13 +44,12 @@ You don't need to change any data to use v2. You *can* enrich rosters with the n
 
 **v1**: One `SpeedRating`, folded into all three of control/attack/defense.
 
-**v2**: Three physicals, plus five specialists. Each one matters for a specific situation.
+**v2**: `SpeedRating` is no longer triple-counted (it now only drives attack + outfield defense, not control), plus an optional `WorkRate` for midfield, plus five specialists. Each specialist matters for a specific situation.
 
 | v1 attribute | v2 equivalent | Used for |
 |---|---|---|
-| `SpeedRating` | `Pace` | Open-play attacking + 1-on-1 breakaways |
-| (same) | `Recovery` | Defense (especially high line) |
-| (same) | `WorkRate` | Midfield control (especially high press) |
+| `SpeedRating` | (same) | Attacking sprints + outfield defensive chase |
+| (new) | `WorkRate` | Midfield control (especially high press) |
 | `AttackRating` | (still there) | All shooting |
 | (new) | `Finishing` | Open-play conversion |
 | (new) | `Heading` | Corners + crosses |
@@ -60,13 +59,15 @@ You don't need to change any data to use v2. You *can* enrich rosters with the n
 | (new) | `Tackling` | Outfield dispossession |
 | `GoalkeeperRating` | (unchanged) | Saves only |
 
-**Backward compatibility**: any of the new attributes left at zero falls back to a reasonable composite (e.g. `Heading` falls back to `AttackRating`). Old rosters work as-is — they just behave like every striker is equally good in the air, which is roughly what v1 did anyway.
+**Backward compatibility**: any of the new attributes left at zero falls back to a reasonable composite (e.g. `Heading` falls back to `AttackRating`, `WorkRate` falls back to `SpeedRating`). Old rosters work as-is — they just behave like every striker is equally good in the air, which is roughly what v1 did anyway.
+
+> **Historical note**: an earlier v2 also exposed `Pace` and `Recovery` as separate fields (so the physical dimension was 3-orthogonal: Pace / Recovery / WorkRate). They were consolidated back into `SpeedRating` for a simpler attribute model — the game is arcade-style and the extra granularity created clutter without enabling new tactic mechanics.
 
 ### 2. The shot itself depends on the situation
 
 **v1**: Every chance was scored the same way — `attackRating × something + speedRating × something`.
 
-**v2**: Each chance type runs its own formula. A corner uses `(attack*2 + heading*3)`. A penalty uses `(attack*2 + composure*3)`. A 1-on-1 breakaway uses `(attack + finishing + pace*3)`.
+**v2**: Each chance type runs its own formula. A corner uses `(attack*2 + heading*3)`. A penalty uses `(attack*2 + composure*3)`. A 1-on-1 breakaway uses `(attack + finishing + speed*3)`.
 
 This is why builds matter now. In v1, "best striker" meant "highest `AttackRating` + `SpeedRating`." In v2, your best striker on corners is your aerial specialist; your best on breakaways is your speedster; your best on penalties is your clutch finisher. The engine picks the right player for each chance.
 
@@ -77,9 +78,9 @@ This is why builds matter now. In v1, "best striker" meant "highest `AttackRatin
 **v2**: Four optional levers per team — Press, Tempo, Line Height, Set-Piece Taker — plus four player roles (Captain, Target Man, Playmaker, Ball Winner). Each lever has trade-offs:
 
 - High press disrupts the opponent's build-up, raises your own injury risk, **shifts which midfielders matter** (work-rate over technique), and triggers in-match fatigue (your attack quality drops 10-18% after the 60th minute). The fatigue is what makes press a real choice rather than a free lunch — without it, the only cost would be a next-game injury bump that recovery items can fix.
-- High line compresses the pitch but **shifts which defenders matter** (recovery over positioning).
+- High line compresses the pitch but **shifts which defenders matter** (speed over positioning).
 - Fast tempo creates more chances but each one is slightly worse quality.
-- Naming a set-piece taker means that player takes every free kick, corner, and penalty.
+- Naming a set-piece taker means that player takes every free kick and penalty directly. On corners they *deliver* (their `Technique` boosts conversion of any header) but a different player heads it home — Heading still picks the finisher.
 
 The same lineup can play very differently depending on tactical choices.
 

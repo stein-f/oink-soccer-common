@@ -24,7 +24,7 @@ func buildFixtures() []buildArchetype {
 		return PlayerAttributes{
 			AttackRating:    atk,
 			ControlRating:   ctrl,
-			Pace:            pace,
+			SpeedRating:     pace,
 			PrimaryPosition: PlayerPositionAttack,
 			Positions:       []PlayerPosition{PlayerPositionAttack},
 		}
@@ -104,8 +104,8 @@ func TestRawAttackForChance_ArchetypeBestAndWorst(t *testing.T) {
 // even though their AttackRatings are similar — that's the whole point of the
 // per-chance weights.
 func TestRawAttackForChance_TargetManBeatsSpeedsterOnCorners(t *testing.T) {
-	targetMan := PlayerAttributes{AttackRating: 88, Pace: 55, ControlRating: 78}
-	speedster := PlayerAttributes{AttackRating: 85, Pace: 92, ControlRating: 65}
+	targetMan := PlayerAttributes{AttackRating: 88, SpeedRating: 55, ControlRating: 78}
+	speedster := PlayerAttributes{AttackRating: 85, SpeedRating: 92, ControlRating: 65}
 
 	tmCorner := rawAttackForChance(targetMan, ChanceTypeCorner)
 	spCorner := rawAttackForChance(speedster, ChanceTypeCorner)
@@ -150,8 +150,8 @@ func TestRawAttackForChance_SpecialistAttributesUnlockTopBuilds(t *testing.T) {
 		// Heading backfills to AttackRating and a high-attack generic gets a
 		// free aerial boost. With realistic FIFA-populated rosters (where the
 		// allocation pipeline sets Heading explicitly) this isn't a concern.
-		generic := PlayerAttributes{AttackRating: 88, Pace: 70, ControlRating: 70, Heading: 70}
-		aerial := PlayerAttributes{AttackRating: 80, Pace: 60, ControlRating: 65, Heading: 92}
+		generic := PlayerAttributes{AttackRating: 88, SpeedRating: 70, ControlRating: 70, Heading: 70}
+		aerial := PlayerAttributes{AttackRating: 80, SpeedRating: 60, ControlRating: 65, Heading: 92}
 
 		assert.Greater(t, rawAttackForChance(aerial, ChanceTypeCorner),
 			rawAttackForChance(generic, ChanceTypeCorner),
@@ -159,8 +159,8 @@ func TestRawAttackForChance_SpecialistAttributesUnlockTopBuilds(t *testing.T) {
 	})
 
 	t.Run("clutch finisher beats a generic striker on penalties", func(t *testing.T) {
-		generic := PlayerAttributes{AttackRating: 88, Pace: 70, ControlRating: 70}
-		clutch := PlayerAttributes{AttackRating: 80, Pace: 60, ControlRating: 70, Composure: 95}
+		generic := PlayerAttributes{AttackRating: 88, SpeedRating: 70, ControlRating: 70}
+		clutch := PlayerAttributes{AttackRating: 80, SpeedRating: 60, ControlRating: 70, Composure: 95}
 
 		assert.Greater(t, rawAttackForChance(clutch, ChanceTypePenalty),
 			rawAttackForChance(generic, ChanceTypePenalty),
@@ -168,8 +168,8 @@ func TestRawAttackForChance_SpecialistAttributesUnlockTopBuilds(t *testing.T) {
 	})
 
 	t.Run("free-kick specialist beats a generic striker on free kicks", func(t *testing.T) {
-		generic := PlayerAttributes{AttackRating: 88, Pace: 70, ControlRating: 70}
-		fkSpec := PlayerAttributes{AttackRating: 78, Pace: 65, ControlRating: 75, Technique: 94}
+		generic := PlayerAttributes{AttackRating: 88, SpeedRating: 70, ControlRating: 70}
+		fkSpec := PlayerAttributes{AttackRating: 78, SpeedRating: 65, ControlRating: 75, Technique: 94}
 
 		assert.Greater(t, rawAttackForChance(fkSpec, ChanceTypeFreeKick),
 			rawAttackForChance(generic, ChanceTypeFreeKick),
@@ -179,8 +179,8 @@ func TestRawAttackForChance_SpecialistAttributesUnlockTopBuilds(t *testing.T) {
 	t.Run("poacher beats a generic striker on open play", func(t *testing.T) {
 		// Same backfill caveat as the aerial test — explicit Finishing on the
 		// generic so its high AttackRating doesn't double-count via EffectiveFinishing.
-		generic := PlayerAttributes{AttackRating: 85, Pace: 80, ControlRating: 70, Finishing: 70}
-		poacher := PlayerAttributes{AttackRating: 80, Pace: 75, ControlRating: 65, Finishing: 95}
+		generic := PlayerAttributes{AttackRating: 85, SpeedRating: 80, ControlRating: 70, Finishing: 70}
+		poacher := PlayerAttributes{AttackRating: 80, SpeedRating: 75, ControlRating: 65, Finishing: 95}
 
 		assert.Greater(t, rawAttackForChance(poacher, ChanceTypeOpenPlay),
 			rawAttackForChance(generic, ChanceTypeOpenPlay),
@@ -191,8 +191,8 @@ func TestRawAttackForChance_SpecialistAttributesUnlockTopBuilds(t *testing.T) {
 		// An aerial specialist with otherwise modest attributes shouldn't
 		// out-score a faster, higher-attack striker on a 1-on-1 breakaway —
 		// pace and finishing matter there, not heading.
-		generic := PlayerAttributes{AttackRating: 85, Pace: 92, ControlRating: 70}
-		aerial := PlayerAttributes{AttackRating: 80, Pace: 60, ControlRating: 65, Heading: 95}
+		generic := PlayerAttributes{AttackRating: 85, SpeedRating: 92, ControlRating: 70}
+		aerial := PlayerAttributes{AttackRating: 80, SpeedRating: 60, ControlRating: 65, Heading: 95}
 
 		assert.Greater(t, rawAttackForChance(generic, ChanceTypeGoalKeeperShot),
 			rawAttackForChance(aerial, ChanceTypeGoalKeeperShot),
@@ -208,14 +208,14 @@ func TestRawDefense_TacklingAttributeShapesOutfieldDefense(t *testing.T) {
 	soft := PlayerAttributes{
 		DefenseRating:   90,
 		Tackling:        60, // smart positioning, doesn't tackle
-		Recovery:        85,
+		SpeedRating:     85,
 		PrimaryPosition: PlayerPositionDefense,
 		Positions:       []PlayerPosition{PlayerPositionDefense},
 	}
 	enforcer := PlayerAttributes{
 		DefenseRating:   80,
 		Tackling:        92, // crunching dispossessor
-		Recovery:        85,
+		SpeedRating:     85,
 		PrimaryPosition: PlayerPositionDefense,
 		Positions:       []PlayerPosition{PlayerPositionDefense},
 	}
@@ -224,12 +224,12 @@ func TestRawDefense_TacklingAttributeShapesOutfieldDefense(t *testing.T) {
 		"enforcer (tackling=92) should out-score a higher-DefenseRating, lower-tackling defender")
 }
 
-// Goalkeepers don't use Tackling — saves come from GoalkeeperRating + Recovery.
+// Goalkeepers don't use Tackling — saves come from GoalkeeperRating + Speed.
 // Setting Tackling on a GK must have no effect.
 func TestRawDefense_GoalkeeperIgnoresTackling(t *testing.T) {
 	gk := PlayerAttributes{
 		GoalkeeperRating: 88,
-		Recovery:         70,
+		SpeedRating:      70,
 		PrimaryPosition:  PlayerPositionGoalkeeper,
 		Positions:        []PlayerPosition{PlayerPositionGoalkeeper},
 	}
@@ -237,5 +237,5 @@ func TestRawDefense_GoalkeeperIgnoresTackling(t *testing.T) {
 	withTackling.Tackling = 95
 
 	assert.Equal(t, rawDefense(gk, Tactics{}), rawDefense(withTackling, Tactics{}),
-		"goalkeepers must ignore Tackling — saves are driven by GoalkeeperRating + Recovery")
+		"goalkeepers must ignore Tackling — saves are driven by GoalkeeperRating + Speed")
 }

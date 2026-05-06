@@ -22,6 +22,8 @@ Every match runs in five phases. The same `(seed, your lineup, opponent lineup)`
 
 Your players have three groups of attributes: **core skills**, **physicals**, and **specialists**. Each one matters in a specific situation; building a balanced team means making sure each chance type has someone good for it.
 
+> The full reference (every attribute, every formula it touches, FIFA-style fields that *aren't* here like Passing) lives in [attributes.md](attributes.md). The summary below is enough for picking players; reach for the reference when you need the maths.
+
 ### Core skills (1-100)
 
 | Attribute | What it does |
@@ -34,12 +36,9 @@ Your players have three groups of attributes: **core skills**, **physicals**, an
 
 ### Physicals (1-100)
 
-These were one number in v1 (`SpeedRating`). v2 splits them so a fast attacker doesn't get a free defensive boost.
-
 | Attribute | What it does | Where it shows up |
 |---|---|---|
-| `Pace` | Top speed. Gets you on the end of through-balls and chasing breakaways. | Open play, crosses, **dominates 1-on-1 breakaways** |
-| `Recovery` | Sprint-back speed. Catches you up when the opponent breaks. | Defense, especially with a high defensive line |
+| `SpeedRating` | Top speed — both attacking sprints and defensive chase-back. | Open play, crosses, **dominates 1-on-1 breakaways**, plus outfield defense (especially with a high line) |
 | `WorkRate` | Stamina / coverage. The "doing the running" attribute. | Midfield control, especially under high press |
 
 ### Specialists (1-100)
@@ -62,17 +61,17 @@ Every shot in a match is one of seven chance types. The engine rolls which type 
 
 | Chance | Roughly how often* | Attacker score formula | Best build |
 |---|---|---|---|
-| **Open Play** | ~30% | `(atk*2 + finishing + pace) / 4` | Well-rounded forward |
-| **Cross** | ~19% | `(atk*2 + heading*2 + pace) / 5` | Striker arriving on a delivery |
-| **Corner** | ~12% | `(atk*2 + heading*3) / 5` | **Aerial specialist** — pace doesn't matter |
+| **Open Play** | ~30% | `(atk*2 + finishing + speed) / 4` | Well-rounded forward |
+| **Cross** | ~19% | `(atk*2 + heading*2 + speed) / 5` | Striker arriving on a delivery |
+| **Corner** | ~12% | `(atk*2 + heading*3) / 5` | **Aerial specialist** — speed doesn't matter |
 | **Long Range** | ~12% | `(atk*2 + technique*3) / 5` | Technical midfielder |
 | **Free Kick** | ~12% | `(atk + technique*3) / 4` | Set-piece specialist (technique-pure) |
-| **Penalty** | ~8% | `(atk*2 + composure*3) / 5` | Clutch finisher — pace doesn't matter |
-| **1-on-1 Breakaway** | ~8% | `(atk + finishing + pace*3) / 5` | **Pure speedster** |
+| **Penalty** | ~8% | `(atk*2 + composure*3) / 5` | Clutch finisher — speed doesn't matter |
+| **1-on-1 Breakaway** | ~8% | `(atk + finishing + speed*3) / 5` | **Pure speedster** |
 
 \* approximate frequencies; the engine bans back-to-back duplicates (no "Corner. Corner. Corner.") so there's some variation.
 
-**Key insight**: a target man (high `Heading` 92, low `Pace` 55) is your best player on a corner. A speedster (high `Pace` 92, low `Heading`) is your best on a 1-on-1 breakaway. Build a squad with both and the engine will pick the right player for the moment.
+**Key insight**: a target man (high `Heading` 92, low `SpeedRating` 55) is your best player on a corner. A speedster (high `SpeedRating` 92, low `Heading`) is your best on a 1-on-1 breakaway. Build a squad with both and the engine will pick the right player for the moment.
 
 ### How the goal/miss roll works
 
@@ -180,13 +179,19 @@ How high your defensive line plays.
 |---|---|---|---|
 | Deep | +3% (opponent has midfield space to dictate) | +5% (compact, well-organised back line) | **Positional defenders** (high `DefenseRating`) |
 | Normal | Baseline | Baseline | Baseline |
-| High | -3% (you compress the pitch and pressure them) | -4% (brittle to balls in behind) | **Fast defenders** (high `Recovery`) |
+| High | -3% (you compress the pitch and pressure them) | -4% (brittle to balls in behind) | **Fast defenders** (high `SpeedRating`) |
 
 This is a real trade-off — deep gives the opponent more of the ball but lets you defend it well; high suppresses the opponent but leaves you exposed. Pair a deep line with positional defenders, or a high line with fast defenders. The wrong combination leaves you exposed.
 
 ### Set-piece taker
 
-Name a specific player to take every Free Kick, Corner, and Penalty for your team. Pick someone with high `Technique` (free kicks), `Heading` (corners), and `Composure` (penalties). A specialist with all three is worth a lot.
+Name a specific player to take your team's Free Kicks, Corners, and Penalties. The taker isn't always the player who scores — what they actually do depends on the chance type:
+
+- **Free Kicks (direct):** the taker takes the shot. Pick high `Technique`.
+- **Penalties:** the taker takes the shot. Pick high `Composure`.
+- **Corners:** the taker *delivers* the corner; somebody else heads it home. The taker's `Technique` boosts the chance of any header converting (great delivery → more dangerous chance), but the finisher is picked separately by `Heading` + position. The taker is excluded from the finisher pool — they can't head their own delivery.
+
+So a high-`Technique` midfielder is your ideal corner taker even if their `Heading` is poor. Their delivery makes your aerial striker (high `Heading`, ideally tagged **Target Man**) more dangerous. A specialist with all three of `Technique`, `Composure`, and a separate aerial finisher with high `Heading` is the strongest set-piece setup.
 
 ---
 
@@ -196,10 +201,10 @@ Optional tags you can attach to a player to reshape their contribution.
 
 | Role | What it does | Best for |
 |---|---|---|
-| **Captain** | +3% to your whole team's control + defense | One per team — pick a leader |
-| **Target Man** | +100% selection weight on corners + crosses | Aerial striker — they'll get the ball when it goes in the air |
-| **Playmaker** | +10% to that player's control score | High-`ControlRating` midfielder |
-| **Ball Winner** | +10% to that player's defense score | High-`Tackling` midfielder or defender |
+| **Captain** | Two effects, both small (≈ ±2.4% at the extremes) and both scaled by *captain quality* — `(ControlRating + Composure) / 2`, or `(GoalkeeperRating + Composure) / 2` for keepers: (1) a team-wide multiplier on control + defense, and (2) a self-multiplier on the captain's own play. A high-quality captain lifts both; a low-quality captain drags both. **Tagging a poor leader hurts you on both axes** — armband isn't a free boost. | A composed, intelligent senior — one per team |
+| **Target Man** | +100% selection weight on corners + crosses (selection only — the score still comes from `Heading` via the chance formula, so tagging a non-aerial striker is a wasted slot) | Aerial striker — they'll get the ball when it goes in the air |
+| **Playmaker** | Becomes the focal point of that position group's contribution to team control — their score is weighted 2× vs the other players in the same group when computing the group's mean. **Tag a strong controller and team control rises; tag a weak one and it drops.** Not a free boost. | Your strongest `ControlRating` player in the position |
+| **Ball Winner** | Same focal-point mechanic as Playmaker but on the defensive side — the Ball Winner's defense score is weighted 2× within their position group when computing team defense. **Tag your destroyer and the team's defense lifts; tag a weak defender and it drops.** Not a free boost. Note: a Ball Winner who's the only player in their position group has no effect (no group mean to drag). | High-`Tackling` / `DefenseRating` midfielder or defender |
 
 You can stack roles across multiple players — a Captain + Playmaker + Ball Winner + Target Man lineup is legal.
 
@@ -212,12 +217,12 @@ You can stack roles across multiple players — a Captain + Playmaker + Ball Win
 Style: Pyramid formation, deep line, slow tempo, low press.
 
 Recruit:
-- Goalkeeper with high `GoalkeeperRating` and decent `Recovery` (saves through-balls).
-- Two defenders with high `DefenseRating` and `Tackling` (positional, not fast — deep line means they don't need pace).
+- Goalkeeper with high `GoalkeeperRating` and decent `SpeedRating` (saves through-balls).
+- Two defenders with high `DefenseRating` and `Tackling` (positional, not fast — deep line means they don't need raw pace).
 - One midfielder with high `Technique` and `ControlRating` (long passes for counters).
-- Striker with high `Pace`, `Finishing`, and `Composure` (1-on-1s and breakaways are your bread and butter; clinical conversion).
+- Striker with high `SpeedRating`, `Finishing`, and `Composure` (1-on-1s and breakaways are your bread and butter; clinical conversion).
 
-Why it works: low press + deep line = solid defense, lots of misses by the opponent. Slow tempo = you don't waste your few chances. High-`Technique` long-range and high-`Pace` 1-on-1 breakaways are your goal sources.
+Why it works: low press + deep line = solid defense, lots of misses by the opponent. Slow tempo = you don't waste your few chances. High-`Technique` long-range and high-`SpeedRating` 1-on-1 breakaways are your goal sources.
 
 ### "Possession" team
 
@@ -225,7 +230,7 @@ Style: Diamond formation, normal line, normal tempo, medium press.
 
 Recruit:
 - Two well-rounded midfielders, one tagged as **Playmaker** (high `ControlRating`).
-- Defenders with balanced `DefenseRating` / `Tackling` / `Recovery` — Diamond defends well.
+- Defenders with balanced `DefenseRating` / `Tackling` / `SpeedRating` — Diamond defends well.
 - Striker with high `AttackRating` and `Finishing` for open play.
 
 Why it works: the Diamond's possession bonus (3%) compounds over the match — you'll see 60-65% of chances. Most of your goals come from open play, so finishing matters more than specialist attributes.
@@ -237,7 +242,7 @@ Style: Box formation (or Y), high tempo, high line, target-man specialist.
 Recruit:
 - Striker with **maxed `Heading`** tagged as **Target Man** (gets ~2× selection on corners and crosses).
 - Set-piece taker with high `Technique` (delivers great corners).
-- Fast defenders with high `Recovery` (high line means they need to chase).
+- Fast defenders with high `SpeedRating` (high line means they need to chase).
 - Captain on your most experienced player.
 
 Why it works: high tempo creates more chances; many of those will be crosses and corners, where your aerial specialist dominates. The high line is risky but creates more counter-attack opportunities. Heading + Technique combo is a goal machine.
@@ -246,7 +251,7 @@ Why it works: high tempo creates more chances; many of those will be crosses and
 
 ## Common pitfalls
 
-**Don't recruit on `OverallRating` alone.** A player with `OverallRating` 85 split across `AttackRating` 90, `Pace` 80, no `Heading` is a different player from one with `AttackRating` 80, `Pace` 75, `Heading` 95. The first is your open-play striker; the second is your corner specialist. They suit different lineups.
+**Don't recruit on `OverallRating` alone.** A player with `OverallRating` 85 split across `AttackRating` 90, `SpeedRating` 80, no `Heading` is a different player from one with `AttackRating` 80, `SpeedRating` 75, `Heading` 95. The first is your open-play striker; the second is your corner specialist. They suit different lineups.
 
 **Don't pair tactics with the wrong builds.** A high line with slow defenders is a goal-conceding machine. A high press with low-`WorkRate` midfielders fizzles by the 60th minute. Match your tactics to the players you have.
 

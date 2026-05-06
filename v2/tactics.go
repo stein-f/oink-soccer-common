@@ -1,5 +1,7 @@
 package soccer
 
+import "github.com/stein-f/oink-soccer-common/v2/internal/tuning"
+
 // Tactics is the optional bundle of manager-controlled levers a team can
 // set before kick-off. The zero value means "neutral" — every existing v1
 // lineup that doesn't populate Tactics still produces a sensible v2 game.
@@ -188,4 +190,23 @@ func lineHeightDefenseFactor(l LineHeight) float64 {
 	default:
 		return 1.0
 	}
+}
+
+// cornerDeliveryFactor returns the multiplier applied to a corner's
+// effective attack score based on the named SetPieceTaker's Technique.
+// Corner finisher selection is independent (still Heading-driven via
+// pickAttacker) — this lever models *delivery quality* of the taker.
+//
+// Returns 1.0 (neutral) for non-corner chances and when no SetPieceTaker
+// is set or the named ID isn't on the pitch.
+func cornerDeliveryFactor(lineup GameLineup, ct ChanceType, tactics Tactics) float64 {
+	if ct != ChanceTypeCorner || tactics.SetPieceTaker == "" {
+		return 1.0
+	}
+	for _, p := range lineup.Players {
+		if p.ID == tactics.SetPieceTaker {
+			return tuning.CornerDeliveryFactor(p.Attributes.EffectiveTechnique())
+		}
+	}
+	return 1.0
 }

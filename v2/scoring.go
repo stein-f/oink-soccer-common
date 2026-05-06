@@ -30,7 +30,7 @@ func rawControl(p PlayerAttributes, tactics Tactics) float64 {
 // AttackScore function so set pieces, breakaways, and long range each
 // reward different player builds.
 func rawAttack(p PlayerAttributes) float64 {
-	return weighted(p.AttackRating, p.EffectivePace(),
+	return weighted(p.AttackRating, p.SpeedRating,
 		tuning.AttackSkillWeight, tuning.AttackSpeedWeight, tuning.AttackDivisor)
 }
 
@@ -59,29 +59,31 @@ func rawAttackForChance(p PlayerAttributes, ct ChanceType) float64 {
 // balanced legacy weighting.
 func rawDefense(p PlayerAttributes, tactics Tactics) float64 {
 	if isGoalkeeper(p) {
-		return weighted(p.GoalkeeperRating, p.EffectiveRecovery(),
+		return weighted(p.GoalkeeperRating, p.SpeedRating,
 			tuning.DefenseSkillWeight, tuning.DefenseSpeedWeight, tuning.DefenseDivisor)
 	}
 	w := tuning.DefenseWeightsForLineHeight(string(tactics.LineHeight))
-	num := p.DefenseRating*w.Skill + p.EffectiveTackling()*w.Tackling + p.EffectiveRecovery()*w.Recovery
+	num := p.DefenseRating*w.Skill + p.EffectiveTackling()*w.Tackling + p.SpeedRating*w.Recovery
 	return math.Round(float64(num) / float64(w.Divisor))
 }
 
-// playerControl applies the skill curve, out-of-position penalty, injury
-// reduction, and any role-based bonus to a raw control score. This is what
-// the engine actually consumes when summing a team's contribution from each
-// player. The team's own Tactics drives the underlying attribute weighting
-// (press level shifts skill ↔ work rate emphasis).
+// playerControl applies the skill curve, out-of-position penalty, and injury
+// reduction to a raw control score. This is what the engine actually consumes
+// when summing a team's contribution from each player. The team's own Tactics
+// drives the underlying attribute weighting (press level shifts skill ↔ work
+// rate emphasis).
+//
+// The Playmaker role is *not* a per-player multiplier here — it's a focal-
+// point lever applied at the team-aggregation step (see teamControl), where
+// the playmaker's score is weighted more heavily within their position group.
+// This means tagging a poor player as Playmaker drags the team's control
+// down rather than giving them a free boost.
 //
 // The curve is applied at the player level so that elite vs average player
 // differentials are amplified before team-level aggregation and chance
 // resolution — see tuning.SkillCurve for the rationale.
 func playerControl(sp SelectedPlayer, tactics Tactics) float64 {
-	score := adjustForState(sp, tuning.SkillCurve(rawControl(sp.Attributes, tactics)))
-	if sp.Role == PlayerRolePlaymaker {
-		score *= 1.10
-	}
-	return score
+	return adjustForState(sp, tuning.SkillCurve(rawControl(sp.Attributes, tactics)))
 }
 
 // playerAttack returns the chance-type-agnostic attack score (open-play
@@ -101,34 +103,64 @@ func playerAttackForChance(sp SelectedPlayer, ct ChanceType) float64 {
 // playerDefense applies the skill curve + state adjustments to the raw
 // defense score. The team's Tactics (specifically LineHeight) shifts the
 // underlying attribute weighting between positioning and recovery.
+//
+// The Ball Winner role is *not* a per-player multiplier here — like
+// Playmaker, it's a focal-point lever applied at team aggregation (see
+// teamDefense), where the Ball Winner's score is weighted more heavily
+// within their position group. Tagging a poor defender drags the team's
+// defense down rather than giving them a free boost.
 func playerDefense(sp SelectedPlayer, tactics Tactics) float64 {
-	score := adjustForState(sp, tuning.SkillCurve(rawDefense(sp.Attributes, tactics)))
-	if sp.Role == PlayerRoleBallWinner {
-		score *= 1.10
-	}
-	return score
+	return adjustForState(sp, tuning.SkillCurve(rawDefense(sp.Attributes, tactics)))
 }
 
-// captainBoost returns a small team-wide multiplier when the lineup carries
-// a captain. Returns 1.0 if no captain is present.
+// captainBoost returns the team-wide multiplier (control + defense) driven
+// by the captain's quality. Returns 1.0 if no captain is present.
+//
+// A quality captain lifts the team; a poor captain drags it. The scaling
+// is small (≈ ±2.4% at the extremes) — captain identity matters but doesn't
+// dominate. See tuning.CaptainTeamBoost for the formula.
 func captainBoost(lineup GameLineup) float64 {
 	for _, p := range lineup.Players {
 		if p.Role == PlayerRoleCaptain {
-			return 1.03
+			return tuning.CaptainTeamBoost(captainQuality(p.Attributes))
 		}
 	}
 	return 1.0
 }
 
+// captainQuality returns a 0-100 score representing how well this player
+// fits the captain role. Drives both team-wide and self multipliers.
+//
+// The proxy: a player's primary skill (GoalkeeperRating for keepers,
+// ControlRating for outfielders — game intelligence + decision-making)
+// averaged with EffectiveComposure (calm under pressure). When Composure
+// isn't set, EffectiveComposure backfills to ControlRating, which keeps
+// legacy rosters from being penalised arbitrarily.
+//
+// Any player can be captain; we rank them by what we can measure. A
+// composed, intelligent senior is the archetype.
+func captainQuality(p PlayerAttributes) int {
+	primary := p.ControlRating
+	if isGoalkeeper(p) {
+		primary = p.GoalkeeperRating
+	}
+	return (primary + p.EffectiveComposure()) / 2
+}
+
 // adjustForState scales a raw score by the out-of-position penalty (if the
-// player is slotted somewhere they can't play) and the injury multiplier
-// (if they're carrying a high-severity injury).
+// player is slotted somewhere they can't play), the injury multiplier (if
+// they're carrying an injury), and the captain self-boost (if this player
+// wears the armband — small ± based on captain quality, since a poor
+// captain feels the burden while a quality captain plays above themselves).
 func adjustForState(sp SelectedPlayer, raw float64) float64 {
 	score := raw
 	if sp.IsOutOfPosition() {
 		score *= tuning.OutOfPositionScale
 	}
 	score *= injuryScale(sp.Injury)
+	if sp.Role == PlayerRoleCaptain {
+		score *= tuning.CaptainSelfBoost(captainQuality(sp.Attributes))
+	}
 	return score
 }
 
@@ -171,52 +203,76 @@ func isGoalkeeper(p PlayerAttributes) bool {
 // formation (60% attacker weight); v2 uses the same uniform weights for
 // every formation — formation differences live in their tuning profiles,
 // not in scoring.
+//
+// Playmakers contribute to their position group's mean with extra weight
+// (tuning.PlaymakerControlWeight) — they're the focal point of the team's
+// possession. A high-rated Playmaker drags the group's mean toward their
+// score; a low-rated Playmaker drags it the other way. This makes Playmaker
+// a real choice instead of a free boost: tag your best controller and you
+// gain, tag a weak player and you lose.
 func teamControl(lineup GameLineup) float64 {
 	tactics := lineup.Team.Tactics
-	return positionWeightedAverage(lineup.Players, tuning.ControlPositionWeights, func(sp SelectedPlayer) float64 {
-		return playerControl(sp, tactics)
+	return rolePositionAverage(lineup.Players, tuning.ControlPositionWeights, func(sp SelectedPlayer) (float64, float64) {
+		score := playerControl(sp, tactics)
+		weight := 1.0
+		if sp.Role == PlayerRolePlaymaker {
+			weight = tuning.PlaymakerControlWeight
+		}
+		return score, weight
 	})
 }
 
+// teamDefense mirrors teamControl's structure: position-weighted average
+// of player defense scores, with a focal-point bump for Ball Winners.
+// A quality Ball Winner amplifies the team's defensive shape; a weak one
+// drags it down — exactly like Playmaker on the control side.
 func teamDefense(lineup GameLineup) float64 {
 	tactics := lineup.Team.Tactics
-	return positionWeightedAverage(lineup.Players, tuning.DefensePositionWeights, func(sp SelectedPlayer) float64 {
-		return playerDefense(sp, tactics)
+	return rolePositionAverage(lineup.Players, tuning.DefensePositionWeights, func(sp SelectedPlayer) (float64, float64) {
+		score := playerDefense(sp, tactics)
+		weight := 1.0
+		if sp.Role == PlayerRoleBallWinner {
+			weight = tuning.BallWinnerDefenseWeight
+		}
+		return score, weight
 	})
 }
 
-// positionWeightedAverage groups players by their selected position, takes
-// the mean score within each group, then combines those means using the
-// supplied position weights. A position with no players contributes zero.
-func positionWeightedAverage(players []SelectedPlayer, w tuning.PositionWeights, score func(SelectedPlayer) float64) float64 {
-	var gkSum, defSum, midSum, atkSum float64
-	var gkN, defN, midN, atkN int
+// rolePositionAverage groups players by their selected position. Each player
+// contributes (score, weight) to their group; the group's contribution is
+// sum(score*weight) / sum(weight). Position groups are then combined using
+// the supplied position weights.
+//
+// All players carrying weight 1.0 reduces to a simple mean — the same shape
+// as a position-weighted average. Roles like Playmaker (in teamControl) and
+// Ball Winner (in teamDefense) use heavier weights to act as focal points
+// within their group.
+func rolePositionAverage(players []SelectedPlayer, w tuning.PositionWeights, get func(SelectedPlayer) (float64, float64)) float64 {
+	type bucket struct{ sum, totalW float64 }
+	var gk, def, mid, atk bucket
 	for _, p := range players {
-		s := score(p)
+		score, weight := get(p)
+		b := &gk
 		switch p.SelectedPosition {
-		case PlayerPositionGoalkeeper:
-			gkSum += s
-			gkN++
 		case PlayerPositionDefense:
-			defSum += s
-			defN++
+			b = &def
 		case PlayerPositionMidfield:
-			midSum += s
-			midN++
+			b = &mid
 		case PlayerPositionAttack:
-			atkSum += s
-			atkN++
+			b = &atk
 		}
+		b.sum += score * weight
+		b.totalW += weight
 	}
-	return mean(gkSum, gkN)*w.Goalkeeper +
-		mean(defSum, defN)*w.Defense +
-		mean(midSum, midN)*w.Midfield +
-		mean(atkSum, atkN)*w.Attack
+	return weightedMean(gk.sum, gk.totalW)*w.Goalkeeper +
+		weightedMean(def.sum, def.totalW)*w.Defense +
+		weightedMean(mid.sum, mid.totalW)*w.Midfield +
+		weightedMean(atk.sum, atk.totalW)*w.Attack
 }
 
-func mean(sum float64, n int) float64 {
-	if n == 0 {
+func weightedMean(sum, totalW float64) float64 {
+	if totalW == 0 {
 		return 0
 	}
-	return sum / float64(n)
+	return sum / totalW
 }
