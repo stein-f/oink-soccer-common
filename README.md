@@ -47,7 +47,7 @@ Each match runs in five phases: **tempo** (how many chances), **schedule** (when
 
 ## Allocation
 
-Season-start NFT allocation lives in `v2/allocation`:
+Season-start NFT allocation is a deterministic function of `(seed, candidates, assets)` — the same Algorand block hash always produces the same allocation, so anyone can re-verify the result on-chain. The pure core lives in `v2/allocation`:
 
 ```go
 import "github.com/stein-f/oink-soccer-common/v2/allocation"
@@ -56,16 +56,34 @@ pool := allocation.NewPool(candidates, allocation.DefaultRules())
 assignments, err := allocation.Allocate(rand, pool, assets)
 ```
 
-Same `(seed, candidates, assets)` always produces the same allocation, so anyone can re-verify the result from just the Algorand block hash.
+### Running a season allocation
+
+`v2/cmd/allocation` is the CLI that loads the CSV datasets and calls `Allocate`. Run it from the v2 module directory:
+
+```sh
+cd v2 && go run ./cmd/allocation
+```
+
+The season comes from `cmd/allocation/config.json` (`current_season`) — the same config the v1 runner reads, so a single edit drives either pipeline. The tool:
+
+1. Reads the season's `round` + `assets_path` from `cmd/allocation/config.json`.
+2. Derives a deterministic seed from that round's Algorand block hash.
+3. Loads candidates from `cmd/allocation/fifa_players_22.csv` and eligible assets from the season's `eligible_assets.csv`.
+4. Runs `NewPool` + `Allocate`.
+5. Writes `cmd/allocation/s<N>/out/assigned_players.csv` (columns: `player_id,asset_name,fifa_player_id,player_name`) — the file `lost-pigs` imports in `scripts/soccer/allocate_players_to_assets_v2`.
+
+The repo root is auto-detected by walking up for `cmd/allocation/config.json`; pass `-root` to point at a different checkout.
+
+> **Note:** the v2 core draws from the seed in a different order than the legacy v1 runner, so the same round produces a *different but equally valid and reproducible* allocation. Expect the season's `assigned_players.csv` to change when cutting over from the v1 runner.
 
 ## Running the v1 examples
 
 The v1 examples still work for historical reference:
 
 ```sh
-go run cmd/simulate/main.go        # 10k-game distribution stats
-go run cmd/verify/main.go          # re-verify a specific historical game
-go run cmd/allocation/runner/main.go  # season allocation (CSV output)
+go run cmd/simulate/main.go           # 10k-game distribution stats
+go run cmd/verify/main.go             # re-verify a specific historical game
+go run cmd/allocation/runner/main.go  # legacy v1 season allocation (superseded by v2/cmd/allocation above)
 ```
 
 ## Testing

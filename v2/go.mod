@@ -2,7 +2,10 @@ module github.com/stein-f/oink-soccer-common/v2
 
 go 1.25
 
-require github.com/stretchr/testify v1.9.0
+require (
+	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
+	github.com/stretchr/testify v1.9.0
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
