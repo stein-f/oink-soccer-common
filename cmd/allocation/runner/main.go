@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 
 	"github.com/gocarina/gocsv"
@@ -31,7 +30,7 @@ func main() {
 
 	log.Info().Msgf("found %d eligible assets", len(eligibleAssets))
 
-	assets, err := assignPlayersToEligibleAssets(appCtx.Rand, playersLookup, eligibleAssets)
+	assets, err := allocation.AssignPlayers(appCtx.Rand, playersLookup, eligibleAssets)
 	if err != nil {
 		log.Fatal().Err(err).Send()
 	}
@@ -43,25 +42,6 @@ func main() {
 	}
 
 	log.Info().Msgf("saved eligibility for %d assets. Run `grep Salah cmd/allocation/s%d/out/assigned_players.csv` to search a player", len(assets), appCtx.Config.Season)
-}
-
-func assignPlayersToEligibleAssets(r *rand.Rand, lookup *allocation.PlayersLookup, assets []allocation.EligibleAsset) ([]allocation.PlayerProfile, error) {
-	assetProfiles := []allocation.PlayerProfile{}
-	for _, asset := range assets {
-		position, err := allocation.GetRandomPosition(r)
-		if err != nil {
-			return nil, err
-		}
-		player, err := lookup.GetRandomPlayer(position, asset)
-		if err != nil {
-			return nil, err
-		}
-		assetProfiles = append(assetProfiles, allocation.PlayerProfile{
-			Asset:      asset,
-			FifaPlayer: player,
-		})
-	}
-	return assetProfiles, nil
 }
 
 func savePlayerAttributes(profiles []allocation.PlayerProfile, season int) error {
