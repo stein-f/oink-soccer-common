@@ -104,9 +104,10 @@ type ShootoutResult struct {
 }
 
 const (
-	// shootoutRegulationKicks is the best-of-5 phase length. Every player takes
-	// a penalty in this phase (with a 5-a-side lineup all five take); there is no
-	// early termination, so the round always completes before sudden death.
+	// shootoutRegulationKicks is the best-of-5 phase length: each team takes up
+	// to five kicks. The phase ends the instant one team's lead is unassailable —
+	// i.e. exceeds what the other can still reach with its remaining kicks — so a
+	// decided shootout doesn't pointlessly play out the remaining penalties.
 	shootoutRegulationKicks = 5
 	// shootoutMaxSuddenDeathRounds caps sudden death so a pathological seed can't
 	// loop forever; if reached while still level the final kick's rand breaks it.
@@ -147,11 +148,29 @@ func RunShootoutWithSeed(r *rand.Rand, home, away GameLineup) (ShootoutResult, e
 		}
 	}
 
-	// Regulation: a fixed five kicks each, no early termination — every player
-	// takes a penalty.
+	// Regulation: up to five kicks each, alternating home then away, ending the
+	// instant one team is mathematically safe — its lead exceeds what the other
+	// can still reach with the kicks it has left. This is the standard rule: a
+	// shootout that's already decided (e.g. 4-0 after seven kicks) stops there
+	// rather than playing out penalties that cannot change the result.
+	homeTaken, awayTaken := 0, 0
+	decided := func() bool {
+		homeRemaining := shootoutRegulationKicks - homeTaken
+		awayRemaining := shootoutRegulationKicks - awayTaken
+		return result.HomeScore > result.AwayScore+awayRemaining ||
+			result.AwayScore > result.HomeScore+homeRemaining
+	}
 	for i := 0; i < shootoutRegulationKicks; i++ {
 		kick(homeTakers, awayKeeper, TeamTypeHome, i)
+		homeTaken++
+		if decided() {
+			break
+		}
 		kick(awayTakers, homeKeeper, TeamTypeAway, i)
+		awayTaken++
+		if decided() {
+			break
+		}
 	}
 
 	// Sudden death: paired kicks (both teams take, then compare) until decided.

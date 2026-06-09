@@ -83,8 +83,7 @@ func TestRunShootoutWithSeed(t *testing.T) {
 			assert.Equal(t, soccer.TeamTypeAway, a.Winner)
 		}
 
-		// At least the 10 regulation kicks were taken, alternating home/away.
-		assert.GreaterOrEqual(t, len(a.Kicks), 2*5)
+		// Kicks alternate home/away regardless of where the shootout ends.
 		for i, kick := range a.Kicks {
 			wantTeam := soccer.TeamTypeHome
 			if i%2 == 1 {
@@ -108,13 +107,42 @@ func TestRunShootoutWithSeed(t *testing.T) {
 		assert.Equal(t, awayScored, a.AwayScore)
 	})
 
-	t.Run("regulation always completes all five kicks each", func(t *testing.T) {
-		// Across many seeds, the kick count is at least 10 and even (paired).
-		for seed := int64(0); seed < 200; seed++ {
+	t.Run("stops as soon as the result is mathematically decided", func(t *testing.T) {
+		// Across many seeds, the shootout must (a) be decisive and (b) never run
+		// a kick that cannot affect the outcome: replaying kick-by-kick, the lead
+		// must not have become unassailable before the final kick.
+		for seed := int64(0); seed < 500; seed++ {
 			res, err := soccer.RunShootoutWithSeed(rand.New(rand.NewSource(seed)), home, away)
 			require.NoError(t, err)
-			assert.GreaterOrEqual(t, len(res.Kicks), 10)
-			assert.Equal(t, 0, len(res.Kicks)%2, "kicks must be paired")
+			require.NotEqual(t, res.HomeScore, res.AwayScore, "shootout must be decisive")
+
+			// The minimum decisive best-of-5 shootout is six kicks (e.g. the team
+			// kicking second going 3-0 up after the other has used all but two).
+			assert.GreaterOrEqual(t, len(res.Kicks), 6)
+
+			homeScore, awayScore := 0, 0
+			homeTaken, awayTaken := 0, 0
+			for i, kick := range res.Kicks {
+				// Before this kick, the result must not already be decided in
+				// regulation — otherwise the shootout ran one kick too many.
+				if homeTaken <= 5 && awayTaken <= 5 {
+					homeRem, awayRem := 5-homeTaken, 5-awayTaken
+					assert.False(t,
+						homeScore > awayScore+awayRem || awayScore > homeScore+homeRem,
+						"seed %d: kick %d taken after result already decided", seed, i)
+				}
+				if kick.TeamType == soccer.TeamTypeHome {
+					homeTaken++
+					if kick.IsGoal() {
+						homeScore++
+					}
+				} else {
+					awayTaken++
+					if kick.IsGoal() {
+						awayScore++
+					}
+				}
+			}
 		}
 	})
 }
