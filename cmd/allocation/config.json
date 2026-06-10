@@ -1,5 +1,5 @@
 {
-  "current_season": 15,
+  "current_season": 16,
   "seasons": [
     {
       "season": 3,
@@ -77,6 +77,12 @@
       "season": 15,
       "collab": "asfc",
       "assets_path": "cmd/allocation/s15/eligible_assets.csv",
+      "round": 60051847
+    },
+    {
+      "season": 16,
+      "collab": "dark-coin",
+      "assets_path": "cmd/allocation/s16/eligible_assets.csv",
       "round": 60051847
     }
   ]
