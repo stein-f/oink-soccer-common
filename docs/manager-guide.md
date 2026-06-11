@@ -144,8 +144,19 @@ How aggressively your team chases the ball.
 | Press level | Effect on opponent's control | Effect on your injury risk | Effect on which midfielders matter | Late-game fatigue |
 |---|---|---|---|---|
 | Low | +2% (passive — they keep the ball easier) | -5% | Skill-heavy: technicians shine | None |
-| Medium / none | Baseline | Baseline | Baseline | None |
+| None (default) | Baseline | Baseline | Baseline | None |
+| Medium | -2% (mild disruption) | Baseline | Baseline | None |
 | High | -6% (you disrupt their build-up) | +10% | **Work-rate-heavy: stamina midfielders shine** | **Yes — see below** |
+
+Note that "no press set" and Medium are not the same: Medium already shaves 2% off the opponent's control with no downside, while the default applies nothing.
+
+Like line height for defenders, press also changes *which attributes* your midfielders are judged on for team control:
+
+| Press | `ControlRating` | `WorkRate` |
+|---|---|---|
+| Low | ≈83% | ≈17% |
+| None / Medium | 80% | 20% |
+| High | 60% | 40% — engine matters |
 
 **Press fatigue is the real cost of pressing high.** A team that's been chasing all match physically tires:
 
@@ -198,6 +209,16 @@ Name a specific player to take your team's Free Kicks, Corners, and Penalties. T
 - **Free Kicks (direct):** the taker takes the shot. Pick high `Technique`.
 - **Penalties:** the taker takes the shot. Pick high `Composure`.
 - **Corners:** the taker *delivers* the corner; somebody else heads it home. The taker's `Technique` boosts the chance of any header converting (great delivery → more dangerous chance), but the finisher is picked separately by `Heading` + position. The taker is excluded from the finisher pool — they can't head their own delivery.
+
+Corner delivery quality scales with the taker's `Technique`:
+
+| Taker `Technique` | Header conversion chance |
+|---|---|
+| 100 | +16% |
+| 85 | +10% |
+| 60 | Neutral (average pro) |
+| 40 | -8% |
+| 20 | -16% |
 
 So a high-`Technique` midfielder is your ideal corner taker even if their `Heading` is poor. Their delivery makes your aerial striker (high `Heading`, ideally tagged **Target Man**) more dangerous. A specialist with all three of `Technique`, `Composure`, and a separate aerial finisher with high `Heading` is the strongest set-piece setup.
 
