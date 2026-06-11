@@ -67,15 +67,19 @@ const (
 
 // pressControlFactor returns the multiplier applied to the *opposing*
 // team's control when this team is pressing.
+//
+// Medium is identical to no press set — the explicit neutral, mirroring
+// tempo "normal" and line height "normal". It used to be 0.98, which made
+// medium a strict upgrade over the default (free opponent-control suppression
+// with no injury, fatigue, or weighting cost) and broke the "no tactic is a
+// free lunch" rule.
 func pressControlFactor(p PressLevel) float64 {
 	switch p {
 	case PressLevelLow:
 		return 1.02
-	case PressLevelMedium:
-		return 0.98
 	case PressLevelHigh:
 		return 0.94
-	default:
+	default: // none, medium
 		return 1.0
 	}
 }

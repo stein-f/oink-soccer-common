@@ -144,11 +144,10 @@ How aggressively your team chases the ball.
 | Press level | Effect on opponent's control | Effect on your injury risk | Effect on which midfielders matter | Late-game fatigue |
 |---|---|---|---|---|
 | Low | +2% (passive — they keep the ball easier) | -5% | Skill-heavy: technicians shine | None |
-| None (default) | Baseline | Baseline | Baseline | None |
-| Medium | -2% (mild disruption) | Baseline | Baseline | None |
+| Medium / none (default) | Baseline | Baseline | Baseline | None |
 | High | -6% (you disrupt their build-up) | +10% | **Work-rate-heavy: stamina midfielders shine** | **Yes — see below** |
 
-Note that "no press set" and Medium are not the same: Medium already shaves 2% off the opponent's control with no downside, while the default applies nothing.
+Medium is the explicit neutral — identical to leaving press unset, mirroring tempo Normal and line height Normal.
 
 Like line height for defenders, press also changes *which attributes* your midfielders are judged on for team control:
 
