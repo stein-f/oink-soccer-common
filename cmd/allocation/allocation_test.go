@@ -100,3 +100,26 @@ func TestEachLegendAllocatedExactlyOnce(t *testing.T) {
 		})
 	}
 }
+
+func TestFindPlayerLevel(t *testing.T) {
+	tests := []struct {
+		name          string
+		playerID      string
+		overallRating int
+		want          string
+	}{
+		{name: "curated legend card is legendary regardless of rating", playerID: "L0001", overallRating: 80, want: "Legendary"},
+		{name: "real player in legendary band is capped at world class", playerID: "158023", overallRating: 93, want: "World class"},
+		{name: "world class band", playerID: "188545", overallRating: 84, want: "World class"},
+		{name: "professional band", playerID: "200000", overallRating: 75, want: "Professional"},
+		{name: "semi professional band", playerID: "200001", overallRating: 60, want: "Semi Professional"},
+		{name: "amateur band", playerID: "200002", overallRating: 40, want: "Amateur"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := findPlayerLevel(tt.playerID, tt.overallRating); string(got) != tt.want {
+				t.Errorf("findPlayerLevel(%s, %d) = %s, want %s", tt.playerID, tt.overallRating, got, tt.want)
+			}
+		})
+	}
+}

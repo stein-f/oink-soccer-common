@@ -123,7 +123,7 @@ func (r *Record) ToDomain(randSource *rand.Rand) FifaPlayer {
 	}
 	overallRating := attributes.GetOverallRating()
 	attributes.OverallRating = overallRating
-	attributes.PlayerLevel = findPlayerLevel(overallRating)
+	attributes.PlayerLevel = findPlayerLevel(r.SoFIFAID, overallRating)
 	return FifaPlayer{
 		PlayerID:         r.SoFIFAID,
 		PlayerAttributes: attributes,
@@ -164,7 +164,13 @@ func (r *Record) GetPositions() []soccer.PlayerPosition {
 	return result
 }
 
-func findPlayerLevel(overallRating int) soccer.PlayerLevel {
+// findPlayerLevel derives the presentational level. Legendary is reserved for
+// the curated legend cards (LegendCardPrefix ids); real players whose rating
+// reaches the legendary band are capped at World class.
+func findPlayerLevel(playerID string, overallRating int) soccer.PlayerLevel {
+	if strings.HasPrefix(playerID, LegendCardPrefix) {
+		return soccer.PlayerLevelLegendary
+	}
 	// Iterate PlayerLevelBands deterministically by sorting keys
 	var keys []string
 	for k := range PlayerLevelBands {
@@ -175,6 +181,9 @@ func findPlayerLevel(overallRating int) soccer.PlayerLevel {
 		level := soccer.PlayerLevel(ks)
 		rng := PlayerLevelBands[level]
 		if overallRating >= rng[0] && overallRating <= rng[1] {
+			if level == soccer.PlayerLevelLegendary {
+				return soccer.PlayerLevelWorldClass
+			}
 			return level
 		}
 	}
