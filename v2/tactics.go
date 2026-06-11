@@ -39,8 +39,10 @@ const (
 )
 
 // LineHeight controls how high the defensive line plays. A high line
-// compresses the pitch (more pressure on the opponent) but is vulnerable
-// to balls in behind (slight boost to opponent breakaway-style chances).
+// compresses the pitch (suppresses opponent control) but is vulnerable to
+// balls in behind — modelled as a flat defense penalty plus a reweighting
+// of defender scoring toward SpeedRating (see lineHeightDefenseFactor and
+// tuning.DefenseWeightsForLineHeight).
 type LineHeight string
 
 const (

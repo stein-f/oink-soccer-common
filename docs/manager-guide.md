@@ -181,7 +181,15 @@ How high your defensive line plays.
 | Normal | Baseline | Baseline | Baseline |
 | High | -3% (you compress the pitch and pressure them) | -4% (brittle to balls in behind) | **Fast defenders** (high `SpeedRating`) |
 
-This is a real trade-off — deep gives the opponent more of the ball but lets you defend it well; high suppresses the opponent but leaves you exposed. Pair a deep line with positional defenders, or a high line with fast defenders. The wrong combination leaves you exposed.
+The flat modifiers are the small part. The real lever is that line height changes *which attributes* your defenders are judged on:
+
+| Line | `DefenseRating` | `Tackling` | `SpeedRating` |
+|---|---|---|---|
+| Deep | 75% | 25% | 0% — pace never tested |
+| Normal | 62.5% | 25% | 12.5% |
+| High | 37.5% | 25% | 37.5% — pace critical |
+
+This is a real trade-off — deep gives the opponent more of the ball but lets you defend it well; high suppresses the opponent but leaves you exposed. Pair a deep line with positional defenders, or a high line with fast defenders. The wrong combination loses far more than the headline -4% — a slow back line playing high is judged on pace it doesn't have, while slow positional defenders playing deep give up nothing.
 
 ### Set-piece taker
 
