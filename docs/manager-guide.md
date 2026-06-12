@@ -209,6 +209,8 @@ Name a specific player to take your team's Free Kicks, Corners, and Penalties. T
 - **Penalties:** the taker takes the shot. Pick high `Composure`.
 - **Corners:** the taker *delivers* the corner; somebody else heads it home. The taker's `Technique` boosts the chance of any header converting (great delivery → more dangerous chance), but the finisher is picked separately by `Heading` + position. The taker is excluded from the finisher pool — they can't head their own delivery.
 
+Leave it blank and set pieces fall to whoever the chance lands on — the normal weighted attacker pick, not necessarily your best taker — and corners get no delivery boost (neutral 1.0). Naming a taker is strictly an upgrade.
+
 Corner delivery quality scales with the taker's `Technique`:
 
 | Taker `Technique` | Header conversion chance |
