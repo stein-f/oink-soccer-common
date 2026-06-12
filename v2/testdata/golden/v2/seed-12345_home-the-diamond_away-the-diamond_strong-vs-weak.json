@@ -46,7 +46,7 @@
       "type": "Miss",
       "chance_type": "Long Range",
       "minute": 67,
-      "player_id": "3",
+      "player_id": "4",
       "team_type": "Home"
     },
     {
@@ -57,7 +57,7 @@
       "team_type": "Home"
     },
     {
-      "type": "Miss",
+      "type": "Goal",
       "chance_type": "Cross",
       "minute": 80,
       "player_id": "5",
@@ -86,7 +86,7 @@
     "home_team_stats": {
       "team_type": "Home",
       "shots": 5,
-      "goals": 2
+      "goals": 3
     },
     "away_team_stats": {
       "team_type": "Away",

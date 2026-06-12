@@ -46,7 +46,7 @@
       "type": "Goal",
       "chance_type": "Open Play",
       "minute": 48,
-      "player_id": "5",
+      "player_id": "4",
       "team_type": "Away"
     },
     {
@@ -57,7 +57,7 @@
       "team_type": "Away"
     },
     {
-      "type": "Miss",
+      "type": "Goal",
       "chance_type": "Cross",
       "minute": 51,
       "player_id": "4",
@@ -105,7 +105,7 @@
     "away_team_stats": {
       "team_type": "Away",
       "shots": 8,
-      "goals": 3
+      "goals": 4
     }
   }
 }

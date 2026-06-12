@@ -11,14 +11,14 @@
       "type": "Miss",
       "chance_type": "Long Range",
       "minute": 13,
-      "player_id": "3",
+      "player_id": "4",
       "team_type": "Home"
     },
     {
       "type": "Goal",
       "chance_type": "Open Play",
       "minute": 20,
-      "player_id": "3",
+      "player_id": "4",
       "team_type": "Home"
     },
     {
@@ -50,7 +50,7 @@
       "team_type": "Away"
     },
     {
-      "type": "Goal",
+      "type": "Miss",
       "chance_type": "Open Play",
       "minute": 69,
       "player_id": "5",
@@ -64,7 +64,7 @@
       "team_type": "Away"
     },
     {
-      "type": "Miss",
+      "type": "Goal",
       "chance_type": "Cross",
       "minute": 94,
       "player_id": "4",

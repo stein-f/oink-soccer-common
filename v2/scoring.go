@@ -241,7 +241,10 @@ func teamDefense(lineup GameLineup) float64 {
 // rolePositionAverage groups players by their selected position. Each player
 // contributes (score, weight) to their group; the group's contribution is
 // sum(score*weight) / sum(weight). Position groups are then combined using
-// the supplied position weights.
+// the supplied position weights, renormalized over the groups that are
+// actually populated — a formation with no players in a position (The Box
+// fields no midfielders) redistributes that position's weight across the
+// rest instead of scoring it as zero.
 //
 // All players carrying weight 1.0 reduces to a simple mean — the same shape
 // as a position-weighted average. Roles like Playmaker (in teamControl) and
@@ -264,15 +267,22 @@ func rolePositionAverage(players []SelectedPlayer, w tuning.PositionWeights, get
 		b.sum += score * weight
 		b.totalW += weight
 	}
-	return weightedMean(gk.sum, gk.totalW)*w.Goalkeeper +
-		weightedMean(def.sum, def.totalW)*w.Defense +
-		weightedMean(mid.sum, mid.totalW)*w.Midfield +
-		weightedMean(atk.sum, atk.totalW)*w.Attack
-}
-
-func weightedMean(sum, totalW float64) float64 {
-	if totalW == 0 {
+	groups := []struct {
+		b bucket
+		w float64
+	}{
+		{gk, w.Goalkeeper}, {def, w.Defense}, {mid, w.Midfield}, {atk, w.Attack},
+	}
+	var total, populatedW float64
+	for _, g := range groups {
+		if g.b.totalW == 0 {
+			continue
+		}
+		total += g.b.sum / g.b.totalW * g.w
+		populatedW += g.w
+	}
+	if populatedW == 0 {
 		return 0
 	}
-	return sum / totalW
+	return total / populatedW
 }

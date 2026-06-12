@@ -201,7 +201,9 @@ func SkillCurve(raw float64) float64 {
 
 // PositionWeights describes how much each on-pitch position contributes to a
 // team-level score (control, defense). Values must sum to 1.0 to keep the
-// team score on a 0-100 scale.
+// team score on a 0-100 scale. Scoring renormalizes over the position groups
+// a formation actually fields, so a shape with no midfielders (The Box)
+// spreads the midfield weight across the rest rather than scoring it zero.
 //
 // v1 special-cased the Box formation here (60% attacker weight in control)
 // which was a major source of formation imbalance. v2 uses the same weights
@@ -423,10 +425,16 @@ var FormationProfiles = map[string]FormationProfile{
 
 	// "The Box" (2-0-2) — direct-play shape; the no-midfield setup
 	// produces direct attacking thrusts and chance volume from the two
-	// strikers. Pays in defensive solidity and injury risk (more transitions
-	// = more tackles). Possession is neutral — direct play compensates for
-	// having no midfielders.
-	"The Box": {Possession: 1.00, ChanceCreation: 1.05, ChanceQuality: 1.05, DefSolidity: 0.96, InjuryRisk: 1.05},
+	// strikers. Pays in injury risk (more transitions = more tackles).
+	//
+	// Possession is above neutral to offset a scoring artifact: with no
+	// midfield group, weight renormalization roughly triples the keeper's
+	// control weight, dragging raw team control ~14% below a comparable
+	// four-group shape. The same renormalization removes the midfield's
+	// weak defense from the average, so Box's raw defense lands ~19% high —
+	// DefSolidity claws most of that back. Tuned against the balance
+	// harness (±3% win-rate spread, RUN_BALANCE_STRICT=1).
+	"The Box": {Possession: 1.12, ChanceCreation: 1.05, ChanceQuality: 1.05, DefSolidity: 0.90, InjuryRisk: 1.05},
 }
 
 // NeutralProfile is returned for unknown formations so the engine can never
