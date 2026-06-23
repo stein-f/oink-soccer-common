@@ -118,7 +118,7 @@ Every formation has a **5-axis trade-off profile**. None strictly dominates anot
 | Formation | Shape | Possession | Chance Volume | Chance Quality | Defense | Injury Risk |
 |---|---|---|---|---|---|---|
 | **The Pyramid** | 2-1-1 (defensive) | Neutral | Lower | Slight bonus | **Bonus** | Neutral |
-| **The Diamond** | 2-1-1 (balanced) | **Bonus** | Neutral | Neutral | Neutral | Neutral |
+| **The Diamond** | 1-2-1 (balanced)  | **Bonus** | Neutral | Neutral | Neutral | Neutral |
 | **The Y** | 1-1-2 (attacking) | Neutral | Bonus | Bonus | Penalty | Neutral |
 | **The Box** | 2-0-2 (direct) | Neutral | Bonus | Bonus | Penalty | **Higher** |
 

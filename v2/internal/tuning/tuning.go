@@ -221,19 +221,6 @@ var (
 	DefensePositionWeights = PositionWeights{Goalkeeper: 0.35, Defense: 0.40, Midfield: 0.20, Attack: 0.05}
 )
 
-// --- Attacking-player selection weights -------------------------------------
-
-// AttackerPickWeights describes how likely each on-pitch position is to be
-// the player who receives a chance. Heavily favours attackers, then mids.
-// v1 had a Box-formation override that zeroed midfielders and gave attackers
-// 88; v2 drops the override (Box has no midfielders so the value is moot).
-var AttackerPickWeights = map[string]uint{
-	"Goalkeeper": 2,
-	"Defense":    10,
-	"Midfield":   20,
-	"Attack":     70,
-}
-
 // --- Role focal-point weighting ---------------------------------------------
 
 // PlaymakerControlWeight / BallWinnerDefenseWeight set the relative weight a
