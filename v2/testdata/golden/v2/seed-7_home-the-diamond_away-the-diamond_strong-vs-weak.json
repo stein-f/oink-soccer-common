@@ -15,7 +15,7 @@
       "team_type": "Home"
     },
     {
-      "type": "Miss",
+      "type": "Goal",
       "chance_type": "Corner",
       "minute": 47,
       "player_id": "4",
@@ -72,7 +72,7 @@
     "home_team_stats": {
       "team_type": "Home",
       "shots": 6,
-      "goals": 3
+      "goals": 4
     },
     "away_team_stats": {
       "team_type": "Away",

@@ -126,13 +126,18 @@ func TestControlSensitivity_BoundedImpact(t *testing.T) {
 	}
 
 	const trials = 2000
-	// 25% tolerance. v2's per-chance attribute weights backfill EffectiveTechnique
-	// and EffectiveComposure from ControlRating, so a ControlRating bump on a
-	// legacy fixture amplifies through multiple chance types (long range, free
-	// kick, penalty). FIFA-populated rosters set Technique/Composure explicitly,
-	// so production swings are smaller. The wider tolerance is a deliberate
-	// concession to the test fixture's incomplete attribute coverage.
-	const tolerance = 0.25
+	// 38% tolerance. Two effects stack here. First, v2's per-chance attribute
+	// weights backfill EffectiveTechnique and EffectiveComposure from
+	// ControlRating, so a ControlRating bump on a legacy fixture amplifies
+	// through multiple chance types (long range, free kick, penalty);
+	// FIFA-populated rosters set Technique/Composure explicitly, so production
+	// swings are smaller. Second, the skill curve was deliberately steepened to
+	// k=6.0 (see tuning.SkillCurveExponent) so squad quality drives outcomes
+	// more strongly — that is the point of the change, and it widens this swing
+	// from ~23% (k=4.0) to ~34% (k=6.0). The tolerance guards only against
+	// *runaway* single-attribute dominance (k=7.0 would hit ~39%), not against
+	// attributes mattering.
+	const tolerance = 0.38
 
 	baseHome := testdata.StrongTeam(soccer.FormationTypeDiamond)
 	baseAway := testdata.StrongTeam(soccer.FormationTypeDiamond)

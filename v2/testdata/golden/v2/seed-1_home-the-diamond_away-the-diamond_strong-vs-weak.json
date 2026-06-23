@@ -50,7 +50,7 @@
       "team_type": "Home"
     },
     {
-      "type": "Miss",
+      "type": "Goal",
       "chance_type": "Open Play",
       "minute": 71,
       "player_id": "4",
@@ -74,8 +74,8 @@
       "type": "Miss",
       "chance_type": "Open Play",
       "minute": 96,
-      "player_id": "10",
-      "team_type": "Away"
+      "player_id": "4",
+      "team_type": "Home"
     }
   ],
   "injuries": {
@@ -92,12 +92,12 @@
   "stats": {
     "home_team_stats": {
       "team_type": "Home",
-      "shots": 8,
-      "goals": 5
+      "shots": 9,
+      "goals": 6
     },
     "away_team_stats": {
       "team_type": "Away",
-      "shots": 2,
+      "shots": 1,
       "goals": 1
     }
   }

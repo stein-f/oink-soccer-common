@@ -8,25 +8,25 @@
   },
   "events": [
     {
-      "type": "Miss",
+      "type": "Goal",
       "chance_type": "Long Range",
       "minute": 15,
       "player_id": "4",
       "team_type": "Home"
     },
     {
-      "type": "Miss",
+      "type": "Goal",
       "chance_type": "Corner",
       "minute": 28,
-      "player_id": "10",
-      "team_type": "Away"
+      "player_id": "4",
+      "team_type": "Home"
     },
     {
-      "type": "Miss",
+      "type": "Goal",
       "chance_type": "Cross",
       "minute": 32,
-      "player_id": "10",
-      "team_type": "Away"
+      "player_id": "4",
+      "team_type": "Home"
     },
     {
       "type": "Goal",
@@ -43,7 +43,7 @@
       "team_type": "Home"
     },
     {
-      "type": "Miss",
+      "type": "Goal",
       "chance_type": "Long Range",
       "minute": 67,
       "player_id": "4",
@@ -67,8 +67,8 @@
       "type": "Goal",
       "chance_type": "Open Play",
       "minute": 87,
-      "player_id": "10",
-      "team_type": "Away"
+      "player_id": "4",
+      "team_type": "Home"
     },
     {
       "type": "Miss",
@@ -85,13 +85,13 @@
   "stats": {
     "home_team_stats": {
       "team_type": "Home",
-      "shots": 5,
-      "goals": 3
+      "shots": 8,
+      "goals": 8
     },
     "away_team_stats": {
       "team_type": "Away",
-      "shots": 5,
-      "goals": 2
+      "shots": 2,
+      "goals": 1
     }
   }
 }
