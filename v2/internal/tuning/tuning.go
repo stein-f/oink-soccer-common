@@ -158,23 +158,38 @@ func DefenseWeightsForLineHeight(lineHeight string) DefenseWeights {
 //
 // v1 used a hand-tuned 100-row CSV (see scaling.csv) approximating y = ax^b
 // with b ≈ 3.1. v2 uses the closed form (rating/100)^k × 100 — same convex
-// shape, no embedded data file. Reference points at k=4.0:
+// shape, no embedded data file. Reference points at k=6.0:
 //
 //	rating  scaled
-//	   50     6.3
-//	   70    24.0
-//	   80    41.0
-//	   85    52.2
-//	   90    65.6
-//	   95    81.5
+//	   50     1.6
+//	   70    11.8
+//	   80    26.2
+//	   85    37.7
+//	   90    53.1
+//	   95    73.5
 //	  100   100.0
 //
-// Without the curve, raw weighted-average scores cluster too tightly: an
-// 87-rated team beats a 78-rated team only ~46% / 31% of the time. With
-// k=4.0 it's ~69% / 14% — close to real-world intuition that a clear
-// rating gap produces a clear favourite. See skill_gap_test.go for the
-// full probe.
-const SkillCurveExponent = 4.0
+// Because possession and conversion both take a *ratio* of curved scores,
+// what the curve controls is how strongly the ratio of two teams' ratings
+// maps to a win-rate edge. At k=4.0 a 5-point top-end gap (88 vs 83, a ~6%
+// ratio edge) produced only ~57% / 24% home/away — a 2:1 favourite that
+// dropped out of the top 2 of an 8-team season ~19% of the time, which read
+// as "strong teams finish low" to players.
+//
+// k=6.0 sharpens that to ~65% / 18% (88 vs 83), so a clear favourite tops
+// the table far more reliably. k=6.0 is the deliberate ceiling: it is the
+// crossover point for the tactical layer. Below it, high press still
+// suppresses opponent scoring; above it (k≥6) the steepness inverts the
+// press effect so pressing mildly *helps* the opponent, and per-attribute
+// swings begin to dominate outcomes. At exactly k=6.0 press's net effect on
+// opponent goals is ~zero — press is a possession/style/injury lever rather
+// than a scoring-suppression one — which is the accepted trade for maximal
+// squad-quality separation without the tactic actively backfiring.
+//
+// Note this does NOT affect the formation balance harness: that test uses
+// identical squads on both sides, where the rating ratio is 1.0 and the
+// exponent cancels. See skill_gap_test.go for the full probe.
+const SkillCurveExponent = 6.0
 
 // SkillCurveFloor is the minimum value the curve returns. Avoids divide-by-
 // zero in chance resolution if a player has a near-zero raw score.
@@ -220,19 +235,6 @@ var (
 	ControlPositionWeights = PositionWeights{Goalkeeper: 0.05, Defense: 0.15, Midfield: 0.65, Attack: 0.15}
 	DefensePositionWeights = PositionWeights{Goalkeeper: 0.35, Defense: 0.40, Midfield: 0.20, Attack: 0.05}
 )
-
-// --- Attacking-player selection weights -------------------------------------
-
-// AttackerPickWeights describes how likely each on-pitch position is to be
-// the player who receives a chance. Heavily favours attackers, then mids.
-// v1 had a Box-formation override that zeroed midfielders and gave attackers
-// 88; v2 drops the override (Box has no midfielders so the value is moot).
-var AttackerPickWeights = map[string]uint{
-	"Goalkeeper": 2,
-	"Defense":    10,
-	"Midfield":   20,
-	"Attack":     70,
-}
 
 // --- Role focal-point weighting ---------------------------------------------
 

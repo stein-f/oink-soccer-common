@@ -22,7 +22,7 @@
       "team_type": "Away"
     },
     {
-      "type": "Miss",
+      "type": "Goal",
       "chance_type": "Open Play",
       "minute": 18,
       "player_id": "5",
@@ -71,7 +71,7 @@
       "team_type": "Home"
     },
     {
-      "type": "Miss",
+      "type": "Goal",
       "chance_type": "Open Play",
       "minute": 84,
       "player_id": "5",
@@ -100,7 +100,7 @@
     "home_team_stats": {
       "team_type": "Home",
       "shots": 8,
-      "goals": 6
+      "goals": 8
     },
     "away_team_stats": {
       "team_type": "Away",
