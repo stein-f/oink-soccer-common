@@ -46,6 +46,14 @@ func (p *PlayersLookup) AddPlayers(profiles []FifaPlayer) {
 func (p *PlayersLookup) AddPlayer(profile FifaPlayer) {
 	overallRating := profile.PlayerAttributes.GetOverallRating()
 	tiers := getPlayerLevels(overallRating)
+	// Curated legend cards bucket only as Legendary, whatever their v1
+	// composite rating works out to: seedLegendaries is the only path allowed
+	// to place them, and the random draw never reads the Legendary bucket.
+	// Without this, a legend whose composite dips below 87 lands in a
+	// drawable bucket and can be allocated more than once.
+	if strings.HasPrefix(profile.PlayerID, LegendCardPrefix) {
+		tiers = []soccer.PlayerLevel{soccer.PlayerLevelLegendary}
+	}
 	for _, tier := range tiers {
 		switch profile.PlayerAttributes.PrimaryPosition {
 		case soccer.PlayerPositionGoalkeeper:
@@ -59,7 +67,8 @@ func (p *PlayersLookup) AddPlayer(profile FifaPlayer) {
 		}
 	}
 	if profile.PlayerAttributes.AggressionRating >= aggressionThreshold &&
-		profile.PlayerAttributes.GetOverallRating() <= aggressivePlayersUpperBound {
+		profile.PlayerAttributes.GetOverallRating() <= aggressivePlayersUpperBound &&
+		!strings.HasPrefix(profile.PlayerID, LegendCardPrefix) {
 		p.AggressivePlayers = append(p.AggressivePlayers, profile)
 	}
 }
