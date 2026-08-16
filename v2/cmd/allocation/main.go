@@ -22,7 +22,11 @@ import (
 	"github.com/gocarina/gocsv"
 	"github.com/stein-f/oink-soccer-common/v2/algorand"
 	"github.com/stein-f/oink-soccer-common/v2/allocation"
+	"github.com/stein-f/oink-soccer-common/v2/allocation/fifacsv"
 )
+
+// fifaPlayersCSV is the source dataset, shared with the v1 runner.
+const fifaPlayersCSV = "cmd/allocation/fifa_players_22.csv"
 
 func main() {
 	root := flag.String("root", "", "repo root containing cmd/allocation (auto-detected when empty)")
@@ -45,7 +49,7 @@ func main() {
 	}
 	log.Printf("seed derived from block %d hash %s", bs.Round, bs.BlockHash)
 
-	candidates, err := loadCandidates(dataRoot, bs.Source)
+	candidates, err := fifacsv.LoadCandidates(filepath.Join(dataRoot, fifaPlayersCSV), bs.Source)
 	if err != nil {
 		log.Fatalf("load candidates: %v", err)
 	}
