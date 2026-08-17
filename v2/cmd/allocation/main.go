@@ -73,6 +73,8 @@ func main() {
 		log.Fatalf("write output: %v", err)
 	}
 	log.Printf("wrote %s", outPath)
+
+	printReport(assignments)
 	log.Printf("spot-check a player with: grep Salah %s", outPath)
 }
 
