@@ -336,6 +336,42 @@ func TestAllocate_LegendHostOddsFavorPigsTenToOne(t *testing.T) {
 		"Tier S legend-host share %f should be ~10/11", share)
 }
 
+// Pigs must be the most likely legend hosts — the top of the value ladder.
+// Weights are S:10 vs A:8, so with equal counts of each the pig share of
+// hosts converges on 10/18 ≈ 55.6%. Regression test: the weights shipped as
+// 10/10, giving custom bots the same per-asset legend odds as pigs.
+func TestAllocate_LegendHostOddsFavorPigsOverCustomBots(t *testing.T) {
+	candidates := append(makeCandidates(), makeLegends(1)...)
+	pool := allocation.NewPool(candidates, allocation.DefaultRules())
+
+	var assets []allocation.Asset
+	for i := 0; i < 100; i++ {
+		assets = append(assets, allocation.Asset{ID: "s", Tier: allocation.AssetTierS})
+	}
+	for i := 0; i < 100; i++ {
+		assets = append(assets, allocation.Asset{ID: "a", Tier: allocation.AssetTierA})
+	}
+
+	const runs = 3000
+	var sHosts int
+	for seed := int64(0); seed < runs; seed++ {
+		got, err := allocation.Allocate(rand.New(rand.NewSource(seed)), pool, assets)
+		require.NoError(t, err)
+		for _, a := range got {
+			if a.Player.Attributes.PlayerLevel == soccer.PlayerLevelLegendary {
+				if a.Asset.Tier == allocation.AssetTierS {
+					sHosts++
+				}
+			}
+		}
+	}
+	share := float64(sHosts) / float64(runs)
+	assert.InDelta(t, 10.0/18.0, share, 0.02,
+		"Tier S legend-host share %f should be ~10/18", share)
+	assert.Greater(t, share, 0.5,
+		"a pig must be a more likely legend host than a custom bot")
+}
+
 // Real players rated 87+ are elite World Class players, not legends —
 // "legend" means a curated historical card, not a rating band. They must
 // stay in the normal draw. Regression test: the pool once re-derived the

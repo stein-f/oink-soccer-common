@@ -20,9 +20,10 @@
 //     Class odds are Tier S's 49% ÷ 10 = 4.9%.
 //   - Legend lottery: curated legend cards (PlayerLevel == Legendary) are
 //     seeded exactly once each onto weighted host assets before the normal
-//     draw. Tier S/A host at weight 10, Tier Specialist at weight 1 — "a
-//     pig is exactly 10× more likely to land a legend than a schnoz". No
-//     other tier can host a legend.
+//     draw. Tier S hosts at weight 10, Tier A at 8, Tier Specialist at 1 —
+//     pigs are the most likely hosts, and "a pig is exactly 10× more
+//     likely to land a legend than a schnoz". No other tier can host a
+//     legend.
 //
 // "Legend" is a curation concept, not a rating one: legend cards are the
 // historical players (Pelé, Zico, …), identified by their L-prefixed id,
@@ -162,8 +163,11 @@ func DefaultRules() Rules {
 			soccer.PlayerLevelProfessional: 951,
 		},
 		LegendHostWeights: map[AssetTier]uint{
+			// Pigs top the ladder: per-asset a pig must be the most likely
+			// legend host, ahead of custom bots, with the published
+			// "1 Pig = 10 Schnoz" ratio held exactly.
 			AssetTierS:          10,
-			AssetTierA:          10,
+			AssetTierA:          8,
 			AssetTierSpecialist: 1,
 		},
 	}
