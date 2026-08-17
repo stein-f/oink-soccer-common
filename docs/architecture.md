@@ -1,6 +1,6 @@
 # v2 Engine Architecture
 
-This document describes how the v2 simulation works end-to-end. For the public API contract, see `docs/api.md`. For the rebuild history, see `docs/rebuild-plan.md`.
+This document describes how the v2 simulation works end-to-end. For the public API contract, see `docs/api.md`.
 
 ## Package layout
 
@@ -106,7 +106,7 @@ Backfills: `Heading→AttackRating`, `Finishing→AttackRating`, `Technique→Co
 
 ### Skill curve
 
-Every per-player score (`playerControl`, `playerAttack`, `playerDefense`) is then run through `tuning.SkillCurve(raw) = (raw/100)^4 × 100` before team aggregation. This amplifies the gap between elite and average players — without the curve, an 87-rated team beats a 78-rated team only 47% of the time; with it, ~70%. Reference points: 70 → 24, 80 → 41, 87 → 57, 90 → 66, 100 → 100.
+Every per-player score (`playerControl`, `playerAttack`, `playerDefense`) is then run through `tuning.SkillCurve(raw) = (raw/100)^6 × 100` before team aggregation. This amplifies the gap between elite and average players — at k=4.0 an 88-vs-83 matchup produced only ~57% / 24% home/away; k=6.0 sharpens it to ~65% / 18%, and 6.0 is the deliberate ceiling (above it press inverts — see `tuning.SkillCurveExponent`). Reference points: 70 → 12, 80 → 26, 87 → 43, 90 → 53, 100 → 100.
 
 ### Tactic-driven attribute weighting
 
@@ -174,7 +174,7 @@ Each lever shifts a specific multiplier. Defaults (zero value) mean "no effect".
 
 | Lever | Multiplier effect | Attribute weighting effect |
 |-------|-------------------|----------------------------|
-| `Press: low/medium/high` | Opponent control × 1.02 / 0.98 / 0.94. Own injury risk × 0.95 / 1.0 / 1.10. **High press also triggers in-match fatigue** — own attack quality × 0.90 in 60-74min, × 0.82 in 75+min. Without this, the only cost of high press would be the next-game injury bump (mitigatable with recovery items), making it a free lunch. | Shifts control formula's skill ↔ workrate balance (see Attribute model). |
+| `Press: low/medium/high` | Opponent control × 1.02 / 1.0 / 0.94 (medium is the explicit neutral, identical to unset). Own injury risk × 0.95 / 1.0 / 1.10. **High press also triggers in-match fatigue** — own attack quality × 0.90 in 60-74min, × 0.82 in 75+min. Without this, the only cost of high press would be the next-game injury bump (mitigatable with recovery items), making it a free lunch. | Shifts control formula's skill ↔ workrate balance (see Attribute model). |
 | `Tempo: slow/normal/fast` | Total chances × 0.92 / 1.0 / 1.10. Own chance quality × 1.05 / 1.0 / 0.96 (faster = rushed). | (no attribute shift) |
 | `LineHeight: deep/normal/high` | Opponent control × 1.03 / 1.0 / 0.97 (deep cedes the midfield; high compresses the pitch). Own defense × 1.05 / 1.0 / 0.96 (deep is compact; high is brittle to balls in behind). | Shifts outfield defense formula's positioning ↔ speed balance. |
 | `SetPieceTaker: PlayerID` | Named player takes every Free Kick + Penalty (taker = scorer). On Corners the named player *delivers* — they're excluded from the finisher pool, and their `Technique` scales the chance's AttackBoost via `tuning.CornerDeliveryFactor` (≈ ×0.84 at technique=20, ×1.16 at technique=100). The corner finisher is still picked normally by Heading + position. | (no attribute shift) |

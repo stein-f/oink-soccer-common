@@ -15,7 +15,6 @@ New work should target v2.
 - **[v1 → v2 differences](docs/v1-vs-v2.md)** — what changed between engines and why we rebuilt.
 - **[Architecture](docs/architecture.md)** — technical deep-dive on the v2 simulation flow.
 - **[Public API](docs/api.md)** — the locked public surface for consumers.
-- **[Rebuild plan](docs/rebuild-plan.md)** — internal changelog and decision history.
 
 ## Using v2
 
@@ -43,7 +42,7 @@ events, injuries, err := soccer.RunGameWithSeed(bs.Source, home, away)
 
 ## Engine model (v2 in one paragraph)
 
-Each match runs in five phases: **tempo** (how many chances), **schedule** (when), **possession** (which team gets each chance), **resolve** (chance type + attacker + goal/miss), **injuries**. Every formation has a 5-axis trade-off profile (Possession / ChanceCreation / ChanceQuality / DefSolidity / InjuryRisk) — none strictly dominates another. Player attributes use a single `SpeedRating` for sprint + defensive chase, plus an optional `WorkRate` for midfield engine, plus specialist attributes (Heading / Composure / Technique / Finishing / Tackling) that drive specific chance types — a target man with high Heading owns corners, a clutch finisher with high Composure owns penalties. Each `ChanceType` runs its own scoring formula referencing the right attributes. Optional `Tactics` (press, tempo, line height, set-piece taker) and `PlayerRole` (captain, target man, playmaker, ball winner) let managers shape outcomes; press and line height also shift which player attributes are most valuable. A skill curve `(rating/100)^4` amplifies player-quality differentials. The whole thing is a pure function of `(seed, lineups)`.
+Each match runs in five phases: **tempo** (how many chances), **schedule** (when), **possession** (which team gets each chance), **resolve** (chance type + attacker + goal/miss), **injuries**. Every formation has a 5-axis trade-off profile (Possession / ChanceCreation / ChanceQuality / DefSolidity / InjuryRisk) — none strictly dominates another. Player attributes use a single `SpeedRating` for sprint + defensive chase, plus an optional `WorkRate` for midfield engine, plus specialist attributes (Heading / Composure / Technique / Finishing / Tackling) that drive specific chance types — a target man with high Heading owns corners, a clutch finisher with high Composure owns penalties. Each `ChanceType` runs its own scoring formula referencing the right attributes. Optional `Tactics` (press, tempo, line height, set-piece taker) and `PlayerRole` (captain, target man, playmaker, ball winner) let managers shape outcomes; press and line height also shift which player attributes are most valuable. A skill curve `(rating/100)^6` amplifies player-quality differentials. The whole thing is a pure function of `(seed, lineups)`.
 
 ## Allocation
 

@@ -2,7 +2,7 @@
 
 Every player attribute the engine consumes, what it represents in real football, and exactly which algorithms it shows up in. Use this as a recruitment / role-decision reference.
 
-All attributes are on a **0-100** scale. The engine applies a skill curve `(rating/100)^4 × 100` per-player before team aggregation, so an 87-rated attribute is *much* stronger than 78. See `tuning.SkillCurve` in the engine.
+All attributes are on a **0-100** scale. The engine applies a skill curve `(rating/100)^6 × 100` per-player before team aggregation, so an 87-rated attribute is *much* stronger than 78. See `tuning.SkillCurveExponent` in the engine.
 
 > **There is no separate `Passing` attribute.** Passing is folded into `ControlRating` — it represents the broader "ball retention, on-ball decisions, distribution, vision" composite. A high-passing playmaker is a high-`ControlRating` midfielder. Other absences are at the bottom of this doc under [What about... ?](#what-about-).
 

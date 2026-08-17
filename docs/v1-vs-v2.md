@@ -88,9 +88,9 @@ The same lineup can play very differently depending on tactical choices.
 
 **v1**: Hand-tuned 100-row CSV (`scaling.csv`) approximating `y = a × x^b` with `b ≈ 3.1`. This curve made an 87-rated striker meaningfully better than a 78-rated one.
 
-**v2**: Closed-form `(rating / 100)^4` applied at the player level, before team aggregation. Same idea, no embedded data file. England (~87) beats Wales (~78) in roughly 7 of 10 matches — close to real-world intuition.
+**v2**: Closed-form `(rating / 100)^6` applied at the player level, before team aggregation. Same idea, no embedded data file. (Shipped at k=4.0, later steepened to 6.0 — at 4.0 a clear favourite still dropped out of the top 2 of an 8-team season ~19% of the time, which read as "strong teams finish low". See `tuning.SkillCurveExponent` for why 6.0 is the ceiling.)
 
-We initially tried v2 *without* the curve. The result: an 87 vs 78 matchup was 47% / 23% / 30% — almost a coin flip. With the curve it's 72% / 15% / 13%. The curve is what makes player quality feel like it matters.
+We initially tried v2 *without* the curve. The result: an 87 vs 78 matchup was 47% / 23% / 30% — almost a coin flip. The curve is what makes player quality feel like it matters: at k=6.0 an 88-vs-83 favourite wins ~65% and loses only ~18%.
 
 ### 5. Formations are actually balanced
 
@@ -163,4 +163,3 @@ A few things are still in progress:
 - [Manager's Guide](manager-guide.md) — concrete advice on building a team and using tactics.
 - [Architecture](architecture.md) — technical detail of the simulation flow.
 - [Public API](api.md) — exact contract for downstream consumers.
-- [Rebuild plan](rebuild-plan.md) — internal changelog and decision history.

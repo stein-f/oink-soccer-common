@@ -94,20 +94,20 @@ The skill scaling curve (next section) is what makes a top striker actually feel
 
 ## Why an 87-rated striker is far better than a 78-rated one
 
-The engine applies a **skill curve** to every player score: `(rating / 100)^4`. Linearly, an 87 vs a 78 is barely a 10% gap; on the curve, it's a 41% gap.
+The engine applies a **skill curve** to every player score: `(rating / 100)^6`. Linearly, an 87 vs a 78 is barely a 12% gap; on the curve the 87 scores nearly double the 78 (43 vs 23).
 
 | Raw rating | After curve |
 |---|---|
-| 50 | 6 |
-| 70 | 24 |
-| 80 | 41 |
-| 85 | 52 |
-| 87 | 57 |
-| 90 | 66 |
-| 95 | 81 |
+| 50 | 2 |
+| 70 | 12 |
+| 80 | 26 |
+| 85 | 38 |
+| 87 | 43 |
+| 90 | 53 |
+| 95 | 74 |
 | 100 | 100 |
 
-This is what makes recruiting a top player meaningful — without the curve, the random factor in chance resolution would flatten skill differences and make matches feel like coin flips. With the curve, England (avg ~87) beats Wales (avg ~78) in roughly 7 out of 10 matches in our skill-gap tests, which matches real-world intuition.
+This is what makes recruiting a top player meaningful — without the curve, the random factor in chance resolution would flatten skill differences and make matches feel like coin flips. With the curve, a squad averaging 88 beats a squad averaging 83 about 65% of the time, losing only ~18% — a clear favourite tops the table far more often than not, but never with certainty. (See `tuning.SkillCurveExponent` for why 6.0 is the deliberate ceiling.)
 
 ---
 
