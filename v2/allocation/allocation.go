@@ -24,10 +24,12 @@
 //     pig is exactly 10× more likely to land a legend than a schnoz". No
 //     other tier can host a legend.
 //
-// Real players whose overall reaches the legendary band (87+) are indexed
-// under the Legendary level only, which no tier distribution draws (weight
-// 0 everywhere). They are deliberately unreachable — Legendary content is
-// exclusively the curated legend cards. This mirrors shipped v1 behavior.
+// "Legend" is a curation concept, not a rating one: legend cards are the
+// historical players (Pelé, Zico, …), identified by their L-prefixed id,
+// and they are the only candidates carrying PlayerLevel Legendary. Real
+// players whose FIFA overall reaches the 87+ band are capped to World
+// Class by fifacsv and stay in the normal draw — they are ordinary elite
+// players, not legends.
 package allocation
 
 import (
@@ -249,13 +251,10 @@ func NewPool(candidates []Candidate, rules Rules) *Pool {
 		if pos == "" || pos == soccer.PlayerPositionAny {
 			continue
 		}
-		levels := levelsFor(c.Attributes.OverallRating)
-		for _, lvl := range levels {
-			key := poolKey{Position: pos, Level: lvl}
-			p.byPosLevel[key] = append(p.byPosLevel[key], c)
-			if passesSpecialistFilter(c, pos, rules) {
-				p.specialist[key] = append(p.specialist[key], c)
-			}
+		key := poolKey{Position: pos, Level: LevelFor(c.Attributes.OverallRating)}
+		p.byPosLevel[key] = append(p.byPosLevel[key], c)
+		if passesSpecialistFilter(c, pos, rules) {
+			p.specialist[key] = append(p.specialist[key], c)
 		}
 		if c.Attributes.AggressionRating >= rules.AggressionMinimum &&
 			c.Attributes.OverallRating <= rules.AggressionOverallMax {
@@ -272,6 +271,37 @@ func NewPool(candidates []Candidate, rules Rules) *Pool {
 	sortCandidates(p.aggressive)
 	sortCandidates(p.legends)
 	return p
+}
+
+// LevelFor returns the level a real (non-legend-card) player of this overall
+// rating is drawn from. The Legendary band is a curation concept — legend
+// cards are historical players, seeded by the lottery rather than drawn — so
+// a real player who rates into it is capped to World Class, the top drawable
+// level. A real 87+ player is simply the best of the World Class pool.
+//
+// This is the single source of truth: both the pool's bucketing and fifacsv's
+// presentational PlayerLevel call it, so they cannot drift apart. They did
+// once, and every elite real player silently left the game.
+func LevelFor(overall int) soccer.PlayerLevel {
+	for _, lvl := range sortedLevels() {
+		band := PlayerLevelBands[lvl]
+		if overall >= band[0] && overall <= band[1] {
+			if lvl == soccer.PlayerLevelLegendary {
+				return soccer.PlayerLevelWorldClass
+			}
+			return lvl
+		}
+	}
+	return soccer.PlayerLevelAmateur
+}
+
+func sortedLevels() []soccer.PlayerLevel {
+	out := make([]soccer.PlayerLevel, 0, len(PlayerLevelBands))
+	for lvl := range PlayerLevelBands {
+		out = append(out, lvl)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
+	return out
 }
 
 func sortCandidates(s []Candidate) {
@@ -475,29 +505,4 @@ func pickLevel(r *rand.Rand, dist map[soccer.PlayerLevel]uint) soccer.PlayerLeve
 		}
 	}
 	return keys[len(keys)-1]
-}
-
-// levelsFor returns every level whose band contains overall. Players that
-// straddle band boundaries (rare with fixed bands) appear in multiple
-// pools — kept for v1 parity. Real (non-legend-card) players in the 87+
-// band land only in the Legendary bucket, which no distribution draws —
-// they are deliberately out of the game.
-func levelsFor(overall int) []soccer.PlayerLevel {
-	var out []soccer.PlayerLevel
-	for _, lvl := range sortedLevels() {
-		band := PlayerLevelBands[lvl]
-		if overall >= band[0] && overall <= band[1] {
-			out = append(out, lvl)
-		}
-	}
-	return out
-}
-
-func sortedLevels() []soccer.PlayerLevel {
-	out := make([]soccer.PlayerLevel, 0, len(PlayerLevelBands))
-	for lvl := range PlayerLevelBands {
-		out = append(out, lvl)
-	}
-	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
-	return out
 }

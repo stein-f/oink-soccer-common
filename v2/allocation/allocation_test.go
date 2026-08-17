@@ -336,20 +336,37 @@ func TestAllocate_LegendHostOddsFavorPigsTenToOne(t *testing.T) {
 		"Tier S legend-host share %f should be ~10/11", share)
 }
 
-// Real players whose overall reaches the legendary band (87+) but who are
-// not curated legend cards are unreachable: they index only under the
-// Legendary level, which no tier distribution draws.
-func TestAllocate_RealPlayersAboveCapNeverDrawn(t *testing.T) {
-	pool := allocation.NewPool(makeCandidates(), allocation.DefaultRules())
+// Real players rated 87+ are elite World Class players, not legends —
+// "legend" means a curated historical card, not a rating band. They must
+// stay in the normal draw. Regression test: the pool once re-derived the
+// bucket from the raw overall, filing them under the undrawable Legendary
+// band and removing every elite real player from the game.
+func TestAllocate_RealPlayersAboveCapAreDrawn(t *testing.T) {
+	candidates := makeCandidates()
+	var want int
+	for _, c := range candidates {
+		if c.Attributes.OverallRating >= 87 &&
+			c.Attributes.PlayerLevel != soccer.PlayerLevelLegendary {
+			want++
+		}
+	}
+	require.NotZero(t, want, "fixture must contain real 87+ players")
+
+	pool := allocation.NewPool(candidates, allocation.DefaultRules())
 	assets := make([]allocation.Asset, 500)
 	for i := range assets {
 		assets[i] = allocation.Asset{ID: "x", Tier: allocation.AssetTierS}
 	}
 	got, err := allocation.Allocate(rand.New(rand.NewSource(23)), pool, assets)
 	require.NoError(t, err)
+
+	drawn := make(map[string]struct{})
 	for _, a := range got {
-		assert.LessOrEqual(t, a.Player.Attributes.OverallRating, 86,
-			"player %s (overall %d) should be unreachable — 87+ is legend-card territory",
-			a.Player.ID, a.Player.Attributes.OverallRating)
+		if a.Player.Attributes.OverallRating >= 87 &&
+			a.Player.Attributes.PlayerLevel != soccer.PlayerLevelLegendary {
+			drawn[a.Player.ID] = struct{}{}
+		}
 	}
+	assert.NotEmpty(t, drawn,
+		"real 87+ players must be drawable from Tier S, not filed under the undrawable Legendary band")
 }

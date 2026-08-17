@@ -153,28 +153,16 @@ func (rec fifaRecord) positions() []soccer.PlayerPosition {
 // exported by the allocation package (single source of truth). Legendary is
 // reserved for the curated legend cards (allocation.LegendCardPrefix ids) —
 // they alone enter the legend lottery. Real players whose FIFA overall
-// reaches the legendary band are presentationally capped at World Class;
-// their 87+ overall still indexes them under the undrawable Legendary band
-// in the pool, keeping them out of the game entirely.
+// reaches the legendary band are capped to World Class, the top drawable
+// level: "legend" means a historical player, not a rating, so a real 87+
+// player is simply the best of the World Class pool. The pool must bucket
+// on this level and not re-derive from the raw overall, or these players
+// fall into the undrawable Legendary band and leave the game entirely.
 func playerLevelFor(id string, overall int) soccer.PlayerLevel {
 	if strings.HasPrefix(id, allocation.LegendCardPrefix) {
 		return soccer.PlayerLevelLegendary
 	}
-	levels := make([]soccer.PlayerLevel, 0, len(allocation.PlayerLevelBands))
-	for lvl := range allocation.PlayerLevelBands {
-		levels = append(levels, lvl)
-	}
-	sort.Slice(levels, func(i, j int) bool { return levels[i] < levels[j] })
-	for _, lvl := range levels {
-		band := allocation.PlayerLevelBands[lvl]
-		if overall >= band[0] && overall <= band[1] {
-			if lvl == soccer.PlayerLevelLegendary {
-				return soccer.PlayerLevelWorldClass
-			}
-			return lvl
-		}
-	}
-	return soccer.PlayerLevelAmateur
+	return allocation.LevelFor(overall)
 }
 
 // normalizeRating fills FIFA's many zeroed columns (e.g. goalkeeping for an
