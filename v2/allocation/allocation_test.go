@@ -243,9 +243,11 @@ func TestAllocate_SpecialistTierRespectsPositionFilters(t *testing.T) {
 	}
 }
 
-// The published ratio: schnoz World Class odds are Tier S's 49% ÷ 10 =
-// 4.9%. Monte Carlo over one big allocation; generous tolerance to keep
-// the test stable across Go versions.
+// The published rate: the specialist level roll is 8.5% World Class —
+// above Tier B's 8% headline, with pigs still ~5.6x more likely to roll
+// World Class. Monte Carlo over one big allocation; generous tolerance to
+// keep the test stable across Go versions. Counts by rating band because
+// the fixtures don't populate PlayerLevel.
 func TestAllocate_SpecialistWorldClassShareMatchesRatio(t *testing.T) {
 	pool := allocation.NewPool(makeCandidates(), allocation.DefaultRules())
 	assets := make([]allocation.Asset, 20000)
@@ -262,8 +264,8 @@ func TestAllocate_SpecialistWorldClassShareMatchesRatio(t *testing.T) {
 		}
 	}
 	share := float64(wc) / float64(len(got))
-	assert.InDelta(t, 0.049, share, 0.015,
-		"specialist World Class share %f should be ~4.9%%", share)
+	assert.InDelta(t, 0.085, share, 0.015,
+		"specialist World Class share %f should be ~8.5%%", share)
 }
 
 // Legend cards are seeded exactly once each, and only Tier S / Tier A /

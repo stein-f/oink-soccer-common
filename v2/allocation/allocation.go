@@ -159,8 +159,10 @@ func DefaultRules() Rules {
 			soccer.PlayerPositionDefense:  {Stat: SpecialistStatTackling, Minimum: 78},
 		},
 		SpecialistLevelDistribution: map[soccer.PlayerLevel]uint{
-			soccer.PlayerLevelWorldClass:   49,
-			soccer.PlayerLevelProfessional: 951,
+			// 8.5% keeps the schnoz World Class headline above Tier B's 8%
+			// while pigs stay ~5.6x more likely to roll World Class.
+			soccer.PlayerLevelWorldClass:   85,
+			soccer.PlayerLevelProfessional: 915,
 		},
 		LegendHostWeights: map[AssetTier]uint{
 			// Pigs top the ladder: per-asset a pig must be the most likely
