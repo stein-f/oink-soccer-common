@@ -1,5 +1,5 @@
 {
-  "current_season": 16,
+  "current_season": 17,
   "seasons": [
     {
       "season": 3,
@@ -84,6 +84,12 @@
       "collab": "dark-coin",
       "assets_path": "cmd/allocation/s16/eligible_assets.csv",
       "round": 62030282
+    },
+    {
+      "season": 17,
+      "collab": "schnoz",
+      "assets_path": "cmd/allocation/s17/eligible_assets.csv",
+      "round": 64196914
     }
   ]
 }
