@@ -157,8 +157,8 @@ func TestTeamScore_UniformPlayersProduceUniformTeamScore(t *testing.T) {
 	}}
 
 	want := tuning.SkillCurve(80)
-	assert.InDelta(t, want, teamControl(lineup), 1e-9)
-	assert.InDelta(t, want, teamDefense(lineup), 1e-9)
+	assert.InDelta(t, want, teamControl(lineup, nil), 1e-9)
+	assert.InDelta(t, want, teamDefense(lineup, nil), 1e-9)
 }
 
 // v1 special-cased the Box formation in team scoring (Box gave attackers
@@ -188,7 +188,7 @@ func TestTeamScore_FormationDoesNotChangePositionWeights(t *testing.T) {
 	withBox := GameLineup{Team: Team{Formation: FormationTypeBox}, Players: players}
 
 	// Same players + same position-weights ⇒ same score regardless of formation.
-	assert.Equal(t, teamControl(withDiamond), teamControl(withBox),
+	assert.Equal(t, teamControl(withDiamond, nil), teamControl(withBox, nil),
 		"formation must not change the position-weight calculation")
 }
 
@@ -234,9 +234,9 @@ func TestPlaymaker_FocalPointShiftsAroundPositionMean(t *testing.T) {
 			}}
 		}
 
-		noPlaymaker := teamControl(build("", ""))
-		strongPlaymaker := teamControl(build(PlayerRolePlaymaker, ""))
-		weakPlaymaker := teamControl(build("", PlayerRolePlaymaker))
+		noPlaymaker := teamControl(build("", ""), nil)
+		strongPlaymaker := teamControl(build(PlayerRolePlaymaker, ""), nil)
+		weakPlaymaker := teamControl(build("", PlayerRolePlaymaker), nil)
 
 		t.Logf("teamControl: none=%.3f strong-PM=%.3f weak-PM=%.3f",
 			noPlaymaker, strongPlaymaker, weakPlaymaker)
@@ -261,8 +261,8 @@ func TestPlaymaker_FocalPointShiftsAroundPositionMean(t *testing.T) {
 				b, c, atk,
 			}}
 		}
-		noPlaymaker := teamControl(uniform(""))
-		withPlaymaker := teamControl(uniform(PlayerRolePlaymaker))
+		noPlaymaker := teamControl(uniform(""), nil)
+		withPlaymaker := teamControl(uniform(PlayerRolePlaymaker), nil)
 		assert.InDelta(t, noPlaymaker, withPlaymaker, 1e-9,
 			"with all mids equal, Playmaker should not move team control")
 	})
@@ -316,9 +316,9 @@ func TestBallWinner_FocalPointShiftsAroundPositionMean(t *testing.T) {
 			}}
 		}
 
-		none := teamDefense(build("", ""))
-		strongBW := teamDefense(build(PlayerRoleBallWinner, ""))
-		weakBW := teamDefense(build("", PlayerRoleBallWinner))
+		none := teamDefense(build("", ""), nil)
+		strongBW := teamDefense(build(PlayerRoleBallWinner, ""), nil)
+		weakBW := teamDefense(build("", PlayerRoleBallWinner), nil)
 
 		t.Logf("teamDefense: none=%.3f strong-BW=%.3f weak-BW=%.3f", none, strongBW, weakBW)
 
@@ -339,8 +339,8 @@ func TestBallWinner_FocalPointShiftsAroundPositionMean(t *testing.T) {
 				b, c, mid, atk,
 			}}
 		}
-		none := teamDefense(uniform(""))
-		withBW := teamDefense(uniform(PlayerRoleBallWinner))
+		none := teamDefense(uniform(""), nil)
+		withBW := teamDefense(uniform(PlayerRoleBallWinner), nil)
 		assert.InDelta(t, none, withBW, 1e-9,
 			"with all defenders equal, Ball Winner should not move team defense")
 	})

@@ -14,8 +14,11 @@ import "math"
 
 // --- Boost decay -------------------------------------------------------------
 
-// BoostDecay is the per-application decay multiplier for stacked boosts.
-// apps=0 → 1.0×, apps=1 → 0.97×, apps=2 → 0.97², …
+// BoostDecay is the decay multiplier applied per unit of decay charge a team
+// has accrued from item use. charge=0 → 1.0×, charge=1 → 0.97×, charge=2 →
+// 0.97², and fractional charges interpolate. Charge is weighted by item
+// strength by the caller, so a boosted day on a +10% item costs ~3.3× a
+// boosted day on a +3% one.
 const BoostDecay = 0.97
 
 // BoostMinMultiplier is a floor so a heavily-stacked boost never decays into

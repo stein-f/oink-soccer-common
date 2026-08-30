@@ -43,15 +43,21 @@ func simulateMatch(r *rand.Rand, home, away GameLineup) ([]GameEvent, Injuries) 
 	totalChances := decideMatchTempo(r, home.Team.Formation, away.Team.Formation, tempoFactor)
 	minutes := scheduleMinutes(r, totalChances)
 
+	// Item boosts are rolled once per team for the whole match, so one item
+	// is one effect across control, defense and attack rather than a fresh
+	// roll wherever it happens to be read.
+	homeItemBoost, awayItemBoost := teamBoost(r, home), teamBoost(r, away)
+	homePosBoosts, awayPosBoosts := rollPositionBoosts(r, home), rollPositionBoosts(r, away)
+
 	// Compute team scores once — they don't change minute-to-minute.
 	// Pressing reduces *opponent* control; line height does the same.
-	homeControl := teamControl(home) * homeProfile.Possession * captainBoost(home) * teamBoost(r, home)
-	awayControl := teamControl(away) * awayProfile.Possession * captainBoost(away) * teamBoost(r, away)
+	homeControl := teamControl(home, homePosBoosts) * homeProfile.Possession * captainBoost(home) * homeItemBoost
+	awayControl := teamControl(away, awayPosBoosts) * awayProfile.Possession * captainBoost(away) * awayItemBoost
 	homeControl *= pressControlFactor(awayTactics.Press) * lineHeightControlFactor(awayTactics.LineHeight)
 	awayControl *= pressControlFactor(homeTactics.Press) * lineHeightControlFactor(homeTactics.LineHeight)
 
-	homeDefense := teamDefense(home) * homeProfile.DefSolidity * captainBoost(home) * tuning.DefenseBiasMultiplier * teamBoost(r, home)
-	awayDefense := teamDefense(away) * awayProfile.DefSolidity * captainBoost(away) * tuning.DefenseBiasMultiplier * teamBoost(r, away)
+	homeDefense := teamDefense(home, homePosBoosts) * homeProfile.DefSolidity * captainBoost(home) * tuning.DefenseBiasMultiplier * homeItemBoost
+	awayDefense := teamDefense(away, awayPosBoosts) * awayProfile.DefSolidity * captainBoost(away) * tuning.DefenseBiasMultiplier * awayItemBoost
 	homeDefense *= lineHeightDefenseFactor(homeTactics.LineHeight)
 	awayDefense *= lineHeightDefenseFactor(awayTactics.LineHeight)
 
@@ -62,20 +68,26 @@ func simulateMatch(r *rand.Rand, home, away GameLineup) ([]GameEvent, Injuries) 
 		// Possession: which team gets this chance?
 		attacker := pickAttackingTeam(r, homeControl, awayControl)
 		var (
-			attackingLineup  GameLineup
-			attackingProfile FormationProfile
-			attackingTactics Tactics
-			defendingDefense float64
+			attackingLineup    GameLineup
+			attackingProfile   FormationProfile
+			attackingTactics   Tactics
+			attackingItemBoost float64
+			attackingPosBoosts positionMultipliers
+			defendingDefense   float64
 		)
 		if attacker == TeamTypeHome {
 			attackingLineup = home
 			attackingProfile = homeProfile
 			attackingTactics = homeTactics
+			attackingItemBoost = homeItemBoost
+			attackingPosBoosts = homePosBoosts
 			defendingDefense = awayDefense
 		} else {
 			attackingLineup = away
 			attackingProfile = awayProfile
 			attackingTactics = awayTactics
+			attackingItemBoost = awayItemBoost
+			attackingPosBoosts = awayPosBoosts
 			defendingDefense = homeDefense
 		}
 
@@ -84,7 +96,11 @@ func simulateMatch(r *rand.Rand, home, away GameLineup) ([]GameEvent, Injuries) 
 
 		ap := pickAttackerWithTactics(r, attackingLineup, ct, attackingTactics)
 		deliveryFactor := cornerDeliveryFactor(attackingLineup, ct, attackingTactics)
-		ev := resolveChance(r, ap, attacker, ct, attackingProfile, attackingTactics, defendingDefense, deliveryFactor, minutes[i])
+		// Items lift the shot as well as possession and defense. A position
+		// boost only counts when one of the boosted players is the one
+		// shooting.
+		attackBoost := attackingItemBoost * attackingPosBoosts.forPosition(ap.SelectedPosition)
+		ev := resolveChance(r, ap, attacker, ct, attackingProfile, attackingTactics, defendingDefense, deliveryFactor, attackBoost, minutes[i])
 		events = append(events, ev)
 	}
 
@@ -198,13 +214,14 @@ func pickAttackingTeam(r *rand.Rand, homeWeight, awayWeight float64) TeamType {
 // Tactics affect chance quality (faster tempo ⇒ rushed shots). deliveryFactor
 // scales the chance's effective attack — currently used by corners to bake in
 // the named SetPieceTaker's delivery quality (1.0 = neutral / no taker).
-func resolveChance(r *rand.Rand, attacker SelectedPlayer, team TeamType, ct ChanceType, attackingProfile FormationProfile, attackingTactics Tactics, defendingDefense, deliveryFactor float64, minute int) GameEvent {
+func resolveChance(r *rand.Rand, attacker SelectedPlayer, team TeamType, ct ChanceType, attackingProfile FormationProfile, attackingTactics Tactics, defendingDefense, deliveryFactor, attackBoost float64, minute int) GameEvent {
 	atk := playerAttackForChance(attacker, ct)
 	atk *= attackingProfile.ChanceCreation * attackingProfile.ChanceQuality
 	atk *= chanceTypeAttackBoost(ct)
 	atk *= tempoQualityFactor(attackingTactics.Tempo)
 	atk *= pressFatigueFactor(attackingTactics.Press, minute)
 	atk *= deliveryFactor
+	atk *= attackBoost
 
 	def := defendingDefense * chanceTypeDefenseScale(ct)
 
@@ -269,8 +286,9 @@ func isSetPieceChance(ct ChanceType) bool {
 	return false
 }
 
-// teamBoost compounds Team-typed boosts on a lineup. Position-specific
-// boosts are honored downstream in the team-score helpers (Phase 5 work).
+// teamBoost compounds Team-typed boosts on a lineup. The result multiplies
+// every team score — control, defense and attack — which is what the truffle
+// items are sold as: "a team boost applied to all attributes".
 func teamBoost(r *rand.Rand, lineup GameLineup) float64 {
 	total := 1.0
 	for _, b := range lineup.ItemBoosts {
@@ -282,20 +300,64 @@ func teamBoost(r *rand.Rand, lineup GameLineup) float64 {
 	return total
 }
 
+// positionMultipliers is the multiplier each position group carries from
+// Position-typed boosts. A nil map means no position boosts are active.
+type positionMultipliers map[PlayerPosition]float64
+
+func (pm positionMultipliers) forPosition(p PlayerPosition) float64 {
+	if m, ok := pm[p]; ok {
+		return m
+	}
+	return 1.0
+}
+
+// rollPositionBoosts compounds Position-typed boosts, grouped by the position
+// they target. A Half-time Orange targets Midfield, so it lifts what the
+// midfielders contribute — to possession, to the defensive shape, and to a
+// shot when one of them takes it — and leaves the rest of the squad alone.
+//
+// Rolled once per team per match rather than once per consultation, so a
+// single item lands as one effect rather than a fresh number everywhere it
+// is read.
+func rollPositionBoosts(r *rand.Rand, lineup GameLineup) positionMultipliers {
+	var pm positionMultipliers
+	for _, b := range lineup.ItemBoosts {
+		if b.BoostType != BoostTypePosition {
+			continue
+		}
+		if pm == nil {
+			pm = positionMultipliers{}
+		}
+		pm[b.BoostPosition] = pm.forPosition(b.BoostPosition) * rollBoost(r, b)
+	}
+	return pm
+}
+
 // rollBoost samples a value from [Min, Max] and applies diminishing returns
-// when Applications > 1. Mirrors v1 semantics: positive boosts decay only
-// the excess over 1.0 so they never become a debuff; debuffs decay whole.
+// against the decay charge the team has already accrued this season.
+//
+// Decay always pulls an effect *toward* neutral and never past it. This is
+// the bug that got decay switched off in the first place: the original
+// formula was a flat `base * multiplier`, so a +3% truffle on a team with
+// any decay came out at 1.03 * 0.97 = 0.999 — a nerf for the team that paid
+// for it. v1 patched the positive branch but left debuffs on `base * m`,
+// which pushes them *further* from 1.0 — the same bug with the sign flipped,
+// and live for the form boost the moment it ever carries a charge.
+// Interpolating toward 1.0 is correct in both directions and cannot invert
+// the sign of an effect no matter how large the charge grows.
 func rollBoost(r *rand.Rand, b Boost) float64 {
+	// An unpopulated boost is neutral. Without this a zero-valued Boost that
+	// reaches here multiplies the team score by 0 rather than leaving it be.
+	if b.MinBoost == 0 && b.MaxBoost == 0 {
+		return 1.0
+	}
 	base := b.MinBoost + r.Float64()*(b.MaxBoost-b.MinBoost)
-	if b.Applications <= 1 {
+	if b.DecayCharge <= 0 {
 		return base
 	}
-	m := math.Pow(tuning.BoostDecay, float64(b.Applications))
+	m := math.Pow(tuning.BoostDecay, b.DecayCharge)
 	if m < tuning.BoostMinMultiplier {
 		m = tuning.BoostMinMultiplier
 	}
-	if base >= 1.0 {
-		return 1.0 + (base-1.0)*m
-	}
-	return base * m
+	return 1.0 + (base-1.0)*m
 }

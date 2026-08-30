@@ -210,10 +210,14 @@ func isGoalkeeper(p PlayerAttributes) bool {
 // score; a low-rated Playmaker drags it the other way. This makes Playmaker
 // a real choice instead of a free boost: tag your best controller and you
 // gain, tag a weak player and you lose.
-func teamControl(lineup GameLineup) float64 {
+//
+// posBoosts scales the players a Position-typed item targets, and only
+// those: a midfield boost lifts the midfield group's mean, which then carries
+// its normal 0.65 share of the team's control.
+func teamControl(lineup GameLineup, posBoosts positionMultipliers) float64 {
 	tactics := lineup.Team.Tactics
 	return rolePositionAverage(lineup.Players, tuning.ControlPositionWeights, func(sp SelectedPlayer) (float64, float64) {
-		score := playerControl(sp, tactics)
+		score := playerControl(sp, tactics) * posBoosts.forPosition(sp.SelectedPosition)
 		weight := 1.0
 		if sp.Role == PlayerRolePlaymaker {
 			weight = tuning.PlaymakerControlWeight
@@ -225,11 +229,14 @@ func teamControl(lineup GameLineup) float64 {
 // teamDefense mirrors teamControl's structure: position-weighted average
 // of player defense scores, with a focal-point bump for Ball Winners.
 // A quality Ball Winner amplifies the team's defensive shape; a weak one
-// drags it down — exactly like Playmaker on the control side.
-func teamDefense(lineup GameLineup) float64 {
+// drags it down — exactly like Playmaker on the control side. posBoosts
+// applies the same way it does in teamControl, over this side's position
+// weights — so a midfield boost shows up here too, at midfield's smaller
+// 0.20 share of the defensive total.
+func teamDefense(lineup GameLineup, posBoosts positionMultipliers) float64 {
 	tactics := lineup.Team.Tactics
 	return rolePositionAverage(lineup.Players, tuning.DefensePositionWeights, func(sp SelectedPlayer) (float64, float64) {
-		score := playerDefense(sp, tactics)
+		score := playerDefense(sp, tactics) * posBoosts.forPosition(sp.SelectedPosition)
 		weight := 1.0
 		if sp.Role == PlayerRoleBallWinner {
 			weight = tuning.BallWinnerDefenseWeight
