@@ -130,3 +130,39 @@ func TestCreateGameStats_AggregatesShotsAndGoals(t *testing.T) {
 	assert.Equal(t, soccer.TeamStats{TeamType: soccer.TeamTypeHome, Shots: 2, Goals: 1}, stats.HomeTeamStats)
 	assert.Equal(t, soccer.TeamStats{TeamType: soccer.TeamTypeAway, Shots: 3, Goals: 1}, stats.AwayTeamStats)
 }
+
+func TestRunGameWithSeedDetailed_ReportsRolledBoosts(t *testing.T) {
+	home := strongLineup(soccer.FormationTypeDiamond)
+	home.ItemBoosts = []soccer.Boost{
+		{BoostType: soccer.BoostTypeTeam, MinBoost: 1.03, MaxBoost: 1.07, Note: "golden"},
+		{BoostType: soccer.BoostTypePosition, BoostPosition: soccer.PlayerPositionMidfield, MinBoost: 1.03, MaxBoost: 1.07, Note: "orange"},
+	}
+	away := strongLineup(soccer.FormationTypeDiamond)
+
+	out, err := soccer.RunGameWithSeedDetailed(rand.New(rand.NewSource(7)), home, away)
+	require.NoError(t, err)
+	require.Len(t, out.Boosts.Home, 2)
+	assert.Empty(t, out.Boosts.Away)
+	assert.Equal(t, "golden", out.Boosts.Home[0].Note)
+	assert.Equal(t, "orange", out.Boosts.Home[1].Note)
+	for _, b := range out.Boosts.Home {
+		assert.GreaterOrEqual(t, b.Multiplier, 1.03)
+		assert.LessOrEqual(t, b.Multiplier, 1.07)
+	}
+
+	// Same inputs, same rolls, and the plain entry point plays the same match.
+	again, err := soccer.RunGameWithSeedDetailed(rand.New(rand.NewSource(7)), home, away)
+	require.NoError(t, err)
+	assert.Equal(t, out, again)
+	events, injuries, err := soccer.RunGameWithSeed(rand.New(rand.NewSource(7)), home, away)
+	require.NoError(t, err)
+	assert.Equal(t, out.Events, events)
+	assert.Equal(t, out.Injuries, injuries)
+
+	// The reported value is net of decay: it moves toward neutral, never past it.
+	home.ItemBoosts[0].DecayCharge = 10
+	decayed, err := soccer.RunGameWithSeedDetailed(rand.New(rand.NewSource(7)), home, away)
+	require.NoError(t, err)
+	assert.Less(t, decayed.Boosts.Home[0].Multiplier, out.Boosts.Home[0].Multiplier)
+	assert.Greater(t, decayed.Boosts.Home[0].Multiplier, 1.0)
+}

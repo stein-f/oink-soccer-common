@@ -30,7 +30,7 @@ import (
 //
 // Determinism: the function is a pure function of (rand, home, away). No
 // time.Now(), no globals, no I/O.
-func simulateMatch(r *rand.Rand, home, away GameLineup) ([]GameEvent, Injuries) {
+func simulateMatch(r *rand.Rand, home, away GameLineup) ([]GameEvent, Injuries, MatchBoosts) {
 	homeProfile := formationProfileFor(home.Team.Formation)
 	awayProfile := formationProfileFor(away.Team.Formation)
 
@@ -46,8 +46,11 @@ func simulateMatch(r *rand.Rand, home, away GameLineup) ([]GameEvent, Injuries) 
 	// Item boosts are rolled once per team for the whole match, so one item
 	// is one effect across control, defense and attack rather than a fresh
 	// roll wherever it happens to be read.
-	homeItemBoost, awayItemBoost := teamBoost(r, home), teamBoost(r, away)
-	homePosBoosts, awayPosBoosts := rollPositionBoosts(r, home), rollPositionBoosts(r, away)
+	homeItemBoost, homeRolls := teamBoost(r, home)
+	awayItemBoost, awayRolls := teamBoost(r, away)
+	homePosBoosts, homePosRolls := rollPositionBoosts(r, home)
+	awayPosBoosts, awayPosRolls := rollPositionBoosts(r, away)
+	boosts := MatchBoosts{Home: append(homeRolls, homePosRolls...), Away: append(awayRolls, awayPosRolls...)}
 
 	// Compute team scores once — they don't change minute-to-minute.
 	// Pressing reduces *opponent* control; line height does the same.
@@ -110,7 +113,7 @@ func simulateMatch(r *rand.Rand, home, away GameLineup) ([]GameEvent, Injuries) 
 	homeInjuries := rollInjuries(r, home, awayAggression, awayProfile.InjuryRisk*pressInjuryFactor(homeTactics.Press), home.Team.ID)
 	awayInjuries := rollInjuries(r, away, homeAggression, homeProfile.InjuryRisk*pressInjuryFactor(awayTactics.Press), away.Team.ID)
 
-	return events, Injuries{HomeTeamInjuries: homeInjuries, AwayTeamInjuries: awayInjuries}
+	return events, Injuries{HomeTeamInjuries: homeInjuries, AwayTeamInjuries: awayInjuries}, boosts
 }
 
 // decideMatchTempo picks the total number of chances using the truth-table
@@ -289,15 +292,22 @@ func isSetPieceChance(ct ChanceType) bool {
 // teamBoost compounds Team-typed boosts on a lineup. The result multiplies
 // every team score — control, defense and attack — which is what the truffle
 // items are sold as: "a team boost applied to all attributes".
-func teamBoost(r *rand.Rand, lineup GameLineup) float64 {
+func teamBoost(r *rand.Rand, lineup GameLineup) (float64, []BoostRoll) {
 	total := 1.0
+	var rolls []BoostRoll
 	for _, b := range lineup.ItemBoosts {
 		if b.BoostType != BoostTypeTeam {
 			continue
 		}
-		total *= rollBoost(r, b)
+		rolled := rollBoost(r, b)
+		total *= rolled
+		rolls = append(rolls, boostRoll(b, rolled))
 	}
-	return total
+	return total, rolls
+}
+
+func boostRoll(b Boost, rolled float64) BoostRoll {
+	return BoostRoll{Note: b.Note, BoostType: b.BoostType, BoostPosition: b.BoostPosition, MinBoost: b.MinBoost, MaxBoost: b.MaxBoost, Multiplier: rolled}
 }
 
 // positionMultipliers is the multiplier each position group carries from
@@ -319,8 +329,9 @@ func (pm positionMultipliers) forPosition(p PlayerPosition) float64 {
 // Rolled once per team per match rather than once per consultation, so a
 // single item lands as one effect rather than a fresh number everywhere it
 // is read.
-func rollPositionBoosts(r *rand.Rand, lineup GameLineup) positionMultipliers {
+func rollPositionBoosts(r *rand.Rand, lineup GameLineup) (positionMultipliers, []BoostRoll) {
 	var pm positionMultipliers
+	var rolls []BoostRoll
 	for _, b := range lineup.ItemBoosts {
 		if b.BoostType != BoostTypePosition {
 			continue
@@ -328,9 +339,11 @@ func rollPositionBoosts(r *rand.Rand, lineup GameLineup) positionMultipliers {
 		if pm == nil {
 			pm = positionMultipliers{}
 		}
-		pm[b.BoostPosition] = pm.forPosition(b.BoostPosition) * rollBoost(r, b)
+		rolled := rollBoost(r, b)
+		pm[b.BoostPosition] = pm.forPosition(b.BoostPosition) * rolled
+		rolls = append(rolls, boostRoll(b, rolled))
 	}
-	return pm
+	return pm, rolls
 }
 
 // rollBoost samples a value from [Min, Max] and applies diminishing returns

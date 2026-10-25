@@ -88,7 +88,7 @@ func TestRollPositionBoosts_HalfTimeOrangeReachesTheEngine(t *testing.T) {
 	lineup := boostTestLineup()
 	lineup.ItemBoosts = []Boost{orange}
 
-	pm := rollPositionBoosts(rand.New(rand.NewSource(7)), lineup)
+	pm, _ := rollPositionBoosts(rand.New(rand.NewSource(7)), lineup)
 
 	require.NotNil(t, pm, "a Position-typed boost must produce a multiplier")
 	assert.InDelta(t, 1.05, pm.forPosition(PlayerPositionMidfield), 0.02)
@@ -105,7 +105,7 @@ func TestRollPositionBoosts_IgnoresTeamBoostsAndCompoundsPerPosition(t *testing.
 		{BoostType: BoostTypePosition, BoostPosition: PlayerPositionDefense, MinBoost: 1.50, MaxBoost: 1.50},
 	}
 
-	pm := rollPositionBoosts(rand.New(rand.NewSource(7)), lineup)
+	pm, _ := rollPositionBoosts(rand.New(rand.NewSource(7)), lineup)
 
 	assert.InDelta(t, 1.32, pm.forPosition(PlayerPositionMidfield), 1e-9, "1.10 * 1.20")
 	assert.InDelta(t, 1.50, pm.forPosition(PlayerPositionDefense), 1e-9)
@@ -114,7 +114,7 @@ func TestRollPositionBoosts_IgnoresTeamBoostsAndCompoundsPerPosition(t *testing.
 }
 
 func TestRollPositionBoosts_NoBoostsIsNil(t *testing.T) {
-	pm := rollPositionBoosts(rand.New(rand.NewSource(7)), boostTestLineup())
+	pm, _ := rollPositionBoosts(rand.New(rand.NewSource(7)), boostTestLineup())
 
 	assert.Nil(t, pm)
 	assert.Equal(t, 1.0, pm.forPosition(PlayerPositionMidfield),

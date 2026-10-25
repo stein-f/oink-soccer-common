@@ -15,9 +15,25 @@ import "math/rand"
 // expiry timestamp is left as the zero time so the engine itself stays
 // deterministic. Callers should attach a clock with ResolveInjuryExpiry.
 func RunGameWithSeed(r *rand.Rand, home GameLineup, away GameLineup) ([]GameEvent, Injuries, error) {
+	outcome, err := RunGameWithSeedDetailed(r, home, away)
+	return outcome.Events, outcome.Injuries, err
+}
+
+// MatchOutcome is a full run: the events and injuries RunGameWithSeed
+// returns, plus every item boost as it was rolled for the match.
+type MatchOutcome struct {
+	Events   []GameEvent `json:"events"`
+	Injuries Injuries    `json:"injuries"`
+	Boosts   MatchBoosts `json:"boosts"`
+}
+
+// RunGameWithSeedDetailed is RunGameWithSeed with the rolled boosts reported.
+// It consumes the random source identically, so both entry points play the
+// same match for the same inputs.
+func RunGameWithSeedDetailed(r *rand.Rand, home GameLineup, away GameLineup) (MatchOutcome, error) {
 	if r == nil {
-		return nil, Injuries{}, ErrNilRandSource
+		return MatchOutcome{}, ErrNilRandSource
 	}
-	events, injuries := simulateMatch(r, home, away)
-	return events, injuries, nil
+	events, injuries, boosts := simulateMatch(r, home, away)
+	return MatchOutcome{Events: events, Injuries: injuries, Boosts: boosts}, nil
 }

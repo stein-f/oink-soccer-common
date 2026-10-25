@@ -29,3 +29,23 @@ type Boost struct {
 	// is constant across item tiers. 0 means no decay.
 	DecayCharge float64 `json:"decay_charge"`
 }
+
+// BoostRoll is one boost as it landed in a match: the value drawn from its
+// range, net of the team's season decay, as the multiplier the engine used.
+// Note carries whatever the caller put on the Boost (lost-pigs stores the
+// item id there), so a consumer can say which item rolled what.
+type BoostRoll struct {
+	Note          string         `json:"note,omitempty"`
+	BoostType     BoostType      `json:"boost_type"`
+	BoostPosition PlayerPosition `json:"boost_position,omitempty"`
+	MinBoost      float64        `json:"min_boost"`
+	MaxBoost      float64        `json:"max_boost"`
+	Multiplier    float64        `json:"multiplier"`
+}
+
+// MatchBoosts lists each side's boosts as rolled for one match, team boosts
+// first and then position boosts, in lineup order.
+type MatchBoosts struct {
+	Home []BoostRoll `json:"home"`
+	Away []BoostRoll `json:"away"`
+}

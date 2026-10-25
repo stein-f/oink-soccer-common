@@ -14,6 +14,15 @@ v1 (`github.com/stein-f/oink-soccer-common`) and v2 can coexist in the same proj
 
 ```go
 func RunGameWithSeed(rand *rand.Rand, home, away GameLineup) ([]GameEvent, Injuries, error)
+
+// The same match, plus every item boost as it was rolled (net of decay).
+func RunGameWithSeedDetailed(rand *rand.Rand, home, away GameLineup) (MatchOutcome, error)
+
+type MatchOutcome struct {
+	Events   []GameEvent
+	Injuries Injuries
+	Boosts   MatchBoosts // Home/Away []BoostRoll: Note, type, position, range, Multiplier
+}
 ```
 
 Simulates a deterministic match. Same `(seed, home, away)` always returns the same output. Returns `ErrNilRandSource` if `rand` is nil.
