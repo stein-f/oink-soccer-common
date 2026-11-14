@@ -1,6 +1,9 @@
 package soccer
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 // RunGameWithSeed simulates a deterministic match between two lineups using
 // the supplied random source. The same (seed, home, away) inputs always
@@ -25,6 +28,37 @@ type MatchOutcome struct {
 	Events   []GameEvent `json:"events"`
 	Injuries Injuries    `json:"injuries"`
 	Boosts   MatchBoosts `json:"boosts"`
+}
+
+// Model selects how chances are resolved. Results are only reproducible from
+// a seed with the same model, so a season is played on one model throughout.
+type Model string
+
+const (
+	// ModelClassic is the original model (seasons 1-18): a handful of shots,
+	// each decided by one roll of attack against the whole defending team.
+	ModelClassic Model = ""
+	// ModelContest resolves possessions as a chain of contests between
+	// players (build-up, shot, keeper), with set pieces caused by fouls,
+	// blocks and saves. See docs/realism-review.md.
+	ModelContest Model = "contest"
+)
+
+// RunGameWithModel plays a match under the given model. ModelClassic is
+// exactly RunGameWithSeedDetailed.
+func RunGameWithModel(r *rand.Rand, home, away GameLineup, m Model) (MatchOutcome, error) {
+	if r == nil {
+		return MatchOutcome{}, ErrNilRandSource
+	}
+	switch m {
+	case ModelClassic:
+		return RunGameWithSeedDetailed(r, home, away)
+	case ModelContest:
+		events, injuries, boosts := simulateContestMatch(r, home, away)
+		return MatchOutcome{Events: events, Injuries: injuries, Boosts: boosts}, nil
+	default:
+		return MatchOutcome{}, fmt.Errorf("%w: %q", ErrUnknownModel, m)
+	}
 }
 
 // RunGameWithSeedDetailed is RunGameWithSeed with the rolled boosts reported.

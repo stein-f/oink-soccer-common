@@ -179,6 +179,28 @@ Each lever shifts a specific multiplier. Defaults (zero value) mean "no effect".
 | `LineHeight: deep/normal/high` | Opponent control × 1.03 / 1.0 / 0.97 (deep cedes the midfield; high compresses the pitch). Own defense × 1.05 / 1.0 / 0.96 (deep is compact; high is brittle to balls in behind). | Shifts outfield defense formula's positioning ↔ speed balance. |
 | `SetPieceTaker: PlayerID` | Named player takes every Free Kick + Penalty (taker = scorer). On Corners the named player *delivers* — they're excluded from the finisher pool, and their `Technique` scales the chance's AttackBoost via `tuning.CornerDeliveryFactor` (≈ ×0.84 at technique=20, ×1.16 at technique=100). The corner finisher is still picked normally by Heading + position. | (no attribute shift) |
 
+## Contest model (season 19+)
+
+`RunGameWithModel(..., ModelContest)` runs `simulateContestMatch` (`contest.go`) instead of `simulateMatch`. The classic flow above is untouched. Per match:
+
+```
+possessions = uniform(ContestPossessions) × tempo          (same for every formation)
+for each possession, in minute order:
+    team    ← possession weights^0.5, with score effects (trailers see more of the ball)
+              and home advantage (ContestHomePossession)
+    build-up: carrier (control; Playmaker more often) vs stopper (defense; Ball Winner more often)
+              stopped → maybe a foul (stopper's aggression, press) → free kick or penalty
+              not stopped → open chance: Open Play / Cross / Long Range / one-on-one
+                            (more one-on-ones against a high line)
+    shot:     shooter (chance-type formula, as classic) vs blocker → blocked (maybe a corner)
+              → on target? (difficulty by chance type)
+              → keeper (GoalkeeperRating) → saved (maybe a corner) or goal
+```
+
+Every duel is `a^e / (a^e + b^e)` with `e = ContestDuelExponent` (0.45): a match now passes through several contests, and at full skill-curve strength they compound into certainties. Leaders ease off from three goals up (`ContestEaseOff`). All constants live in `internal/tuning/contest.go`; `cmd/calibrate` replays real line-ups to tune them, and `TestContest_FormationBalance` keeps formations within 3%.
+
+Only shots are emitted (Goal / Miss with ChanceType), exactly like the classic model. Stops, fouls, blocks and saves happen but aren't reported yet.
+
 ## Determinism contract
 
 The engine's only inputs are `(rand, home, away)`. The contract:

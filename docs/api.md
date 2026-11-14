@@ -27,6 +27,23 @@ type MatchOutcome struct {
 
 Simulates a deterministic match. Same `(seed, home, away)` always returns the same output. Returns `ErrNilRandSource` if `rand` is nil.
 
+### Models (v2.1.0+)
+
+```go
+type Model string
+
+const (
+	ModelClassic Model = ""        // seasons 1-18: one roll per shot
+	ModelContest Model = "contest" // season 19+: possessions as a chain of contests
+)
+
+func RunGameWithModel(rand *rand.Rand, home, away GameLineup, m Model) (MatchOutcome, error)
+```
+
+`RunGameWithModel(r, h, a, ModelClassic)` is exactly `RunGameWithSeedDetailed(r, h, a)`; `RunGameWithSeed` and `RunGameWithSeedDetailed` always use the classic model. A season must be played on one model throughout, and re-verifying a match from its seed needs the model it was played with. Returns `ErrUnknownModel` for any other value.
+
+Both models emit the same events (goals and misses with a chance type), so consumers need no changes. See [realism-review.md](realism-review.md) for what the contest model does and how it was calibrated.
+
 ## Types
 
 ### Lineups
