@@ -57,7 +57,7 @@ The engine is a pure function of `(rand, home, away)`. No `time.Now()`, no globa
 
 ## Open work
 
-- `cmd/allocation` v2 wrapper: allocation core is done; the CSV CLI tool is the only deferred piece. Will refresh against the new FIFA columns once the season finishes.
+- Player dataset: seasons are pinned via `fifacsv.DatasetPath` (FIFA 22 ≤ s18, FC 27 from s19 via `cmd/convert_fc27`); `FC27FirstSeason` must match lost-pigs `domain.FC27FirstSeason`.
 - `v2.0.0` tag: balance now passes ±3% strict, so the tag is unblocked.
 
 ## Conventions

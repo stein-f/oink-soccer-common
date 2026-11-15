@@ -25,9 +25,6 @@ import (
 	"github.com/stein-f/oink-soccer-common/v2/allocation/fifacsv"
 )
 
-// fifaPlayersCSV is the source dataset, shared with the v1 runner.
-const fifaPlayersCSV = "cmd/allocation/fifa_players_22.csv"
-
 func main() {
 	root := flag.String("root", "", "repo root containing cmd/allocation (auto-detected when empty)")
 	flag.Parse()
@@ -49,11 +46,14 @@ func main() {
 	}
 	log.Printf("seed derived from block %d hash %s", bs.Round, bs.BlockHash)
 
-	candidates, err := fifacsv.LoadCandidates(filepath.Join(dataRoot, fifaPlayersCSV), bs.Source)
+	// The dataset is pinned per season (fifacsv.DatasetPath) so a past
+	// season re-runs byte-identical from its block seed.
+	dataset := fifacsv.DatasetPath(season.Season)
+	candidates, err := fifacsv.LoadCandidates(filepath.Join(dataRoot, dataset), bs.Source)
 	if err != nil {
 		log.Fatalf("load candidates: %v", err)
 	}
-	log.Printf("loaded %d candidate players", len(candidates))
+	log.Printf("loaded %d candidate players from %s", len(candidates), dataset)
 
 	assets, err := loadAssets(dataRoot, season.AssetsPath)
 	if err != nil {

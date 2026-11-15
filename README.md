@@ -67,7 +67,7 @@ The season comes from `cmd/allocation/config.json` (`current_season`) — the sa
 
 1. Reads the season's `round` + `assets_path` from `cmd/allocation/config.json`.
 2. Derives a deterministic seed from that round's Algorand block hash.
-3. Loads candidates from `cmd/allocation/fifa_players_22.csv` and eligible assets from the season's `eligible_assets.csv`.
+3. Loads candidates from the season's pinned dataset (`fifacsv.DatasetPath`: `cmd/allocation/fifa_players_22.csv` up to s18, `cmd/allocation/fifa_players_fc27.csv` from s19 — regenerate with `go run ./cmd/convert_fc27`) and eligible assets from the season's `eligible_assets.csv`. The v1 runner only knows FIFA 22, so it cannot allocate s19+.
 4. Runs `NewPool` + `Allocate`.
 5. Writes `cmd/allocation/s<N>/out/assigned_players.csv` (columns: `player_id,asset_name,fifa_player_id,player_name`) — the file `lost-pigs` imports in `scripts/soccer/allocate_players_to_assets_v2`.
 
