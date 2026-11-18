@@ -887,6 +887,15 @@ func (m *stepMatch) dribble(att, def *stepSide, actor *stepPlayer, chain []Step,
 			}
 		}
 	}
+	// A wide player who goes alone has come inside to do it: the winger
+	// cutting in to shoot, where squaring it was the run to the byline.
+	if !solo && actor.lane != 0 {
+		for i := range chain {
+			if chain[i].Kind == StepKindTakeOn && chain[i].ActorID == actor.ID {
+				chain[i].Detail = "cut_in"
+			}
+		}
+	}
 	m.shot(att, def, actor, ChanceTypeOpenPlay, chain, tuning.StepsMomentum, "", minute, 0, how)
 }
 

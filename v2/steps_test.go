@@ -59,6 +59,13 @@ func playerIDs(l soccer.GameLineup) map[string]bool {
 // players belong to the right sides, and the summary fields agree with the
 // steps.
 func TestSteps_EventsAreCausal(t *testing.T) {
+	// Take-ons a wide player finished himself, by the home side's shape.
+	cutIns := map[soccer.FormationType]int{}
+	defer func() {
+		// The Y has two forwards, a side each. (Away sides cut in too, so
+		// every shape sees some.)
+		assert.Greater(t, cutIns[soccer.FormationTypeY], 0)
+	}()
 	for _, hf := range allFormations {
 		for _, af := range allFormations {
 			home, away := testdata.StrongTeam(hf), testdata.WeakTeam(af)
@@ -165,6 +172,14 @@ func TestSteps_EventsAreCausal(t *testing.T) {
 							require.True(t, defenders[s.OpponentID], "step %d opponent %q is on the defending side", i, s.OpponentID)
 						}
 						switch s.Kind {
+						case soccer.StepKindTakeOn:
+							if s.Detail == "cut_in" {
+								// He came inside to shoot, and did.
+								require.True(t, s.Won)
+								require.Equal(t, soccer.ChanceTypeOpenPlay, e.ChanceType)
+								require.Equal(t, s.ActorID, e.Steps[len(e.Steps)-1].ActorID)
+								cutIns[hf]++
+							}
 						case soccer.StepKindShot:
 							sawShotOnTarget = s.Won
 						case soccer.StepKindSave:

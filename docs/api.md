@@ -51,7 +51,7 @@ The classic and contest models emit the same events (goals and misses with a cha
 type GameEvent struct { ...; Steps []Step `json:"steps,omitempty"` }   // how the event came about, in order
 type Step struct { Kind StepKind; ActorID, OpponentID string; Won bool; Detail string }
 // StepKind: pass, take_on, run, cross, aerial, foul, rebound, shot, save
-// Detail: take_on "solo" (a run from deep); rebound "save" | "post" | "bar" (what it came off)
+// Detail: take_on "solo" (a run from deep) or "cut_in" (a wide player coming inside to shoot); rebound "save" | "post" | "bar" (what it came off)
 
 type GoalEvent struct { ...; AssistID, Detail string }    // who set it up, if anyone; worldie|solo|rebound|keeper
 type MissEvent struct { ...; Detail, StopperID string }   // blocked|wide|over|post|bar|held|parried, and who stopped it

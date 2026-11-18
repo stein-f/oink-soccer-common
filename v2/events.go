@@ -38,7 +38,8 @@ const (
 //   - shot:  blocked | wide | over | post | bar | on_target
 //   - save:  goal | held | parried
 //   - foul:  free_kick | penalty
-//   - take_on: solo (a run from deep, past a midfielder first)
+//   - take_on: solo (a run from deep, past a midfielder first) | cut_in (a
+//     wide player coming inside to shoot himself)
 //   - rebound: save | post | bar (what it came back off)
 type Step struct {
 	Kind       StepKind `json:"kind"`

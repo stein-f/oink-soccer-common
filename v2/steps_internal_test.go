@@ -281,6 +281,40 @@ func TestSteps_ASlowPlayerOnlyDribblesAtASlowerOne(t *testing.T) {
 	assert.Greater(t, poor, 2.5*good, "against one he can beat, he does")
 }
 
+func TestSteps_OnlyAWidePlayerCutsInside(t *testing.T) {
+	cutIns := func(formation FormationType) (wide, central int) {
+		h, a := stepSides(t, formation, FormationTypePyramid)
+		m := &stepMatch{r: rand.New(rand.NewSource(9))}
+		for _, actor := range h.lines[PlayerPositionAttack] {
+			for i := 0; i < 400; i++ {
+				m.dribble(h, a, actor, nil, 1, false, 30)
+			}
+		}
+		for _, e := range m.events {
+			if e.Steps[0].Kind != StepKindTakeOn || e.Steps[0].Detail != "cut_in" {
+				continue
+			}
+			for _, p := range h.outfield {
+				if p.ID == e.Steps[0].ActorID {
+					if p.lane != 0 {
+						wide++
+					} else {
+						central++
+					}
+				}
+			}
+		}
+		return wide, central
+	}
+	// The Y's two forwards take a side each; the Diamond's one is central.
+	wide, central := cutIns(FormationTypeY)
+	assert.Greater(t, wide, 100)
+	assert.Zero(t, central)
+	wide, central = cutIns(FormationTypeDiamond)
+	assert.Zero(t, wide)
+	assert.Zero(t, central)
+}
+
 func TestSteps_AWorldieNeedsPower(t *testing.T) {
 	strike := func(power, technique int) float64 {
 		return worldieChance(PlayerAttributes{ShotPower: power, Technique: technique})

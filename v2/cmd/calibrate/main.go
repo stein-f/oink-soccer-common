@@ -265,6 +265,12 @@ func (t *tally) add(outcome soccer.MatchOutcome, positions map[string]soccer.Pla
 					case first.Kind == soccer.StepKindTakeOn && first.Detail == "solo":
 						t.special["solo"]++
 					}
+					for _, s := range e.Steps {
+						if s.Kind == soccer.StepKindTakeOn && s.Detail == "cut_in" {
+							t.special["cut in"]++
+							break
+						}
+					}
 					if last := e.Steps[len(e.Steps)-1]; positions[last.ActorID] == soccer.PlayerPositionGoalkeeper {
 						t.special["keeper"]++
 					}
@@ -453,8 +459,8 @@ func report(t tally, fixtures, seeds int, model, label string) {
 		per100 := func(v int) string { return fmt.Sprintf("%.1f", 100*float64(v)/n) }
 		fmt.Printf("per 100 matches, goals: worldie %s  solo %s  rebound %s  keeper %s\n",
 			per100(t.goalDetail["worldie"]), per100(t.goalDetail["solo"]), per100(t.goalDetail["rebound"]), per100(t.goalDetail["keeper"]))
-		fmt.Printf("per 100 matches, shots: after a solo run %s  rebound off a save %s, the post %s, the bar %s  by a keeper %s\n",
-			per100(t.special["solo"]), per100(t.special["rebound off save"]), per100(t.special["rebound off post"]),
+		fmt.Printf("per 100 matches, shots: after a solo run %s  a wide player cutting inside %s  rebound off a save %s, the post %s, the bar %s  by a keeper %s\n",
+			per100(t.special["solo"]), per100(t.special["cut in"]), per100(t.special["rebound off save"]), per100(t.special["rebound off post"]),
 			per100(t.special["rebound off bar"]), per100(t.special["keeper"]))
 		fmt.Printf("misses:")
 		for _, d := range []string{"blocked", "wide", "over", "post", "bar", "held", "parried"} {
