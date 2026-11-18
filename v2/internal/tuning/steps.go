@@ -13,8 +13,8 @@ package tuning
 
 // StepsPossessions is how many attacks a match has (before tempo). Every
 // formation gets the same number: shape is expressed by who meets whom, not
-// by volume. Set for about 3.6 goals and 13 shots a match on real line-ups.
-var StepsPossessions = ChanceRange{Min: 20, Max: 27}
+// by volume. Set for about 3.8 goals and 13.5 shots a match on real line-ups.
+var StepsPossessions = ChanceRange{Min: 22, Max: 30}
 
 // StepsDuelExponent sets how much a rating edge is worth in one contest.
 // At 3.5 a player rated 90 beats one rated 70 about 71% of the time, and a
@@ -114,7 +114,7 @@ const (
 // behind him, still has the other defender to deal with if there is one.
 // Below 1 because the covering man arrives late. This is what a second
 // defender is for: a one-man defence, once beaten, is beaten.
-const StepsCoverScale = 0.55
+const StepsCoverScale = 0.62
 
 // StepsOutOfPosition multiplies the odds of a player fielded where he can't
 // play.
@@ -144,15 +144,61 @@ const (
 // ball forward. Each is then weighted by how likely it is to work for the
 // players involved, so a side with a quick forward against a slow defender
 // runs in behind more, without ever doing only that.
+//
+// The weights say how often, not how well. How well each pays is set by the
+// scales further down, and is kept level between the main four (take-on,
+// run, cross, long ball): TestSteps_NoRouteSimplyPaysMore. When a run in
+// behind paid half as much again as a take-on, pace was the attribute to
+// have and tackling was worth nothing.
 var StepsRouteWeights = map[string]float64{
 	"take_on":   4.0,
 	"cross":     3.0,
-	"run":       2.0,
+	"run":       2.6,
 	"long_shot": 1.0,
 	// A run from deep, past a midfielder and then the defence. Rare for
 	// most; a quick, strong dribbler up against slower men does it often.
 	"solo": 0.6,
+	// A long ball from the back for a forward to win (see StepsHighBallScale).
+	"long_ball": 2.0,
 }
+
+// The long ball. It is hit over the midfield, so nobody cuts it out on the
+// way and everything rides on the forward winning it against the defender on
+// him: StepsHighBallScale weights that defender, who is facing the ball and
+// is the favourite. It is set so that going long pays a typical side about
+// what its other attacks do, no more.
+//
+// A side with a midfield plays through it and goes long
+// StepsLongBallWithMidfield times as often as one without. Going long is
+// also the way over a high press, and not worth it against a side sitting
+// off.
+const (
+	StepsHighBallScale        = 1.38
+	StepsLongBallWithMidfield = 0.5
+	StepsLongBallVsHighPress  = 1.35
+	StepsLongBallVsLowPress   = 0.85
+)
+
+// StepsTrackBackScale weights a midfielder who has dropped in to cover a
+// flick-on, for a side with one defender. Higher than StepsCoverScale: he
+// had the time the ball was in the air, where a second defender covering a
+// dribble or a run arrives late.
+const StepsTrackBackScale = 0.75
+
+// StepsKnockDown is how often a forward who wins a long ball knocks it down
+// for a midfielder to shoot, when he has one near, rather than flicking it on
+// for a runner.
+const StepsKnockDown = 0.3
+
+// StepsThroughBall multiplies the passer's odds when the ball is played in
+// behind for a run: it is the hardest pass there is to play.
+const StepsThroughBall = 0.85
+
+// StepsCleanTackle sets how much a defender's tackling decides whether a
+// tackle he wins is a clean one. His chance of giving away a foul is scaled
+// by (StepsTypicalScore / tackling) to this power: at 1.5 an 85 tackler fouls
+// about 0.78 times as often as a 72, and a 55 half as often again.
+const StepsCleanTackle = 1.5
 
 // Who does what. Every kind of attack is shared out between the players who
 // could make it by what suits each of them and whether it would work.
@@ -181,8 +227,8 @@ const (
 const (
 	StepsRunVsHighLine     = 1.35
 	StepsRunVsDeepLine     = 0.75
-	StepsRunOddsVsHighLine = 1.10
-	StepsRunOddsVsDeepLine = 0.92
+	StepsRunOddsVsHighLine = 1.18
+	StepsRunOddsVsDeepLine = 0.86
 )
 
 // StepsCutBack is how often a forward who has beaten his man squares it to a
@@ -212,12 +258,14 @@ const (
 )
 
 // Scales on the defender's score in each final-third contest. Above 1 the
-// contest favours the defender between equals.
+// contest favours the defender between equals. The race for a ball in behind
+// favours him most, because what it leads to (through on the keeper) is the
+// best chance there is.
 const (
 	StepsTackleScale    = 1.06 // a take-on
-	StepsChaseScale     = 1.12 // a run in behind
+	StepsChaseScale     = 1.26 // a run in behind
 	StepsCloseDownScale = 0.62 // stopping a cross at source: most get in
-	StepsMarkerScale    = 1.08 // the header in the box
+	StepsMarkerScale    = 1.03 // the header in the box
 )
 
 // --- The shot ----------------------------------------------------------------
@@ -240,7 +288,7 @@ var StepsShots = map[string]StepsShot{
 	"Long Range":      {Block: 0.45, OnTarget: 90, Keeper: 1.55},
 	"Free Kick":       {Block: 0.30, OnTarget: 84, Keeper: 1.45},
 	"Penalty":         {Block: 0, OnTarget: 32, Keeper: 0.60},
-	"Goalkeeper Shot": {Block: 0, OnTarget: 52, Keeper: 1.18},
+	"Goalkeeper Shot": {Block: 0, OnTarget: 52, Keeper: 1.28},
 }
 
 // StepsFallbackKeeper is the keeper score when a line-up has no goalkeeper.

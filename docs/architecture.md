@@ -230,17 +230,22 @@ Same determinism contract: same `(seed, candidates, rules, assets)` ⇒ same out
 ```
 possessions = uniform(StepsPossessions) × tempo          (same for every formation)
 who attacks = each side's quality, home advantage         (see "the stronger side" below)
-route       = take-on | solo run | run in behind | cross | long shot, one option per player who
-              could make it, weighted by what suits him and whether it would work (see below)
+route       = take-on | solo run | run in behind | cross | long ball | long shot, one option per
+              player who could make it, weighted by what suits him and whether it would work
 1. pass     passer (midfield, or defence if there is none) v the opponent's midfield
-            (a solo run has no pass: the runner beats a midfielder instead)
+            (a solo run has no pass: the runner beats a midfielder instead; a long ball has
+            none either: it goes over the midfield and is settled where it drops)
 2. route    forward v the defender facing him, then v the defender covering if there is one;
-            a cross is then a header v the marker
+            a cross is then a header v the marker; a long ball is the forward v the defender
+            on him, then the runner on to his flick-on v the cover
 3. shot     shooter v a blocker, then on target or not (off the woodwork it can come back out)
 4. save     shot v the keeper: goal, held or parried (which can give a corner or a rebound)
 ```
 
 - **Who does what follows the players.** `routes` lists every (kind of attack, player) option. Within a line a kind of attack goes to the player it suits, by `(score / StepsTypicalScore)^StepsAptitude × P(works)^StepsChoiceByOdds`: a tricky winger takes people on, a big man gets the crosses, and a slow forward only runs at a slower defender. How often the side does that kind of thing at all follows the same two (`StepsAptitudeMix`, `StepsOddsMix`), so a side leans to what its players are good at and what this opponent is weak to. The options depend only on who is on the pitch, so they are worked out once a match.
+- **The long ball.** A defender hits it over the midfield for a forward to win against the man on him (`holdUpScore`: strength, then heading; the ball itself counts through the passer's long passing). Nobody intercepts it, so `StepsHighBallScale` makes the defender the favourite. Won, it is flicked on for a strike partner (a midfielder, for a lone forward) who has only the covering defender to beat, and a side with one defender has a midfielder drop in (`StepsTrackBackScale`); sometimes it is knocked down for a midfielder's shot (`StepsKnockDown`). Lost, it is a `Stop` with detail `header`. A side with no midfield goes long twice as often as one with (`StepsLongBallWithMidfield`), a Target Man is the one aimed at, and going long is the way over a high press (`StepsLongBallVsHighPress`).
+- **No route simply pays more.** The scales are set so that a typical side scores about as often from a take-on, a run in behind, a cross or a long ball (about 0.11 goals an attempt; a long shot and a solo run pay less and are rarer). A through ball is the hardest pass (`StepsThroughBall`) and the race is the defender's to lose (`StepsChaseScale`). When this drifts, the attributes behind the better route become the only ones worth having: the check is the attribute report.
+- **Tackling and strength.** A tackle is tackling first, then pace and strength; the defender covering a run in behind makes a tackle too, not a second race. A block is marking and tackling (`blockScore`). A poor tackler who wins the ball gives away a foul more often (`StepsCleanTackle`). Strength is half of every header and two thirds of a long ball.
 - **Moments.** A *solo run* is a route of its own: past the midfielder who meets him, then the defence, and he always finishes it himself (`soloScore`: dribbling, pace, strength). After a take-on the dribbler squares it only if a team-mate is the better finisher (`StepsCutBack`, scaled by the two finishers). A *rebound* off a parry or the woodwork falls to whoever reads it (`poachScore`: positioning, finishing), nearly always a forward, except from a corner when everyone is up. A side one goal down from `StepsKeeperUpFromMinute` sends its *keeper* up for corners. A goal from distance is labelled a *worldie* by the scorer's shot power (`worldieChance`); the label changes no odds. `GoalEvent.Detail` carries worldie | solo | rebound | keeper.
 
 - **Odds.** Every contest is `(a / b)^StepsDuelExponent × modifiers`, on plain 0-100 blends of the player-on-player attributes (`passScore`, `takeOnScore`, `aerialScore`, ...). No skill curve: the sharpening happens once. A 20-point edge is worth about 20 points over a coin toss.
@@ -248,14 +253,14 @@ route       = take-on | solo run | run in behind | cross | long shot, one option
 - **Who meets whom.** Each line is spread across the pitch in line-up order (one player: centre; two: left and right). A contest is met by the nearest player of the defending line that faces it; the attacking left faces the defending right.
 - **Formations are numbers, not multipliers.** A defending line that outnumbers the attackers in front of it has a spare man (`StepsSupport`), one that is outnumbered is stretched (`StepsStretched`), an empty line is covered from the best other line, out of place (`StepsLineCover`), and a side with no midfield builds with a long ball (`StepsLongBall`). A forward who beats his man still has to beat the other defender of a two-man line (`StepsCoverScale`); a lone defender has no cover. The forwards make a fixed share of a side's take-ons and runs between them (`StepsMidfieldAttackShare`), so a lone striker carries as much of the attack as two do. `FormationProfile` is read only for injury risk.
 - **Team-wide multipliers** (captain, items, position boosts, the home boost) reach the odds and the possession weight through `StepsBoostExponent`, set so an item is worth what it is on the classic model.
-- **Tactics.** Tempo sets volume and shot quality. The opponent's press squeezes the pass and the tackle and raises fouls; a pressing side intercepts on work rate and tires late. A high line squeezes the pass and is run in behind more; a deep one is the reverse, so the right line depends on how quick the defenders are. Roles: a Playmaker plays more of the passes, a Target Man is aimed at more, a Ball Winner makes up half the ground a stretched line is short and fouls more.
+- **Tactics.** Tempo sets volume and shot quality. The opponent's press squeezes the pass and the tackle and raises fouls; a pressing side intercepts on work rate and tires late. A high line squeezes the pass and is run in behind more, by through balls and flick-ons alike; a deep one is the reverse, so the right line depends on how quick the defenders are. Roles: a Playmaker plays more of the passes, a Target Man is aimed at more (crosses, corners and long balls), a Ball Winner makes up half the ground a stretched line is short and fouls more.
 
 Constants live in `internal/tuning/steps.go`. `cmd/calibrate` is how they are tuned and checked:
 
 | Report | Question |
 |---|---|
 | `-archives <dir>` | realism (goals, shots, draws...), and how often the stronger side wins by rating gap, on real fixtures |
-| `-attributes N` | what +5 of each attribute is worth, to catch a dominant one |
+| `-attributes N` | what +5 of each attribute is worth (`-attribute-delta` to change the 5), to catch a dominant one or a worthless one |
 | `-levers N` | what an item boost, each tactic and each role is worth |
 | `-formations <dir>` | the formations gate: every team's best line-up per shape against a mixed field |
 

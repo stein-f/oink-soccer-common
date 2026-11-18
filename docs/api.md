@@ -51,13 +51,15 @@ The classic and contest models emit the same events (goals and misses with a cha
 type GameEvent struct { ...; Steps []Step `json:"steps,omitempty"` }   // how the event came about, in order
 type Step struct { Kind StepKind; ActorID, OpponentID string; Won bool; Detail string }
 // StepKind: pass, take_on, run, cross, aerial, foul, rebound, shot, save
-// Detail: take_on "solo" (a run from deep) or "cut_in" (a wide player coming inside to shoot); rebound "save" | "post" | "bar" (what it came off)
+// Detail: take_on "solo" (a run from deep) or "cut_in" (a wide player coming inside to shoot); rebound "save" | "post" | "bar" (what it came off);
+//         pass "short" | "long" | "through" | "high" (a long ball over the midfield: no opponent, and an aerial follows);
+//         aerial, for a high ball won: "flick_on" (a team-mate's run is the next step) | "knock_down" (a team-mate shoots) | "brought_down" (he shoots)
 
 type GoalEvent struct { ...; AssistID, Detail string }    // who set it up, if anyone; worldie|solo|rebound|keeper
 type MissEvent struct { ...; Detail, StopperID string }   // blocked|wide|over|post|bar|held|parried, and who stopped it
 
 const GameEventTypeStop GameEventType = "Stop"            // an attack ended before a shot
-type StopEvent struct { PlayerID string; TeamType TeamType; AgainstID, Detail string } // the defender, his side, the attacker, tackle|caught
+type StopEvent struct { PlayerID string; TeamType TeamType; AgainstID, Detail string } // the defender, his side, the attacker, tackle|caught|header
 
 type MatchOutcome struct { ...; Totals *MatchTotals }     // every contest of the match, per side
 ```

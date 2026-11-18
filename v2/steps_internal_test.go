@@ -264,8 +264,8 @@ func TestSteps_ASlowPlayerOnlyDribblesAtASlowerOne(t *testing.T) {
 			if away.Players[i].SelectedPosition == PlayerPositionDefense {
 				a := &away.Players[i].Attributes
 				// Only what a take-on is up against: he is no easier to run
-				// in behind or to cross past.
-				a.Tackling, a.Strength = tackling, tackling
+				// in behind, to cross past or to beat to a long ball.
+				a.Tackling = tackling
 			}
 		}
 		h, a := stepSidesOf(t, home, away)
@@ -383,4 +383,270 @@ func TestSteps_TheKeeperComesUpOnlyLateAndAGoalDown(t *testing.T) {
 	assert.Zero(t, keeperHeaders(60, 0, 1), "behind with time left: he stays at home")
 	assert.Zero(t, keeperHeaders(88, 0, 3), "well beaten: no point")
 	assert.Greater(t, keeperHeaders(88, 0, 1), 20, "a goal down at the death: up he comes")
+}
+
+// typicalStepLineup is a side of ordinary top-division players, each with
+// the attributes his position really has (testdata.TypicalTeam's, which this
+// package can't import).
+func typicalStepLineup(formation FormationType, prefix string) GameLineup {
+	typical := map[PlayerPosition]PlayerAttributes{
+		PlayerPositionGoalkeeper: {
+			GoalkeeperRating: 79, DefenseRating: 15, SpeedRating: 81, ControlRating: 15, AttackRating: 15, AggressionRating: 28, OverallRating: 81,
+			WorkRate: 36, Finishing: 12, Heading: 41, Technique: 13, Composure: 59, Tackling: 15,
+			Dribbling: 35, Passing: 48, Crossing: 14, Pace: 45, Strength: 68, Interceptions: 18, Positioning: 12, Marking: 15, ShotPower: 35,
+			Reflexes: 82, Handling: 79, OneOnOne: 69,
+		},
+		PlayerPositionDefense: {
+			GoalkeeperRating: 10, DefenseRating: 81, SpeedRating: 74, ControlRating: 74, AttackRating: 58, AggressionRating: 81, OverallRating: 81,
+			WorkRate: 79, Finishing: 55, Heading: 81, Technique: 59, Composure: 79, Tackling: 81,
+			Dribbling: 71, Passing: 75, Crossing: 69, Pace: 74, Strength: 80, Interceptions: 81, Positioning: 68, Marking: 81, ShotPower: 65,
+			Reflexes: 10, Handling: 10, OneOnOne: 10,
+		},
+		PlayerPositionMidfield: {
+			GoalkeeperRating: 10, DefenseRating: 57, SpeedRating: 77, ControlRating: 79, AttackRating: 77, AggressionRating: 70, OverallRating: 82,
+			WorkRate: 80, Finishing: 77, Heading: 67, Technique: 75, Composure: 81, Tackling: 57,
+			Dribbling: 81, Passing: 80, Crossing: 79, Pace: 77, Strength: 70, Interceptions: 60, Positioning: 80, Marking: 58, ShotPower: 79,
+			Reflexes: 10, Handling: 10, OneOnOne: 10,
+		},
+		PlayerPositionAttack: {
+			GoalkeeperRating: 9, DefenseRating: 41, SpeedRating: 77, ControlRating: 71, AttackRating: 83, AggressionRating: 72, OverallRating: 82,
+			WorkRate: 75, Finishing: 85, Heading: 83, Technique: 69, Composure: 80, Tackling: 35,
+			Dribbling: 76, Passing: 72, Crossing: 69, Pace: 76, Strength: 83, Interceptions: 38, Positioning: 85, Marking: 39, ShotPower: 80,
+			Reflexes: 10, Handling: 9, OneOnOne: 10,
+		},
+	}
+	l := stepLineup(formation, prefix)
+	for i := range l.Players {
+		pos := l.Players[i].SelectedPosition
+		a := typical[pos]
+		a.PrimaryPosition, a.Positions = pos, []PlayerPosition{pos}
+		l.Players[i].Attributes = a
+	}
+	return l
+}
+
+var stepShapes = []FormationType{FormationTypePyramid, FormationTypeDiamond, FormationTypeY, FormationTypeBox}
+
+func routeShare(routes []stepRoute, kind string) float64 {
+	var total float64
+	for _, r := range routes {
+		total += r.weight
+	}
+	return routeWeight(routes, kind, "", "") / total
+}
+
+// The main ways to goal pay a typical side about the same. When one pays
+// much more, the attributes behind it are the only ones worth having, and
+// the ones that defend the others are worth nothing: that is how runs in
+// behind once made pace everything and tackling pointless.
+func TestSteps_NoRouteSimplyPaysMore(t *testing.T) {
+	const attempts = 6000
+	goals, tries := map[string]float64{}, map[string]float64{}
+	for _, as := range stepShapes {
+		for _, ds := range stepShapes {
+			att, def := stepSidesOf(t, typicalStepLineup(as, "h"), typicalStepLineup(ds, "a"))
+			m := &stepMatch{r: rand.New(rand.NewSource(7))}
+			byKind := map[string][]stepRoute{}
+			for _, r := range m.routes(att, def) {
+				byKind[r.kind] = append(byKind[r.kind], r)
+			}
+			for kind, rs := range byKind {
+				var total float64
+				for _, r := range rs {
+					total += r.weight
+				}
+				for i := 0; i < attempts; i++ {
+					roll, route := m.r.Float64()*total, rs[len(rs)-1]
+					for _, r := range rs {
+						if roll < r.weight {
+							route = r
+							break
+						}
+						roll -= r.weight
+					}
+					m.events, m.homeGoals, m.awayGoals = m.events[:0], 0, 0
+					m.attack(att, def, route, 30)
+					tries[kind]++
+					for _, e := range m.events {
+						if e.IsGoal() {
+							goals[kind]++
+						}
+					}
+				}
+			}
+		}
+	}
+	main := []string{"take_on", "run", "cross", "long_ball"}
+	var mean float64
+	for _, kind := range main {
+		mean += goals[kind] / tries[kind] / float64(len(main))
+	}
+	for _, kind := range main {
+		pays := goals[kind] / tries[kind]
+		t.Logf("%-10s %.3f goals an attempt", kind, pays)
+		assert.InDelta(t, mean, pays, 0.25*mean, "%s pays %.3f goals an attempt against a mean of %.3f", kind, pays, mean)
+	}
+	// Shooting from distance and going alone from deep are the long shots.
+	assert.Less(t, goals["long_shot"]/tries["long_shot"], mean)
+	assert.Less(t, goals["solo"]/tries["solo"], mean)
+}
+
+func TestSteps_ASideWithoutAMidfieldGoesLongMost(t *testing.T) {
+	long := func(shape FormationType, press PressLevel) float64 {
+		away := typicalStepLineup(FormationTypePyramid, "a")
+		away.Team.Tactics.Press = press
+		h, a := stepSidesOf(t, typicalStepLineup(shape, "h"), away)
+		return routeShare((&stepMatch{}).routes(h, a), "long_ball")
+	}
+	box, diamond := long(FormationTypeBox, PressLevelNone), long(FormationTypeDiamond, PressLevelNone)
+	assert.Greater(t, box, 1.5*diamond, "the Box has nobody to play through")
+	assert.Greater(t, box, 0.08)
+	assert.Less(t, box, 0.25, "it is one way to goal among several, not the only one")
+	// Going long is the way over a press, and not worth it against a side
+	// sitting off.
+	assert.Greater(t, long(FormationTypeBox, PressLevelHigh), 1.15*box)
+	assert.Less(t, long(FormationTypeBox, PressLevelLow), box)
+}
+
+func TestSteps_ALongBallIsForTheBigManAndStrengthWinsIt(t *testing.T) {
+	home := typicalStepLineup(FormationTypeBox, "h")
+	fw := forwardsOf(home)
+	require.Len(t, fw, 2)
+	bigMan, partner := &home.Players[fw[0]], &home.Players[fw[1]]
+	bigMan.Role = PlayerRoleTargetMan
+	bigMan.Attributes.Strength, bigMan.Attributes.Heading = 92, 90
+	partner.Attributes.Strength, partner.Attributes.Heading = 62, 62
+	h, a := stepSidesOf(t, home, typicalStepLineup(FormationTypePyramid, "a"))
+	routes := (&stepMatch{}).routes(h, a)
+	assert.Greater(t, routeWeight(routes, "long_ball", bigMan.ID, ""), 8*routeWeight(routes, "long_ball", partner.ID, ""))
+	// And the side goes long more for having him.
+	ph, pa := stepSidesOf(t, typicalStepLineup(FormationTypeBox, "h"), typicalStepLineup(FormationTypePyramid, "a"))
+	assert.Greater(t, routeShare(routes, "long_ball"), 1.3*routeShare((&stepMatch{}).routes(ph, pa), "long_ball"))
+
+	// What he does with them is down to his strength against the defender's.
+	won := func(strength int) float64 {
+		home := typicalStepLineup(FormationTypeBox, "h")
+		home.Players[fw[0]].Attributes.Strength = strength
+		h, a := stepSidesOf(t, home, typicalStepLineup(FormationTypePyramid, "a"))
+		target := h.lines[PlayerPositionAttack][0]
+		m := &stepMatch{r: rand.New(rand.NewSource(3))}
+		for i := 0; i < 4000; i++ {
+			// Level throughout: a side well ahead eases off.
+			m.homeGoals, m.awayGoals = 0, 0
+			m.longBall(h, a, target, 30)
+		}
+		require.Equal(t, 4000, h.totals.Passes)
+		return float64(h.totals.PassesCompleted) / float64(h.totals.Passes)
+	}
+	weak, typical, strong := won(60), won(83), won(98)
+	assert.Less(t, typical, 0.45, "the defender is facing the ball: he is the favourite")
+	assert.Greater(t, typical, 0.22)
+	assert.Greater(t, strong, typical+0.08)
+	assert.Less(t, weak, typical-0.08)
+}
+
+func TestSteps_AFlickOnIsCoveredByTheOtherDefenderOrAMidfielder(t *testing.T) {
+	covers := func(shape FormationType) map[PlayerPosition]int {
+		h, a := stepSidesOf(t, typicalStepLineup(FormationTypeBox, "h"), typicalStepLineup(shape, "a"))
+		line := map[string]PlayerPosition{}
+		for _, p := range a.outfield {
+			line[p.ID] = p.line
+		}
+		target := h.lines[PlayerPositionAttack][0]
+		m := &stepMatch{r: rand.New(rand.NewSource(11))}
+		out := map[PlayerPosition]int{}
+		for i := 0; i < 2000; i++ {
+			m.events, m.homeGoals, m.awayGoals = m.events[:0], 0, 0
+			m.longBall(h, a, target, 30)
+			for _, e := range m.events {
+				// (A corner or a rebound can follow the shot it led to.)
+				if e.Steps[0].Detail != "high" {
+					continue
+				}
+				require.Equal(t, target.ID, e.Steps[1].ActorID)
+				if e.Steps[1].Detail != "flick_on" {
+					continue
+				}
+				run := e.Steps[2]
+				require.Equal(t, StepKindRun, run.Kind)
+				require.NotEqual(t, target.ID, run.ActorID, "someone else runs on to it")
+				require.NotEqual(t, e.Steps[1].OpponentID, run.OpponentID, "the man beaten in the air doesn't cover it too")
+				out[line[run.OpponentID]]++
+			}
+		}
+		return out
+	}
+	twoBack := covers(FormationTypePyramid)
+	assert.Greater(t, twoBack[PlayerPositionDefense], 100)
+	assert.Zero(t, twoBack[PlayerPositionMidfield], "two defenders: the other one covers")
+	oneBack := covers(FormationTypeDiamond)
+	assert.Greater(t, oneBack[PlayerPositionMidfield], 100, "one defender: a midfielder drops in")
+	assert.Zero(t, oneBack[PlayerPositionDefense])
+}
+
+func TestSteps_APoorTacklerGivesAwayMoreFouls(t *testing.T) {
+	fouls := func(tackling int) float64 {
+		away := typicalStepLineup(FormationTypePyramid, "a")
+		for i := range away.Players {
+			away.Players[i].Attributes.Tackling = tackling
+		}
+		h, a := stepSidesOf(t, typicalStepLineup(FormationTypeY, "h"), away)
+		m := &stepMatch{r: rand.New(rand.NewSource(9))}
+		actor, opp := h.lines[PlayerPositionAttack][0], a.lines[PlayerPositionDefense][0]
+		const n = 20000
+		for i := 0; i < n; i++ {
+			m.events, m.homeGoals, m.awayGoals = m.events[:0], 0, 0
+			m.tackled(h, a, actor, opp, nil, 30)
+		}
+		return float64(a.totals.Fouls) / n
+	}
+	good, typical, poor := fouls(92), fouls(72), fouls(52)
+	assert.Less(t, good, 0.8*typical, "a good tackler takes the ball")
+	assert.Greater(t, poor, 1.4*typical, "a poor one takes the man too")
+}
+
+func TestSteps_TheCoveringDefenderHasToTackle(t *testing.T) {
+	// Behind the first defender on a run, the second isn't racing: what
+	// stops the runner is his tackling.
+	caught := func(tackling int) float64 {
+		away := typicalStepLineup(FormationTypePyramid, "a")
+		for i := range away.Players {
+			if away.Players[i].SelectedPosition == PlayerPositionDefense {
+				away.Players[i].Attributes.Tackling = tackling
+			}
+		}
+		h, a := stepSidesOf(t, typicalStepLineup(FormationTypeY, "h"), away)
+		m := &stepMatch{r: rand.New(rand.NewSource(13))}
+		var route stepRoute
+		for _, r := range m.routes(h, a) {
+			if r.kind == "run" {
+				route = r
+				break
+			}
+		}
+		require.NotNil(t, route.actor)
+		second, stopped := 0, 0
+		for i := 0; i < 30000; i++ {
+			m.events, m.homeGoals, m.awayGoals = m.events[:0], 0, 0
+			m.attack(h, a, route, 30)
+			for _, e := range m.events {
+				runs := 0
+				for _, s := range e.Steps {
+					if s.Kind == StepKindRun {
+						runs++
+					}
+				}
+				if runs < 2 {
+					continue
+				}
+				second++
+				if e.Type == GameEventTypeStop {
+					stopped++
+				}
+			}
+		}
+		require.Greater(t, second, 500)
+		return float64(stopped) / float64(second)
+	}
+	assert.Greater(t, caught(95), caught(60)+0.05)
 }

@@ -61,10 +61,15 @@ func playerIDs(l soccer.GameLineup) map[string]bool {
 func TestSteps_EventsAreCausal(t *testing.T) {
 	// Take-ons a wide player finished himself, by the home side's shape.
 	cutIns := map[soccer.FormationType]int{}
+	// What became of the long balls a forward won, and the ones he didn't.
+	longBalls := map[string]int{}
 	defer func() {
 		// The Y has two forwards, a side each. (Away sides cut in too, so
 		// every shape sees some.)
 		assert.Greater(t, cutIns[soccer.FormationTypeY], 0)
+		assert.Greater(t, longBalls["flick_on"], 0)
+		assert.Greater(t, longBalls["knock_down"], 0)
+		assert.Greater(t, longBalls[""], 0, "long balls the defender won")
 	}()
 	for _, hf := range allFormations {
 		for _, af := range allFormations {
@@ -102,7 +107,7 @@ func TestSteps_EventsAreCausal(t *testing.T) {
 						if ev.AssistID != "" {
 							set := false
 							for _, s := range e.Steps {
-								if s.ActorID == ev.AssistID && s.Won && (s.Kind == soccer.StepKindPass || s.Kind == soccer.StepKindCross || s.Kind == soccer.StepKindTakeOn) {
+								if s.ActorID == ev.AssistID && s.Won && (s.Kind == soccer.StepKindPass || s.Kind == soccer.StepKindCross || s.Kind == soccer.StepKindTakeOn || s.Kind == soccer.StepKindAerial) {
 									set = true
 								}
 							}
@@ -151,7 +156,11 @@ func TestSteps_EventsAreCausal(t *testing.T) {
 						require.False(t, last.Won)
 						require.Equal(t, ev.AgainstID, last.ActorID)
 						require.Equal(t, ev.PlayerID, last.OpponentID)
-						require.Contains(t, []string{"tackle", "caught"}, ev.Detail)
+						require.Contains(t, []string{"tackle", "caught", "header"}, ev.Detail)
+						if ev.Detail == "header" {
+							require.Equal(t, soccer.StepKindAerial, last.Kind)
+							require.Equal(t, "high", e.Steps[0].Detail)
+						}
 						// The stop belongs to the defending side.
 						team = soccer.TeamTypeHome
 						if ev.TeamType == soccer.TeamTypeHome {
@@ -179,6 +188,36 @@ func TestSteps_EventsAreCausal(t *testing.T) {
 								require.Equal(t, soccer.ChanceTypeOpenPlay, e.ChanceType)
 								require.Equal(t, s.ActorID, e.Steps[len(e.Steps)-1].ActorID)
 								cutIns[hf]++
+							}
+						case soccer.StepKindPass:
+							if s.Detail == "high" {
+								// A long ball: nobody cuts it out, and a
+								// forward goes up for it.
+								require.Equal(t, 0, i)
+								require.Empty(t, s.OpponentID)
+								require.Equal(t, soccer.StepKindAerial, e.Steps[1].Kind)
+								longBalls[e.Steps[1].Detail]++
+							}
+						case soccer.StepKindAerial:
+							switch s.Detail {
+							case "":
+							case "flick_on":
+								// For a team-mate's run, and his shot if he
+								// gets there.
+								next := e.Steps[i+1]
+								require.Equal(t, soccer.StepKindRun, next.Kind)
+								require.NotEqual(t, s.ActorID, next.ActorID)
+								if next.Won {
+									require.Equal(t, soccer.ChanceTypeGoalKeeperShot, e.ChanceType)
+									require.Equal(t, next.ActorID, e.Steps[len(e.Steps)-1].ActorID)
+								}
+							case "knock_down":
+								require.Equal(t, soccer.ChanceTypeOpenPlay, e.ChanceType)
+								require.NotEqual(t, s.ActorID, e.Steps[len(e.Steps)-1].ActorID)
+							case "brought_down":
+								require.Equal(t, s.ActorID, e.Steps[len(e.Steps)-1].ActorID)
+							default:
+								t.Fatalf("unknown aerial detail %q", s.Detail)
 							}
 						case soccer.StepKindShot:
 							sawShotOnTarget = s.Won

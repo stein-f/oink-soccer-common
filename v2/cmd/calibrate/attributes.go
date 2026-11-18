@@ -100,8 +100,7 @@ func pointsPerGame(team, base soccer.GameLineup, seeds int, model soccer.Model) 
 	return float64(points) / float64(2*seeds)
 }
 
-func attributeReport(seeds int, model soccer.Model) {
-	const delta = 5
+func attributeReport(seeds int, model soccer.Model, delta int) {
 	type cell struct {
 		attr, pos int
 		value     float64

@@ -87,6 +87,7 @@ func main() {
 	dataset := flag.String("enrich", "", "player dataset CSV to fill in what archived players lack (see enrich.go)")
 	enrichMode := flag.String("enrich-mode", "steps", `"steps": add the player-on-player attributes; "all": replace every attribute`)
 	attributes := flag.Int("attributes", 0, "instead of replaying fixtures, report what each attribute is worth, over this many seeds")
+	attributeDelta := flag.Int("attribute-delta", 5, "attribute report: how many points to raise each attribute by")
 	formationsDir := flag.String("formations", "", "instead of replaying fixtures, run the formations gate on this directory of team files (see formations.go)")
 	dealAssets := flag.String("deal", "", "formations report: eligible assets CSV; deal every squad afresh from -deal-dataset (see deal.go)")
 	dealData := flag.String("deal-dataset", "", "formations report: the dataset to deal from")
@@ -96,7 +97,7 @@ func main() {
 	levers := flag.Int("levers", 0, "instead of replaying fixtures, report what boosts, tactics and roles are worth, over this many seeds")
 	flag.Parse()
 	if *attributes > 0 {
-		attributeReport(*attributes, soccer.Model(*model))
+		attributeReport(*attributes, soccer.Model(*model), *attributeDelta)
 		return
 	}
 	if *levers > 0 {
@@ -264,6 +265,11 @@ func (t *tally) add(outcome soccer.MatchOutcome, positions map[string]soccer.Pla
 						t.special["rebound off "+first.Detail]++
 					case first.Kind == soccer.StepKindTakeOn && first.Detail == "solo":
 						t.special["solo"]++
+					case first.Kind == soccer.StepKindPass && first.Detail == "high":
+						t.special["long ball"]++
+						if e.Type == soccer.GameEventTypeGoal {
+							t.special["long ball goal"]++
+						}
 					}
 					for _, s := range e.Steps {
 						if s.Kind == soccer.StepKindTakeOn && s.Detail == "cut_in" {
@@ -462,6 +468,8 @@ func report(t tally, fixtures, seeds int, model, label string) {
 		fmt.Printf("per 100 matches, shots: after a solo run %s  a wide player cutting inside %s  rebound off a save %s, the post %s, the bar %s  by a keeper %s\n",
 			per100(t.special["solo"]), per100(t.special["cut in"]), per100(t.special["rebound off save"]), per100(t.special["rebound off post"]),
 			per100(t.special["rebound off bar"]), per100(t.special["keeper"]))
+		fmt.Printf("per 100 matches, long balls a forward won that ended in a shot %s, and in a goal %s\n",
+			per100(t.special["long ball"]), per100(t.special["long ball goal"]))
 		fmt.Printf("misses:")
 		for _, d := range []string{"blocked", "wide", "over", "post", "bar", "held", "parried"} {
 			fmt.Printf("  %s %s", d, share(t.missDetail[d], t.shots-t.goals))

@@ -34,7 +34,11 @@ const (
 // nobody contested it.
 //
 // Detail narrows the kind:
-//   - pass:  short | long | through
+//   - pass:  short | long | through | high (a long ball over the midfield
+//     for a forward to win: nobody contests it on the way)
+//   - aerial: for a high ball he won, what he did with it: flick_on (for a
+//     partner's run, the next step) | knock_down (for a team-mate's shot) |
+//     brought_down (for his own)
 //   - shot:  blocked | wide | over | post | bar | on_target
 //   - save:  goal | held | parried
 //   - foul:  free_kick | penalty
@@ -84,8 +88,8 @@ type MissEvent struct {
 	StopperID string `json:"stopper_id,omitempty"`
 }
 
-// StopEvent is an attack that ended before a shot: a tackle, or a forward
-// caught by the last defender. PlayerID is the defender who made the stop
+// StopEvent is an attack that ended before a shot: a tackle, a forward
+// caught by the last defender, or a long ball the defender headed away. PlayerID is the defender who made the stop
 // and TeamType his side; AgainstID is the attacker he stopped. Only
 // ModelSteps emits it, and only for a few notable stops a match (the rest
 // are counted in MatchOutcome.Totals).
@@ -93,7 +97,7 @@ type StopEvent struct {
 	PlayerID  string   `json:"player_id"`
 	TeamType  TeamType `json:"team_type"`
 	AgainstID string   `json:"against_id"`
-	Detail    string   `json:"detail"` // tackle | caught
+	Detail    string   `json:"detail"` // tackle | caught | header
 }
 
 type GameStats struct {
