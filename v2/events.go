@@ -6,6 +6,41 @@ type GameEvent struct {
 	Minute int           `json:"minute"`
 	// ChanceType is new in v2. Empty string for events that pre-date the field.
 	ChanceType ChanceType `json:"chance_type,omitempty"`
+	// Steps is how the event came about, contest by contest, in order. Only
+	// ModelSteps (season 19+) fills it.
+	Steps []Step `json:"steps,omitempty"`
+}
+
+// StepKind names one contest inside an attack.
+type StepKind string
+
+const (
+	StepKindPass   StepKind = "pass"    // a ball forward, against whoever tries to cut it out
+	StepKindTakeOn StepKind = "take_on" // a dribble at a defender
+	StepKindRun    StepKind = "run"     // a race in behind the last defender
+	StepKindCross  StepKind = "cross"   // a ball into the box, against the man closing it down
+	StepKindAerial StepKind = "aerial"  // two players going for the same ball in the air
+	StepKindFoul   StepKind = "foul"    // the defender won it unfairly
+	StepKindShot   StepKind = "shot"    // the shot, against a defender trying to block it
+	StepKindSave   StepKind = "save"    // the shot on target, against the keeper
+)
+
+// Step is one contest between two players. ActorID is the player on the
+// attacking side of it (the keeper's save is the one exception: the actor is
+// still the shooter, and Won means he scored). OpponentID is empty when
+// nobody contested it.
+//
+// Detail narrows the kind:
+//   - pass:  short | long | through
+//   - shot:  blocked | wide | over | post | bar | on_target
+//   - save:  goal | held | parried
+//   - foul:  free_kick | penalty
+type Step struct {
+	Kind       StepKind `json:"kind"`
+	ActorID    string   `json:"actor_id"`
+	OpponentID string   `json:"opponent_id,omitempty"`
+	Won        bool     `json:"won"`
+	Detail     string   `json:"detail,omitempty"`
 }
 
 func (g GameEvent) IsGoal() bool {
@@ -23,11 +58,31 @@ func (g GameEvent) GetMissEvent() MissEvent {
 type GoalEvent struct {
 	PlayerID string   `json:"player_id"`
 	TeamType TeamType `json:"team_type"`
+	// AssistID is the team-mate whose pass or cross made the goal. Only
+	// ModelSteps fills it; empty for a goal nobody set up.
+	AssistID string `json:"assist_id,omitempty"`
 }
 
 type MissEvent struct {
 	PlayerID string   `json:"player_id"`
 	TeamType TeamType `json:"team_type"`
+	// Detail is how the chance ended: blocked, wide, over, post, bar, held
+	// or parried. StopperID is the defender who blocked it or the keeper who
+	// saved it. Only ModelSteps fills them.
+	Detail    string `json:"detail,omitempty"`
+	StopperID string `json:"stopper_id,omitempty"`
+}
+
+// StopEvent is an attack that ended before a shot: a tackle, or a forward
+// caught by the last defender. PlayerID is the defender who made the stop
+// and TeamType his side; AgainstID is the attacker he stopped. Only
+// ModelSteps emits it, and only for a few notable stops a match (the rest
+// are counted in MatchOutcome.Totals).
+type StopEvent struct {
+	PlayerID  string   `json:"player_id"`
+	TeamType  TeamType `json:"team_type"`
+	AgainstID string   `json:"against_id"`
+	Detail    string   `json:"detail"` // tackle | caught
 }
 
 type GameStats struct {

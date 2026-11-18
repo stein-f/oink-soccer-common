@@ -41,6 +41,9 @@ type GameEventType string
 const (
 	GameEventTypeGoal GameEventType = "Goal"
 	GameEventTypeMiss GameEventType = "Miss"
+	// GameEventTypeStop is an attack ended before a shot (see StopEvent).
+	// Only ModelSteps emits it. CreateGameStats ignores it.
+	GameEventTypeStop GameEventType = "Stop"
 )
 
 type BoostType string

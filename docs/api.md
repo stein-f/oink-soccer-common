@@ -34,7 +34,8 @@ type Model string
 
 const (
 	ModelClassic Model = ""        // seasons 1-18: one roll per shot
-	ModelContest Model = "contest" // season 19+: possessions as a chain of contests
+	ModelContest Model = "contest" // possessions as a chain of contests (never released; the base of ModelSteps)
+	ModelSteps   Model = "steps"   // season 19+: each attack a chain of steps between specific players
 )
 
 func RunGameWithModel(rand *rand.Rand, home, away GameLineup, m Model) (MatchOutcome, error)
@@ -42,7 +43,25 @@ func RunGameWithModel(rand *rand.Rand, home, away GameLineup, m Model) (MatchOut
 
 `RunGameWithModel(r, h, a, ModelClassic)` is exactly `RunGameWithSeedDetailed(r, h, a)`; `RunGameWithSeed` and `RunGameWithSeedDetailed` always use the classic model. A season must be played on one model throughout, and re-verifying a match from its seed needs the model it was played with. Returns `ErrUnknownModel` for any other value.
 
-Both models emit the same events (goals and misses with a chance type), so consumers need no changes. See [realism-review.md](realism-review.md) for what the contest model does and how it was calibrated.
+The classic and contest models emit the same events (goals and misses with a chance type). See [realism-review.md](realism-review.md) for what the contest model does and how it was calibrated.
+
+`ModelSteps` emits the same goals and misses, so tables, scorers and `CreateGameStats` are unaffected, and adds:
+
+```go
+type GameEvent struct { ...; Steps []Step `json:"steps,omitempty"` }   // how the event came about, in order
+type Step struct { Kind StepKind; ActorID, OpponentID string; Won bool; Detail string }
+// StepKind: pass, take_on, run, cross, aerial, foul, shot, save
+
+type GoalEvent struct { ...; AssistID string }            // who set it up, if anyone
+type MissEvent struct { ...; Detail, StopperID string }   // blocked|wide|over|post|bar|held|parried, and who stopped it
+
+const GameEventTypeStop GameEventType = "Stop"            // an attack ended before a shot
+type StopEvent struct { PlayerID string; TeamType TeamType; AgainstID, Detail string } // the defender, his side, the attacker, tackle|caught
+
+type MatchOutcome struct { ...; Totals *MatchTotals }     // every contest of the match, per side
+```
+
+All of it is `omitempty` and absent from the other models' output. At most `StepsMaxStops` (3) stops are emitted per match; the rest are only counted in `Totals`. A `StopEvent`'s `TeamType` is the defending side's. Consumers that switch on the event type must ignore types they don't know.
 
 ## Types
 

@@ -28,6 +28,39 @@ type MatchOutcome struct {
 	Events   []GameEvent `json:"events"`
 	Injuries Injuries    `json:"injuries"`
 	Boosts   MatchBoosts `json:"boosts"`
+	// Totals counts every contest of the match, including the attacks that
+	// never became an event. Only ModelSteps fills it.
+	Totals *MatchTotals `json:"totals,omitempty"`
+}
+
+// MatchTotals is each side's count of what it did over the match.
+type MatchTotals struct {
+	Home TeamTotals `json:"home"`
+	Away TeamTotals `json:"away"`
+}
+
+// TeamTotals counts one side's contests. The attacking counts (passes,
+// take-ons, crosses, shots) are what the side tried going forward; the
+// defending ones (tackles, interceptions, blocks, saves, fouls) are what it
+// did without the ball.
+type TeamTotals struct {
+	Possessions      int `json:"possessions"`
+	Passes           int `json:"passes"`
+	PassesCompleted  int `json:"passes_completed"`
+	TakeOns          int `json:"take_ons"`
+	TakeOnsWon       int `json:"take_ons_won"`
+	Crosses          int `json:"crosses"`
+	CrossesCompleted int `json:"crosses_completed"`
+	AerialsWon       int `json:"aerials_won"`
+	Shots            int `json:"shots"`
+	ShotsOnTarget    int `json:"shots_on_target"`
+	Woodwork         int `json:"woodwork"`
+	Tackles          int `json:"tackles"`
+	Interceptions    int `json:"interceptions"`
+	Clearances       int `json:"clearances"`
+	Blocks           int `json:"blocks"`
+	Saves            int `json:"saves"`
+	Fouls            int `json:"fouls"`
 }
 
 // Model selects how chances are resolved. Results are only reproducible from
@@ -42,6 +75,12 @@ const (
 	// players (build-up, shot, keeper), with set pieces caused by fouls,
 	// blocks and saves. See docs/realism-review.md.
 	ModelContest Model = "contest"
+	// ModelSteps (season 19+) resolves each attack as a chain of steps
+	// between specific players, chosen by where they stand: a pass against
+	// the man trying to cut it out, a winger against the defender on his
+	// side, a header against the centre-back. The steps are reported on each
+	// event. See steps.go.
+	ModelSteps Model = "steps"
 )
 
 // RunGameWithModel plays a match under the given model. ModelClassic is
@@ -56,6 +95,8 @@ func RunGameWithModel(r *rand.Rand, home, away GameLineup, m Model) (MatchOutcom
 	case ModelContest:
 		events, injuries, boosts := simulateContestMatch(r, home, away)
 		return MatchOutcome{Events: events, Injuries: injuries, Boosts: boosts}, nil
+	case ModelSteps:
+		return simulateStepsMatch(r, home, away), nil
 	default:
 		return MatchOutcome{}, fmt.Errorf("%w: %q", ErrUnknownModel, m)
 	}

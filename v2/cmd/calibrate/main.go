@@ -40,12 +40,18 @@ type tally struct {
 	shotsByType, goalsByType      map[soccer.ChanceType]int
 	goalsByPosition               map[soccer.PlayerPosition]int
 	strongerWins, strongerMatches int
+
+	// Step model only.
+	stops, assisted, headed int
+	missDetail              map[string]int
+	totals                  soccer.TeamTotals
+	withTotals              int
 }
 
 func main() {
 	dir := flag.String("archives", "", "directory of lost-pigs match archive JSON files")
 	seeds := flag.Int("seeds", 20, "replays per fixture")
-	model := flag.String("model", "", `engine model: "" (classic) or "contest"`)
+	model := flag.String("model", "", `engine model: "" (classic), "contest" or "steps"`)
 	limit := flag.Int("limit", 0, "use at most this many fixtures (0 = all)")
 	flag.Parse()
 	if *dir == "" {
@@ -62,6 +68,7 @@ func main() {
 			shotsByType:     map[soccer.ChanceType]int{},
 			goalsByType:     map[soccer.ChanceType]int{},
 			goalsByPosition: map[soccer.PlayerPosition]int{},
+			missDetail:      map[string]int{},
 		}
 	}
 	// S18 fixtures range from evenly matched to a full side against a
@@ -94,7 +101,7 @@ func main() {
 				log.Fatalf("%s: %v", f.Name, err)
 			}
 			for _, t := range buckets {
-				t.add(outcome.Events, positions, strongerHome)
+				t.add(outcome, positions, strongerHome)
 			}
 		}
 	}
@@ -103,11 +110,49 @@ func main() {
 	report(*mismatch, mismatchFixtures, *seeds, *model, "mismatches (mean overall 8+ apart)")
 }
 
-func (t *tally) add(events []soccer.GameEvent, positions map[string]soccer.PlayerPosition, strongerHome bool) {
+func (t *tally) add(outcome soccer.MatchOutcome, positions map[string]soccer.PlayerPosition, strongerHome bool) {
+	events := outcome.Events
+	if tt := outcome.Totals; tt != nil {
+		t.withTotals++
+		for _, side := range []soccer.TeamTotals{tt.Home, tt.Away} {
+			t.totals.Possessions += side.Possessions
+			t.totals.Passes += side.Passes
+			t.totals.PassesCompleted += side.PassesCompleted
+			t.totals.TakeOns += side.TakeOns
+			t.totals.TakeOnsWon += side.TakeOnsWon
+			t.totals.Crosses += side.Crosses
+			t.totals.CrossesCompleted += side.CrossesCompleted
+			t.totals.AerialsWon += side.AerialsWon
+			t.totals.ShotsOnTarget += side.ShotsOnTarget
+			t.totals.Woodwork += side.Woodwork
+			t.totals.Tackles += side.Tackles
+			t.totals.Interceptions += side.Interceptions
+			t.totals.Clearances += side.Clearances
+			t.totals.Blocks += side.Blocks
+			t.totals.Saves += side.Saves
+			t.totals.Fouls += side.Fouls
+		}
+	}
 	{
 		{
 			home, away := 0, 0
 			for _, e := range events {
+				switch e.Type {
+				case soccer.GameEventTypeStop:
+					t.stops++
+					continue
+				case soccer.GameEventTypeMiss:
+					if d := e.GetMissEvent().Detail; d != "" {
+						t.missDetail[d]++
+					}
+				case soccer.GameEventTypeGoal:
+					if e.GetGoalEvent().AssistID != "" {
+						t.assisted++
+					}
+					if e.ChanceType == soccer.ChanceTypeCross || e.ChanceType == soccer.ChanceTypeCorner {
+						t.headed++
+					}
+				}
 				t.shots++
 				t.shotsByType[e.ChanceType]++
 				if e.ChanceType == soccer.ChanceTypePenalty {
@@ -233,6 +278,25 @@ func report(t tally, fixtures, seeds int, model, label string) {
 	for _, ct := range types {
 		n := t.shotsByType[ct]
 		fmt.Printf("%-16s %7.1f%% %7.1f%%\n", ct, 100*float64(n)/float64(t.shots), 100*float64(t.goalsByType[ct])/float64(n))
+	}
+
+	if t.withTotals > 0 {
+		n := float64(t.withTotals)
+		per := func(v int) string { return fmt.Sprintf("%.1f", float64(v)/n) }
+		share := func(a, b int) string { return fmt.Sprintf("%.0f%%", 100*float64(a)/float64(max(b, 1))) }
+		fmt.Printf("\nper match: possessions %s  passes %s (%s arrive)  take-ons %s (%s won)  crosses %s (%s in)\n",
+			per(t.totals.Possessions), per(t.totals.Passes), share(t.totals.PassesCompleted, t.totals.Passes),
+			per(t.totals.TakeOns), share(t.totals.TakeOnsWon, t.totals.TakeOns),
+			per(t.totals.Crosses), share(t.totals.CrossesCompleted, t.totals.Crosses))
+		fmt.Printf("           on target %s  saves %s  blocks %s  woodwork %s  tackles %s  interceptions %s  clearances %s  fouls %s  stops shown %s\n",
+			per(t.totals.ShotsOnTarget), per(t.totals.Saves), per(t.totals.Blocks), per(t.totals.Woodwork),
+			per(t.totals.Tackles), per(t.totals.Interceptions), per(t.totals.Clearances), per(t.totals.Fouls), per(t.stops))
+		fmt.Printf("goals: assisted %s (target 60-75%%)  headed %s (target 10-20%%)\n", share(t.assisted, t.goals), share(t.headed, t.goals))
+		fmt.Printf("misses:")
+		for _, d := range []string{"blocked", "wide", "over", "post", "bar", "held", "parried"} {
+			fmt.Printf("  %s %s", d, share(t.missDetail[d], t.shots-t.goals))
+		}
+		fmt.Println()
 	}
 
 	fmt.Printf("\ngoals by scorer position:")

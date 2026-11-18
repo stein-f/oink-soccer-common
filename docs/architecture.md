@@ -222,3 +222,25 @@ Allocate(rand, pool, assets) → []Assignment // pure function
 ```
 
 Same determinism contract: same `(seed, candidates, rules, assets)` ⇒ same output. The Algorand block-hash → `*rand.Rand` derivation lives in `v2/algorand` so it's reusable between match seeding and allocation seeding.
+
+## Step model (season 19+)
+
+`RunGameWithModel(..., ModelSteps)` runs `simulateStepsMatch` (`steps.go`). The classic and contest flows are untouched. An attack is a chain of contests between two named players:
+
+```
+possessions = uniform(StepsPossessions) × tempo          (same for every formation)
+who attacks = home advantage and the score only           (quality shows in the steps, not in the split)
+route       = take-on | run in behind | cross | long shot, weighted by how likely each is to work
+1. pass     passer (midfield, or defence if there is none) v the opponent's midfield
+2. route    forward v the defender facing him; a cross is then a header v the marker
+3. shot     shooter v a blocker, then on target or not
+4. save     shot v the keeper: goal, held or parried (which can give a corner or a rebound)
+```
+
+- **Odds.** Every contest is `(a / b)^StepsDuelExponent × modifiers`, on plain 0-100 blends of the player-on-player attributes (`passScore`, `takeOnScore`, `aerialScore`, ...). No skill curve: the sharpening happens once. A 20-point edge is worth about 18 points over a coin toss.
+- **Who meets whom.** Each line is spread across the pitch in line-up order (one player: centre; two: left and right). A contest is met by the nearest player of the defending line that faces it; the attacking left faces the defending right.
+- **Formations are numbers, not multipliers.** A defending line that outnumbers the attackers in front of it has a spare man (`StepsSupport`), one that is outnumbered is stretched (`StepsStretched`), and an empty line is covered from the best other line, out of place (`StepsLineCover`). A side with no midfield builds with a long ball from the back (`StepsLongBall`). `FormationProfile` is read only for injury risk. Every shape has four outfielders to be an extra man somewhere and a man short somewhere else.
+- **Team-wide multipliers** (captain, items, position boosts, the home boost) reach the odds through `StepsBoostExponent`, because here they touch every contest of an attack and of defending one.
+- **Tactics.** Tempo sets volume and shot quality; the opponent's press and line squeeze the pass and the tackle, raise fouls, and change how often a side runs in behind; high press tires late. Roles: a Playmaker plays more of the passes, a Target Man is aimed at more, a Ball Winner is never stretched.
+
+Constants live in `internal/tuning/steps.go`. `cmd/calibrate -model steps` replays real line-ups and reports the realism targets plus per-match totals, assists and miss kinds. Formation balance is judged on real squads (best line-up per formation for every Premier League team), not on one identical squad: the classic and contest models both passed the identical-squad test while one formation was unusable. `testdata.TypicalTeam` / `ModestTeam` are median FC 27 players by position, for tests that need real squad shapes.
