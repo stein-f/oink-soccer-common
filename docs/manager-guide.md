@@ -240,6 +240,86 @@ You can stack roles across multiple players — a Captain + Playmaker + Ball Win
 
 ---
 
+## Season 19 onwards — tactics and roles
+
+Everything above describes the engine seasons 1 to 18 were played on. From season 19 a match is played as attacks between named players: a pass forward, then a take-on, a run in behind, a cross, a long ball or a shot from distance, each one a contest between two of them. Tactics and roles change the odds of particular contests instead of a team score, so what a setting is worth depends on who you have and who you are playing. None of them is better on its own, which is why there are no percentages below. (The in-product help, `TacticsInfoModal.tsx` in lost-pigs-ui, carries the same text.)
+
+### Press
+
+How hard your team closes the ball down. It trades time for space.
+
+| Press | Their player on the ball | Room behind you | Your legs |
+|---|---|---|---|
+| Low | Has time: passes, crosses and long shots come off more, and they see more of the ball | None: dribbles and runs in behind are harder | No cost |
+| Medium (default) | Baseline | Baseline | No cost |
+| High | No time: passes, crosses and long shots come off less, and they see less of the ball | Plenty: dribbles, runs in behind and flick-ons are easier | Your own attacks fade from the 60th minute, and more from the 75th |
+
+A press is only as good as the running in it. How much time a high press takes away depends on the `WorkRate` of the player closing the ball down, and how much your own attack fades depends on the average `WorkRate` of your outfield players: a side that can run all day barely notices, one that can't is finished by the 75th minute. `WorkRate` does nothing for a side that doesn't press high.
+
+Pressing high also gives away more fouls when you win the ball (more free kicks and penalties against you), raises your own injury risk, and invites the long ball, which goes over a press. Sitting off does the reverse of all three.
+
+- Press high with high-`WorkRate` players against a side that wants time on the ball: passers, crossers, long-range shooters.
+- Don't press quick dribblers or forwards who run in behind: you are handing them the room.
+- Sit off a side that runs at you. Don't sit off good crossers with a big forward to aim at.
+- Being pressed? A long ball to a strong Target Man skips the press.
+
+### Tempo
+
+How quickly your team plays when it has the ball.
+
+| Tempo | Your dribbles and runs in behind | Your passes, crosses and long shots | Attacks in the match |
+|---|---|---|---|
+| Slow | Harder: the defence is set | Better: fewer passes go astray and the cross is one worth heading | Fewer, for both sides |
+| Normal (default) | Baseline | Baseline | Baseline |
+| Fast | Easier: you catch them before they are set | Looser: more passes go astray and crosses are harder to win | More, for both sides |
+
+- Play fast with quick dribblers (`Dribbling`, `Pace`) and forwards who run in behind (`Pace`, `Positioning`).
+- Play slow with good passers and crossers (`Passing`, `Crossing`), a forward who wins headers, or midfielders who shoot from distance.
+- Your team already leans towards what its players are good at. Tempo is how hard you lean.
+
+### Line Height
+
+How far up the pitch your defence stands.
+
+| Line | Their passing | Balls in behind you |
+|---|---|---|
+| Deep | Easier, and they see a little more of the ball | Tried less often, and they lose the race more |
+| Normal (default) | Baseline | Baseline |
+| High | Harder, and they see a little less of the ball | Tried more often, and they win the race more |
+
+A ball in behind is a race between their forward (`Pace`, `Positioning`) and your defender (`Pace`, `Marking`). If he loses it, whoever is covering has to make a tackle (`Tackling`): your other defender, or with one defender and two midfielders the midfielder who tackles best. With nobody covering, the forward is through on your keeper. A flick-on from a long ball is run on to the same way.
+
+- Play high with quick defenders, or against slow forwards and sides that want to pass through you.
+- Play deep against quick forwards, or when your defenders are slow.
+- Unlike earlier seasons, your defenders are judged on the same attributes at any height. What changes is how often they are asked to win a race.
+
+### Set-piece taker
+
+Name one player to take your free kicks, penalties and corners. Leave it blank and your best taker steps up for each free kick and each penalty, and corners are taken by one of your better crossers.
+
+| Chance | What the taker does | Attributes that matter |
+|---|---|---|
+| Free kick | Takes the shot | `Technique`, then `ShotPower` |
+| Penalty | Takes the shot | `Composure`, then `Finishing` |
+| Corner | Delivers it: someone else goes up for it | `Crossing` |
+
+A good corner makes the header easier to win: the delivery helps your player in the air against the defender marking him. Who goes up for it follows `Heading` and `Strength`, and a Target Man is found twice as often. The taker can't head his own corner.
+
+- Naming a taker is not automatically an upgrade: he takes all three. Name one if the same player is your best, or near it, at free kicks and penalties and can cross.
+- Don't name your best header. Left blank he may still take the odd corner if he also crosses well; naming someone else keeps him in the box for all of them.
+- A goal down from the 82nd minute, your keeper comes up for corners.
+
+### Player roles
+
+| Role | What it does | Best for |
+|---|---|---|
+| **Captain** | A small boost to the whole team and to his own play, both scaled by his quality: `(ControlRating + Composure) / 2` (`GoalkeeperRating` instead for keepers). Above 60 he lifts both; below it he drags both down. | A composed, intelligent senior — one per team |
+| **Target Man** | The one your team looks for in the air: aimed at twice as often with crosses, corners and long balls from the back. It only decides who is aimed at. Winning it takes `Heading` and `Strength`, and a long ball is mostly `Strength`. | A strong forward who is good in the air, most of all in a team with no midfield, which goes long more than any other |
+| **Playmaker** | Plays nearly twice as many of your passes forward as the players beside him. That helps if he is your best passer and costs you if he isn't. Does little for a midfielder on his own in midfield: he is playing most of them anyway. | Your best `Passing` midfielder when you have two (or defender, when you have no midfield) |
+| **Ball Winner** | Goes to the ball. When his line is outnumbered (one defender against two forwards, say) he makes up half of what it is short. The price is fouls: he gives one away about a third more often when he wins a tackle. | A high-`Tackling` defender or midfielder in a line that is outnumbered. Good tacklers foul less to begin with; a poor tackler with this tag is a liability |
+
+---
+
 ## Building a team — three concrete examples
 
 ### "Counter-attacking" team
