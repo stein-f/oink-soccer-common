@@ -240,9 +240,22 @@ You can stack roles across multiple players — a Captain + Playmaker + Ball Win
 
 ---
 
-## Season 19 onwards — tactics and roles
+## Season 19 onwards — formations, tactics and roles
 
-Everything above describes the engine seasons 1 to 18 were played on. From season 19 a match is played as attacks between named players: a pass forward, then a take-on, a run in behind, a cross, a long ball or a shot from distance, each one a contest between two of them. Tactics and roles change the odds of particular contests instead of a team score, so what a setting is worth depends on who you have and who you are playing. None of them is better on its own, which is why there are no percentages below. (The in-product help, `TacticsInfoModal.tsx` in lost-pigs-ui, carries the same text.)
+Everything above describes the engine seasons 1 to 18 were played on. From season 19 a match is played as attacks between named players: a pass forward, then a take-on, a run in behind, a cross, a long ball or a shot from distance, each one a contest between two of them. Tactics and roles change the odds of particular contests instead of a team score, so what a setting is worth depends on who you have and who you are playing. None of them is better on its own, which is why there are no percentages below. (The in-product help in lost-pigs-ui carries the same text: `TacticsInfoModal.tsx`, `FormationInfoModal.tsx` and the guide pages `content/guide/*-s19.mdx`.)
+
+### Formations
+
+A formation is how many of your four outfield players stand in each line, and nothing else. No shape gets a bonus, and every shape gets the same number of attacks. An attack is met by whoever stands in the line that faces it: two players in a line is one to spare, and an empty line has to be covered by someone from another line, out of place.
+
+| Formation | What that buys | What it costs |
+|---|---|---|
+| **The Pyramid** 2-1-1, two at the back | A forward who beats one defender still has the other to get past | One midfielder, and one forward who is outnumbered by two defenders |
+| **The Diamond** 1-2-1, two in midfield | More of your passes arrive, fewer of theirs. The better tackler of the two sits in front of your defender and covers | One forward, and one defender for their forwards to run at |
+| **The Y** 1-1-2, two up front | Two forwards outnumber a lone defender, and cross and flick on for each other | One defender with nobody covering: beaten once, beaten |
+| **The Box** 2-0-2, no midfield | Two at the back and two up front. Your defenders play it forward, often long for a forward to win | The opponent passes through the space where your midfield would be |
+
+Pick the shape your best players fit: the Pyramid for two good defenders and a forward who can carry the attack alone; the Diamond when your best players are midfielders, one of whom can tackle; the Y for two forwards who suit each other and a defender you trust alone; the Box for a strong Target Man with a partner who runs beyond him and two defenders who can pass.
 
 ### Press
 
