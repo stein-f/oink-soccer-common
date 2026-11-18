@@ -67,7 +67,17 @@ func TestSteps_EventsAreCausal(t *testing.T) {
 				out := runSteps(t, seed, home, away)
 				require.NotNil(t, out.Totals)
 				stops, lastMinute := 0, 0
-				for _, e := range out.Events {
+				for i, e := range out.Events {
+					if e.Steps[0].Kind == soccer.StepKindRebound {
+						// A rebound follows the save or the woodwork it came off.
+						require.Greater(t, i, 0)
+						before := out.Events[i-1]
+						require.Equal(t, e.Minute, before.Minute)
+						require.Equal(t, soccer.GameEventTypeMiss, before.Type)
+						came := map[string]string{"parried": "save", "post": "post", "bar": "bar"}[before.GetMissEvent().Detail]
+						require.Equal(t, came, e.Steps[0].Detail)
+						require.Equal(t, soccer.ChanceTypeOpenPlay, e.ChanceType)
+					}
 					require.GreaterOrEqual(t, e.Minute, lastMinute, "events in order")
 					lastMinute = e.Minute
 					require.NotEmpty(t, e.Steps, "%s event with no steps", e.Type)
@@ -90,6 +100,21 @@ func TestSteps_EventsAreCausal(t *testing.T) {
 								}
 							}
 							require.True(t, set, "the assister set the goal up in the steps")
+						}
+						switch ev.Detail {
+						case "":
+						case "worldie":
+							require.Equal(t, soccer.ChanceTypeLongRange, e.ChanceType)
+						case "solo":
+							require.Equal(t, soccer.StepKindTakeOn, e.Steps[0].Kind)
+							require.Equal(t, "solo", e.Steps[0].Detail)
+							require.Empty(t, ev.AssistID, "a solo goal is nobody else's")
+						case "rebound":
+							require.Equal(t, soccer.StepKindRebound, e.Steps[0].Kind)
+						case "keeper":
+							require.Equal(t, soccer.ChanceTypeCorner, e.ChanceType)
+						default:
+							t.Fatalf("unknown goal detail %q", ev.Detail)
 						}
 					case soccer.MissEvent:
 						team = ev.TeamType

@@ -177,3 +177,176 @@ func TestSteps_ASecondDefenderCovers(t *testing.T) {
 	// behind him in that line to cover in turn.
 	assert.Nil(t, coverFor(box, box.lines[PlayerPositionAttack][0]))
 }
+
+// routeWeight is how much of a side's attack is one kind, by one player
+// (and, for a cross, aimed at one player). "" matches anyone.
+func routeWeight(routes []stepRoute, kind, actor, target string) float64 {
+	var w float64
+	for _, r := range routes {
+		if r.kind != kind || (actor != "" && r.actor.ID != actor) {
+			continue
+		}
+		if target != "" && (r.target == nil || r.target.ID != target) {
+			continue
+		}
+		w += r.weight
+	}
+	return w
+}
+
+func stepSidesOf(t *testing.T, home, away GameLineup) (*stepSide, *stepSide) {
+	t.Helper()
+	r := rand.New(rand.NewSource(1))
+	h, _ := newStepSide(r, TeamTypeHome, home, &TeamTotals{})
+	a, _ := newStepSide(r, TeamTypeAway, away, &TeamTotals{})
+	return h, a
+}
+
+// forwardsOf returns the indexes of a line-up's forwards.
+func forwardsOf(l GameLineup) []int {
+	var out []int
+	for i, p := range l.Players {
+		if p.SelectedPosition == PlayerPositionAttack {
+			out = append(out, i)
+		}
+	}
+	return out
+}
+
+func TestSteps_AnAttackGoesToThePlayerItSuits(t *testing.T) {
+	// Two forwards: a quick, tricky winger and a big man who is neither.
+	home := stepLineup(FormationTypeY, "h")
+	fw := forwardsOf(home)
+	require.Len(t, fw, 2)
+	winger, bigMan := &home.Players[fw[0]], &home.Players[fw[1]]
+	winger.Attributes.Dribbling, winger.Attributes.Pace = 92, 90
+	winger.Attributes.Heading, winger.Attributes.Strength = 50, 50
+	bigMan.Attributes.Dribbling, bigMan.Attributes.Pace = 52, 52
+	bigMan.Attributes.Heading, bigMan.Attributes.Strength = 92, 92
+	h, a := stepSidesOf(t, home, stepLineup(FormationTypePyramid, "a"))
+	routes := (&stepMatch{}).routes(h, a)
+
+	// The winger does the running at people, with and without help.
+	assert.Greater(t, routeWeight(routes, "take_on", winger.ID, ""), 6*routeWeight(routes, "take_on", bigMan.ID, ""))
+	assert.Greater(t, routeWeight(routes, "run", winger.ID, ""), 3*routeWeight(routes, "run", bigMan.ID, ""))
+	assert.Greater(t, routeWeight(routes, "solo", winger.ID, ""), 6*routeWeight(routes, "solo", bigMan.ID, ""))
+	// The crosses are aimed at the big man.
+	assert.Greater(t, routeWeight(routes, "cross", "", bigMan.ID), 4*routeWeight(routes, "cross", "", winger.ID))
+
+	// And the side as a whole does more of what its players are good at:
+	// swap the winger for a second big man and it crosses more, dribbles less.
+	plain := stepLineup(FormationTypeY, "h")
+	for _, i := range forwardsOf(plain) {
+		plain.Players[i].Attributes = bigMan.Attributes
+	}
+	ph, pa := stepSidesOf(t, plain, stepLineup(FormationTypePyramid, "a"))
+	bigMen := (&stepMatch{}).routes(ph, pa)
+	share := func(rs []stepRoute, kind string) float64 {
+		var total float64
+		for _, r := range rs {
+			total += r.weight
+		}
+		return routeWeight(rs, kind, "", "") / total
+	}
+	assert.Greater(t, share(routes, "take_on"), share(bigMen, "take_on")+0.10)
+	assert.Greater(t, share(bigMen, "cross"), share(routes, "cross")+0.10)
+}
+
+func TestSteps_ASlowPlayerOnlyDribblesAtASlowerOne(t *testing.T) {
+	home := stepLineup(FormationTypeDiamond, "h")
+	fw := forwardsOf(home)
+	require.Len(t, fw, 1)
+	home.Players[fw[0]].Attributes.Dribbling, home.Players[fw[0]].Attributes.Pace = 58, 45
+	id := home.Players[fw[0]].ID
+	share := func(tackling int) float64 {
+		away := stepLineup(FormationTypeDiamond, "a")
+		for i := range away.Players {
+			if away.Players[i].SelectedPosition == PlayerPositionDefense {
+				a := &away.Players[i].Attributes
+				// Only what a take-on is up against: he is no easier to run
+				// in behind or to cross past.
+				a.Tackling, a.Strength = tackling, tackling
+			}
+		}
+		h, a := stepSidesOf(t, home, away)
+		routes := (&stepMatch{}).routes(h, a)
+		var total float64
+		for _, r := range routes {
+			total += r.weight
+		}
+		return routeWeight(routes, "take_on", id, "") / total
+	}
+	good, poor := share(82), share(35)
+	assert.Less(t, good, 0.10, "against a good defender he hardly tries it")
+	assert.Greater(t, poor, 2.5*good, "against one he can beat, he does")
+}
+
+func TestSteps_AWorldieNeedsPower(t *testing.T) {
+	strike := func(power, technique int) float64 {
+		return worldieChance(PlayerAttributes{ShotPower: power, Technique: technique})
+	}
+	assert.Zero(t, strike(45, 45))
+	assert.Greater(t, strike(75, 75), 0.0)
+	assert.Greater(t, strike(92, 88), 2*strike(75, 75))
+	assert.LessOrEqual(t, strike(99, 99), 1.0)
+}
+
+func TestSteps_ReboundsFallToForwardsExceptFromACorner(t *testing.T) {
+	scorers := func(ct ChanceType) map[PlayerPosition]int {
+		h, a := stepSides(t, FormationTypeY, FormationTypePyramid)
+		m := &stepMatch{r: rand.New(rand.NewSource(3))}
+		for i := 0; i < 2000; i++ {
+			// At the last follow-up allowed, so nothing comes of this one.
+			m.rebound(h, a, ct, "post", 30, tuning.StepsMaxFollowUps-1)
+		}
+		byLine := map[PlayerPosition]int{}
+		for _, e := range m.events {
+			require.Equal(t, StepKindRebound, e.Steps[0].Kind)
+			require.Equal(t, "post", e.Steps[0].Detail)
+			require.Equal(t, ChanceTypeOpenPlay, e.ChanceType)
+			if e.IsGoal() {
+				require.Equal(t, "rebound", e.GetGoalEvent().Detail)
+				require.Empty(t, e.GetGoalEvent().AssistID)
+			}
+			for _, p := range h.outfield {
+				if p.ID == e.Steps[0].ActorID {
+					byLine[p.line]++
+				}
+			}
+		}
+		return byLine
+	}
+	open := scorers(ChanceTypeOpenPlay)
+	assert.Greater(t, open[PlayerPositionAttack], 1500, "a poacher's ball: the forwards")
+	assert.Less(t, open[PlayerPositionDefense], 100)
+	corner := scorers(ChanceTypeCorner)
+	assert.Greater(t, corner[PlayerPositionDefense], 350, "from a corner the defender is up too")
+}
+
+func TestSteps_TheKeeperComesUpOnlyLateAndAGoalDown(t *testing.T) {
+	keeperHeaders := func(minute, homeGoals, awayGoals int) int {
+		h, a := stepSides(t, FormationTypeY, FormationTypePyramid)
+		m := &stepMatch{r: rand.New(rand.NewSource(5)), homeGoals: homeGoals, awayGoals: awayGoals}
+		n := 0
+		for i := 0; i < 600; i++ {
+			m.homeGoals, m.awayGoals = homeGoals, awayGoals
+			before := len(m.events)
+			m.corner(h, a, minute, tuning.StepsMaxFollowUps)
+			for _, e := range m.events[before:] {
+				require.Equal(t, ChanceTypeCorner, e.ChanceType)
+				if e.Steps[1].ActorID == h.keeper.ID {
+					n++
+					if e.IsGoal() {
+						require.Equal(t, "keeper", e.GetGoalEvent().Detail)
+					}
+				}
+			}
+		}
+		return n
+	}
+	assert.Zero(t, keeperHeaders(88, 1, 1), "level: he stays at home")
+	assert.Zero(t, keeperHeaders(88, 2, 1), "ahead: he stays at home")
+	assert.Zero(t, keeperHeaders(60, 0, 1), "behind with time left: he stays at home")
+	assert.Zero(t, keeperHeaders(88, 0, 3), "well beaten: no point")
+	assert.Greater(t, keeperHeaders(88, 0, 1), 20, "a goal down at the death: up he comes")
+}

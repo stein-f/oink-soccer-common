@@ -21,8 +21,11 @@ const (
 	StepKindCross  StepKind = "cross"   // a ball into the box, against the man closing it down
 	StepKindAerial StepKind = "aerial"  // two players going for the same ball in the air
 	StepKindFoul   StepKind = "foul"    // the defender won it unfairly
-	StepKindShot   StepKind = "shot"    // the shot, against a defender trying to block it
-	StepKindSave   StepKind = "save"    // the shot on target, against the keeper
+	// StepKindRebound is a loose ball off the keeper or the woodwork, and
+	// who got to it. It opens the chance that follows.
+	StepKindRebound StepKind = "rebound"
+	StepKindShot    StepKind = "shot" // the shot, against a defender trying to block it
+	StepKindSave    StepKind = "save" // the shot on target, against the keeper
 )
 
 // Step is one contest between two players. ActorID is the player on the
@@ -35,6 +38,8 @@ const (
 //   - shot:  blocked | wide | over | post | bar | on_target
 //   - save:  goal | held | parried
 //   - foul:  free_kick | penalty
+//   - take_on: solo (a run from deep, past a midfielder first)
+//   - rebound: save | post | bar (what it came back off)
 type Step struct {
 	Kind       StepKind `json:"kind"`
 	ActorID    string   `json:"actor_id"`
@@ -61,6 +66,11 @@ type GoalEvent struct {
 	// AssistID is the team-mate whose pass or cross made the goal. Only
 	// ModelSteps fills it; empty for a goal nobody set up.
 	AssistID string `json:"assist_id,omitempty"`
+	// Detail is what kind of goal it was, when it was one to remember:
+	// worldie (from distance, struck with real power), solo (a run from deep
+	// past two or more), rebound (first to a loose ball) or keeper (the
+	// goalkeeper, up for a late corner). Only ModelSteps fills it.
+	Detail string `json:"detail,omitempty"`
 }
 
 type MissEvent struct {

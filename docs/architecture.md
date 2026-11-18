@@ -230,13 +230,18 @@ Same determinism contract: same `(seed, candidates, rules, assets)` ⇒ same out
 ```
 possessions = uniform(StepsPossessions) × tempo          (same for every formation)
 who attacks = each side's quality, home advantage         (see "the stronger side" below)
-route       = take-on | run in behind | cross | long shot, weighted by how likely each is to work
+route       = take-on | solo run | run in behind | cross | long shot, one option per player who
+              could make it, weighted by what suits him and whether it would work (see below)
 1. pass     passer (midfield, or defence if there is none) v the opponent's midfield
+            (a solo run has no pass: the runner beats a midfielder instead)
 2. route    forward v the defender facing him, then v the defender covering if there is one;
             a cross is then a header v the marker
-3. shot     shooter v a blocker, then on target or not
+3. shot     shooter v a blocker, then on target or not (off the woodwork it can come back out)
 4. save     shot v the keeper: goal, held or parried (which can give a corner or a rebound)
 ```
+
+- **Who does what follows the players.** `routes` lists every (kind of attack, player) option. Within a line a kind of attack goes to the player it suits, by `(score / StepsTypicalScore)^StepsAptitude × P(works)^StepsChoiceByOdds`: a tricky winger takes people on, a big man gets the crosses, and a slow forward only runs at a slower defender. How often the side does that kind of thing at all follows the same two (`StepsAptitudeMix`, `StepsOddsMix`), so a side leans to what its players are good at and what this opponent is weak to. The options depend only on who is on the pitch, so they are worked out once a match.
+- **Moments.** A *solo run* is a route of its own: past the midfielder who meets him, then the defence, and he always finishes it himself (`soloScore`: dribbling, pace, strength). After a take-on the dribbler squares it only if a team-mate is the better finisher (`StepsCutBack`, scaled by the two finishers). A *rebound* off a parry or the woodwork falls to whoever reads it (`poachScore`: positioning, finishing), nearly always a forward, except from a corner when everyone is up. A side one goal down from `StepsKeeperUpFromMinute` sends its *keeper* up for corners. A goal from distance is labelled a *worldie* by the scorer's shot power (`worldieChance`); the label changes no odds. `GoalEvent.Detail` carries worldie | solo | rebound | keeper.
 
 - **Odds.** Every contest is `(a / b)^StepsDuelExponent × modifiers`, on plain 0-100 blends of the player-on-player attributes (`passScore`, `takeOnScore`, `aerialScore`, ...). No skill curve: the sharpening happens once. A 20-point edge is worth about 20 points over a coin toss.
 - **The stronger side mostly wins.** A side's share of the attacks is the mean overall rating of the players it fields, raised to `StepsPossessionExponent` (three points better ≈ 61% of the ball), times the opponent's press and line as in the classic model. Overall is used because it is the number managers buy on and it knows nothing about formations. Without this the ball was shared evenly and results were more of a coin flip than the classic model's; with it the favourite wins more and loses less than on the classic model at every rating gap. There is no catch-up for a side that is behind (`StepsScoreEffect` 0).

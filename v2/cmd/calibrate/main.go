@@ -71,8 +71,12 @@ type tally struct {
 	// Step model only.
 	stops, assisted, headed int
 	missDetail              map[string]int
-	totals                  soccer.TeamTotals
-	withTotals              int
+	// Goals worth a second look, by kind, and the chances that could
+	// have been: shots at the end of a solo run, from a rebound (by what
+	// it came off) and by a goalkeeper.
+	goalDetail, special map[string]int
+	totals              soccer.TeamTotals
+	withTotals          int
 }
 
 func main() {
@@ -142,6 +146,8 @@ func main() {
 			goalsByType:     map[soccer.ChanceType]int{},
 			goalsByPosition: map[soccer.PlayerPosition]int{},
 			missDetail:      map[string]int{},
+			goalDetail:      map[string]int{},
+			special:         map[string]int{},
 		}
 	}
 	// S18 fixtures range from evenly matched to a full side against a
@@ -243,12 +249,26 @@ func (t *tally) add(outcome soccer.MatchOutcome, positions map[string]soccer.Pla
 					if e.GetGoalEvent().AssistID != "" {
 						t.assisted++
 					}
+					if d := e.GetGoalEvent().Detail; d != "" {
+						t.goalDetail[d]++
+					}
 					if e.ChanceType == soccer.ChanceTypeCross || e.ChanceType == soccer.ChanceTypeCorner {
 						t.headed++
 					}
 				}
 				t.shots++
 				t.shotsByType[e.ChanceType]++
+				if len(e.Steps) > 0 {
+					switch first := e.Steps[0]; {
+					case first.Kind == soccer.StepKindRebound:
+						t.special["rebound off "+first.Detail]++
+					case first.Kind == soccer.StepKindTakeOn && first.Detail == "solo":
+						t.special["solo"]++
+					}
+					if last := e.Steps[len(e.Steps)-1]; positions[last.ActorID] == soccer.PlayerPositionGoalkeeper {
+						t.special["keeper"]++
+					}
+				}
 				if e.ChanceType == soccer.ChanceTypePenalty {
 					t.penalties++
 				}
@@ -430,6 +450,12 @@ func report(t tally, fixtures, seeds int, model, label string) {
 			per(t.totals.ShotsOnTarget), per(t.totals.Saves), per(t.totals.Blocks), per(t.totals.Woodwork),
 			per(t.totals.Tackles), per(t.totals.Interceptions), per(t.totals.Clearances), per(t.totals.Fouls), per(t.stops))
 		fmt.Printf("goals: assisted %s (target 60-75%%)  headed %s (target 10-20%%)\n", share(t.assisted, t.goals), share(t.headed, t.goals))
+		per100 := func(v int) string { return fmt.Sprintf("%.1f", 100*float64(v)/n) }
+		fmt.Printf("per 100 matches, goals: worldie %s  solo %s  rebound %s  keeper %s\n",
+			per100(t.goalDetail["worldie"]), per100(t.goalDetail["solo"]), per100(t.goalDetail["rebound"]), per100(t.goalDetail["keeper"]))
+		fmt.Printf("per 100 matches, shots: after a solo run %s  rebound off a save %s, the post %s, the bar %s  by a keeper %s\n",
+			per100(t.special["solo"]), per100(t.special["rebound off save"]), per100(t.special["rebound off post"]),
+			per100(t.special["rebound off bar"]), per100(t.special["keeper"]))
 		fmt.Printf("misses:")
 		for _, d := range []string{"blocked", "wide", "over", "post", "bar", "held", "parried"} {
 			fmt.Printf("  %s %s", d, share(t.missDetail[d], t.shots-t.goals))
