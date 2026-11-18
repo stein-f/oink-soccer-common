@@ -779,3 +779,33 @@ func TestSteps_WhoIsBehindABeatenDefender(t *testing.T) {
 	nobody, _ := behind(y, alone)
 	assert.Nil(t, nobody)
 }
+
+func TestSteps_AFormationChangesNobodysInjuryRisk(t *testing.T) {
+	factor := func(shape FormationType, press PressLevel) float64 {
+		l := typicalStepLineup(shape, "h")
+		l.Team.Tactics.Press = press
+		h, _ := stepSidesOf(t, l, typicalStepLineup(FormationTypePyramid, "a"))
+		return h.injuryFactor()
+	}
+	// Whatever the shape, and whatever shape it is up against.
+	for _, shape := range stepShapes {
+		assert.Equal(t, 1.0, factor(shape, PressLevelNone), string(shape))
+	}
+	// A side's own press is what moves it.
+	assert.Greater(t, factor(FormationTypeBox, PressLevelHigh), 1.0)
+	assert.Less(t, factor(FormationTypeBox, PressLevelLow), 1.0)
+
+	// And over many matches a side is hurt no more often by a Box than by
+	// any other shape, on the same seeds.
+	injuries := func(opponent FormationType) int {
+		n := 0
+		for seed := int64(0); seed < 1500; seed++ {
+			out := simulateStepsMatch(rand.New(rand.NewSource(seed)), typicalStepLineup(FormationTypeY, "h"), typicalStepLineup(opponent, "a"))
+			n += len(out.Injuries.HomeTeamInjuries)
+		}
+		return n
+	}
+	box, pyramid := injuries(FormationTypeBox), injuries(FormationTypePyramid)
+	require.Greater(t, pyramid, 100)
+	assert.InDelta(t, pyramid, box, 0.2*float64(pyramid))
+}

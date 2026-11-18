@@ -246,7 +246,7 @@ Everything above describes the engine seasons 1 to 18 were played on. From seaso
 
 ### Formations
 
-A formation is how many of your four outfield players stand in each line, and nothing else. No shape gets a bonus, and every shape gets the same number of attacks. An attack is met by whoever stands in the line that faces it: two players in a line is one to spare, and an empty line has to be covered by someone from another line, out of place.
+A formation is how many of your four outfield players stand in each line, and nothing else. No shape gets a bonus, none changes anyone's injury risk, and every shape gets the same number of attacks. An attack is met by whoever stands in the line that faces it: two players in a line is one to spare, and an empty line has to be covered by someone from another line, out of place.
 
 | Formation | What that buys | What it costs |
 |---|---|---|

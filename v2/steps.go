@@ -46,15 +46,14 @@ type stepPlayer struct {
 
 // stepSide is everything about one team the steps read, worked out once.
 type stepSide struct {
-	team       TeamType
-	lineup     GameLineup
-	tactics    Tactics
-	outfield   []*stepPlayer
-	lines      map[PlayerPosition][]*stepPlayer
-	keeper     *stepPlayer
-	teamMod    float64 // captain, items and home advantage: every player's odds
-	posBoosts  positionMultipliers
-	injuryRisk float64
+	team      TeamType
+	lineup    GameLineup
+	tactics   Tactics
+	outfield  []*stepPlayer
+	lines     map[PlayerPosition][]*stepPlayer
+	keeper    *stepPlayer
+	teamMod   float64 // captain, items and home advantage: every player's odds
+	posBoosts positionMultipliers
 	// legs is how much running the side has in it, against a typical side's
 	// 1: what a high press asks for (see the tactics below).
 	legs   float64
@@ -63,12 +62,11 @@ type stepSide struct {
 
 func newStepSide(r *rand.Rand, team TeamType, lineup GameLineup, totals *TeamTotals) (*stepSide, []BoostRoll) {
 	s := &stepSide{
-		team:       team,
-		lineup:     lineup,
-		tactics:    lineup.Team.Tactics,
-		lines:      map[PlayerPosition][]*stepPlayer{},
-		injuryRisk: formationProfileFor(lineup.Team.Formation).InjuryRisk,
-		totals:     totals,
+		team:    team,
+		lineup:  lineup,
+		tactics: lineup.Team.Tactics,
+		lines:   map[PlayerPosition][]*stepPlayer{},
+		totals:  totals,
 	}
 	itemBoost, rolls := teamBoost(r, lineup)
 	var posRolls []BoostRoll
@@ -120,6 +118,16 @@ func newStepSide(r *rand.Rand, team TeamType, lineup GameLineup, totals *TeamTot
 	return s, append(rolls, posRolls...)
 }
 
+// injuryFactor is what a side's own choices do to its players' chance of an
+// injury: pressing high raises it, sitting off lowers it. (The opponent's
+// aggression is counted separately.) Formations play no part. The classic
+// and contest models multiply in the opponent's formation, which made a Box
+// a little more bruising to play against; here no shape has a multiplier of
+// any kind.
+func (s *stepSide) injuryFactor() float64 {
+	return pressInjuryFactor(s.tactics.Press)
+}
+
 // mod is everything that multiplies this player's odds in any contest.
 func (s *stepSide) mod(p *stepPlayer) float64 {
 	return math.Pow(s.teamMod*s.posBoosts.forPosition(p.SelectedPosition), tuning.StepsBoostExponent) * p.state
@@ -152,8 +160,8 @@ func simulateStepsMatch(r *rand.Rand, home, away GameLineup) MatchOutcome {
 	}
 	m.capStops()
 
-	homeInjuries := rollInjuries(r, home, teamAverageAggression(away), a.injuryRisk*pressInjuryFactor(h.tactics.Press), home.Team.ID)
-	awayInjuries := rollInjuries(r, away, teamAverageAggression(home), h.injuryRisk*pressInjuryFactor(a.tactics.Press), away.Team.ID)
+	homeInjuries := rollInjuries(r, home, teamAverageAggression(away), h.injuryFactor(), home.Team.ID)
+	awayInjuries := rollInjuries(r, away, teamAverageAggression(home), a.injuryFactor(), away.Team.ID)
 	return MatchOutcome{
 		Events:   m.events,
 		Injuries: Injuries{HomeTeamInjuries: homeInjuries, AwayTeamInjuries: awayInjuries},
