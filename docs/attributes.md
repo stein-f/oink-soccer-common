@@ -131,6 +131,31 @@ Sustained running, pressing engine, midfield support.
 
 ---
 
+## Player-on-player (season 19+)
+
+Written for players allocated from season 19 (FC 27 dataset) and read by the step engine, which decides a match by one player meeting another. The classic model reads none of them. All optional: when zero the engine backfills from the core rating that used to stand in.
+
+Both importers of the dataset (the allocation loader here and the lost-pigs importer that writes player records) derive them through `allocation/fifacsv.StepSource`, so a stored player matches what the engine was calibrated on.
+
+| Attribute | Dataset columns | Backfill | Used for |
+|---|---|---|---|
+| `Dribbling` | dribbling, skill_dribbling, movement_agility, movement_balance | `ControlRating` | taking a defender on |
+| `Passing` | passing, attacking_short_passing, mentality_vision, skill_long_passing | `ControlRating` | finding a team-mate |
+| `Crossing` | attacking_crossing, skill_curve | `Technique` | the ball into the box |
+| `Pace` | movement_acceleration, movement_sprint_speed | `SpeedRating` | a race |
+| `Strength` | power_strength, power_jumping | defence, attack or their mean, by position | holding off, winning the ball in the air |
+| `Interceptions` | mentality_interceptions | `DefenseRating` | cutting out a pass |
+| `Positioning` | mentality_positioning | `AttackRating` | finding space going forward |
+| `Marking` | defending_marking_awareness | `DefenseRating` | tracking a runner, blocking a shot |
+| `ShotPower` | power_shot_power, power_long_shots | `Technique` | shots from distance |
+| `Reflexes` | goalkeeping_reflexes, goalkeeping_diving | `GoalkeeperRating` | shot-stopping |
+| `Handling` | goalkeeping_handling | `GoalkeeperRating` | holding rather than parrying |
+| `OneOnOne` | goalkeeping_positioning (twice) and goalkeeping_speed | `GoalkeeperRating` | meeting a forward who is through |
+
+Columns are averaged, skipping blanks. The dataset blanks its composite columns (dribbling, passing) for goalkeepers, so theirs come from the detailed columns. `OneOnOne` weights positioning twice because a keeper's speed column sits about 30 points below his other skills.
+
+---
+
 ## Display-only
 
 Fields on `PlayerAttributes` that the simulation doesn't consume.

@@ -49,6 +49,45 @@ type fifaRecord struct {
 	DefendingStandingTackle  int `csv:"defending_standing_tackle"`
 	DefendingSlidingTackle   int `csv:"defending_sliding_tackle"`
 	MentalityInterceptions   int `csv:"mentality_interceptions"`
+
+	// Columns that feed only the player-on-player attributes (StepSource).
+	Dribbling                 int `csv:"dribbling"`
+	SkillDribbling            int `csv:"skill_dribbling"`
+	MovementAgility           int `csv:"movement_agility"`
+	MovementBalance           int `csv:"movement_balance"`
+	AttackingShortPassing     int `csv:"attacking_short_passing"`
+	MentalityVision           int `csv:"mentality_vision"`
+	SkillLongPassing          int `csv:"skill_long_passing"`
+	AttackingCrossing         int `csv:"attacking_crossing"`
+	MovementAcceleration      int `csv:"movement_acceleration"`
+	MovementSprintSpeed       int `csv:"movement_sprint_speed"`
+	PowerStrength             int `csv:"power_strength"`
+	DefendingMarkingAwareness int `csv:"defending_marking_awareness"`
+	MentalityPositioning      int `csv:"mentality_positioning"`
+	PowerShotPower            int `csv:"power_shot_power"`
+	GoalkeepingReflexes       int `csv:"goalkeeping_reflexes"`
+	GoalkeepingDiving         int `csv:"goalkeeping_diving"`
+	GoalkeepingSpeed          int `csv:"goalkeeping_speed"`
+	GoalkeepingPositioning    int `csv:"goalkeeping_positioning"`
+}
+
+// stepSource gathers the row's columns for the player-on-player attributes.
+func (rec fifaRecord) stepSource() StepSource {
+	return StepSource{
+		Dribbling: rec.Dribbling, SkillDribbling: rec.SkillDribbling,
+		Agility: rec.MovementAgility, Balance: rec.MovementBalance,
+		Passing: rec.Passing, ShortPassing: rec.AttackingShortPassing,
+		Vision: rec.MentalityVision, LongPassing: rec.SkillLongPassing,
+		Crossing: rec.AttackingCrossing, Curve: rec.SkillCurve,
+		Acceleration: rec.MovementAcceleration, SprintSpeed: rec.MovementSprintSpeed,
+		Strength: rec.PowerStrength, Jumping: rec.PowerJumping,
+		Interceptions: rec.MentalityInterceptions, MarkingAwareness: rec.DefendingMarkingAwareness,
+		AttackPositioning: rec.MentalityPositioning,
+		ShotPower:         rec.PowerShotPower, LongShots: rec.PowerLongShots,
+		GKReflexes: rec.GoalkeepingReflexes, GKDiving: rec.GoalkeepingDiving,
+		GKHandling: rec.Goalkeeping,
+		GKSpeed:    rec.GoalkeepingSpeed, GKPositioning: rec.GoalkeepingPositioning,
+	}
 }
 
 // LoadCandidates reads the FIFA dataset CSV at path and maps each row to an
@@ -96,6 +135,10 @@ func (rec fifaRecord) toAttributes(r *rand.Rand) soccer.PlayerAttributes {
 		Composure: rec.Mentality,
 		Tackling:  averagePositive(rec.DefendingStandingTackle, rec.DefendingSlidingTackle, rec.MentalityInterceptions),
 	}
+	// Player-on-player attributes for the step engine. Derived from the row
+	// alone (no draw from r), so adding them leaves every earlier season's
+	// candidate set and block-seeded draw exactly as they were.
+	rec.stepSource().Apply(&attrs)
 	// OverallRating is the FIFA `overall` column verbatim. v1 derived a
 	// position-weighted overall here; since the 2026-06 OVR alignment the
 	// game displays FIFA overall everywhere, so the allocation bands (and
