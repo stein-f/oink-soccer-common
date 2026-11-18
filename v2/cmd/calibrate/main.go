@@ -95,6 +95,7 @@ func main() {
 	lineupsPath := flag.String("lineups", "", "formations report: cache file for every team's best line-up per formation (written if missing, read if present)")
 	seasons := flag.Int("seasons", 1000, "formations report: seasons to play for the strongest team's title odds (0 to skip)")
 	levers := flag.Int("levers", 0, "instead of replaying fixtures, report what boosts, tactics and roles are worth, over this many seeds")
+	tactics := flag.Int("tactics", 0, "instead of replaying fixtures, report what each tactic is worth to each kind of squad, over this many seeds")
 	flag.Parse()
 	if *attributes > 0 {
 		attributeReport(*attributes, soccer.Model(*model), *attributeDelta)
@@ -102,6 +103,10 @@ func main() {
 	}
 	if *levers > 0 {
 		leversReport(*levers, soccer.Model(*model))
+		return
+	}
+	if *tactics > 0 {
+		tacticsReport(*tactics, soccer.Model(*model))
 		return
 	}
 	if *formationsDir != "" {

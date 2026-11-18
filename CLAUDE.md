@@ -27,6 +27,7 @@ cd v2 && RUN_BALANCE_STRICT=1 go test ./...           # fail if balance spread >
 # calibrating a model against real line-ups (see v2/cmd/calibrate)
 cd v2 && go run ./cmd/calibrate -archives <dir of match archives> -model steps [-enrich ../cmd/allocation/fifa_players_22.csv]
 cd v2 && go run ./cmd/calibrate -model steps -attributes 4000     # what +5 of each attribute is worth (-attribute-delta 12 for a clearer read)
+cd v2 && go run ./cmd/calibrate -model steps -tactics 4000        # is each tactic a real choice: its worth by kind of squad and opponent
 cd v2 && go run ./cmd/calibrate -model steps -levers 12000        # what boosts, tactics and roles are worth
 cd v2 && go run ./cmd/calibrate -model steps -formations <dir of team files> \
     [-enrich <dataset.csv>] [-deal ../cmd/allocation/s18/eligible_assets.csv -deal-dataset ../cmd/allocation/fifa_players_fc27.csv] \

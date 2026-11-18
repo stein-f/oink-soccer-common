@@ -1071,6 +1071,8 @@ func formationsReport(o formationsOptions) error {
 		fmt.Println()
 	}
 
+	tacticsOnSquads(files, setups)
+
 	if pass {
 		fmt.Printf("\nformations gate: PASS\n")
 	} else {
@@ -1138,4 +1140,92 @@ func titleOdds(league []soccer.GameLineup, me, seasons int) (title, avgPos float
 		ps += pos[s]
 	}
 	return float64(t) / float64(seasons), float64(ps) / float64(seasons)
+}
+
+// tacticsOnSquads reports what each tactic setting is worth on these squads.
+// Every team's best line-up in each shape plays every other team's, in every
+// shape, with everyone on the default settings; then again with one setting
+// changed, on the same seeds. A setting that is a real choice is worth about
+// nothing on average and something, one way or the other, to particular
+// squads. One that is worth the same to everybody is not a choice. (The
+// tactics report asks the same of invented squads; this is the real ones.)
+func tacticsOnSquads(files []teamFile, setups []map[soccer.FormationType]bestSetup) {
+	changes := []struct {
+		name string
+		t    tactics
+	}{
+		{"press low", tactics{press: soccer.PressLevelLow}},
+		{"press high", tactics{press: soccer.PressLevelHigh}},
+		{"tempo slow", tactics{tempo: soccer.TempoLevelSlow}},
+		{"tempo fast", tactics{tempo: soccer.TempoLevelFast}},
+		{"line deep", tactics{line: soccer.LineHeightDeep}},
+		{"line high", tactics{line: soccer.LineHeightHigh}},
+	}
+	type cell struct{ i, f int }
+	var cells []cell
+	for i := range files {
+		for f := range formations {
+			cells = append(cells, cell{i, f})
+		}
+	}
+	deltas := make([][]float64, len(cells))
+	parallelFor(len(cells), func(c int) {
+		i, f := cells[c].i, formations[cells[c].f]
+		var opps []soccer.GameLineup
+		for j := range files {
+			if j == i {
+				continue
+			}
+			for _, g := range formations {
+				opps = append(opps, setups[j][g].lineup.gameLineup(files[j].Team.ID, tactics{}))
+			}
+		}
+		const seeds = 8
+		base := evaluate(setups[i][f].lineup.gameLineup("MINE", tactics{}), opps, 9000, seeds).ppg()
+		deltas[c] = make([]float64, len(changes))
+		for k, ch := range changes {
+			deltas[c][k] = evaluate(setups[i][f].lineup.gameLineup("MINE", ch.t), opps, 9000, seeds).ppg() - base
+		}
+	})
+
+	fmt.Printf("\ntactics on these squads: points per game for changing one setting from the default, each team's best line-up in each shape against a mixed field\n")
+	fmt.Printf("%-18s", "")
+	for _, ch := range changes {
+		fmt.Printf(" %11s", ch.name)
+	}
+	fmt.Println()
+	row := func(name string, keep func(cell) bool) {
+		fmt.Printf("%-18s", name)
+		for k := range changes {
+			var sum float64
+			count := 0
+			for c := range cells {
+				if keep(cells[c]) {
+					sum += deltas[c][k]
+					count++
+				}
+			}
+			fmt.Printf(" %+11.3f", sum/float64(count))
+		}
+		fmt.Println()
+	}
+	row("every set-up", func(cell) bool { return true })
+	for f := range formations {
+		row("  "+strings.TrimPrefix(string(formations[f]), "The "), func(c cell) bool { return c.f == f })
+	}
+	// How far it depends on the squad: the set-ups it suits least and most.
+	fmt.Printf("%-18s", "  suits least")
+	spread := make([][]float64, len(changes))
+	for k := range changes {
+		for c := range cells {
+			spread[k] = append(spread[k], deltas[c][k])
+		}
+		sort.Float64s(spread[k])
+		fmt.Printf(" %+11.3f", spread[k][len(spread[k])/10])
+	}
+	fmt.Printf("\n%-18s", "  suits most")
+	for k := range changes {
+		fmt.Printf(" %+11.3f", spread[k][len(spread[k])*9/10])
+	}
+	fmt.Printf("\n(least and most are the 10th and 90th of %d set-ups; one set-up's figure is good to about 0.05)\n", len(cells))
 }

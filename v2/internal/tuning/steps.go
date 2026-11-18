@@ -32,8 +32,8 @@ const (
 
 // StepsPossessionExponent sets how much of the ball the better side sees. A
 // side's possession weight is the mean overall rating of the players it
-// fields, raised to this power. At 12, a side three points better on average
-// has about 61% of the attacks and one eight points better about 77%.
+// fields, raised to this power. At 12.8, a side three points better on
+// average has about 62% of the attacks and one eight points better about 77%.
 //
 // This is what makes the stronger side win. With the ball shared evenly a
 // much better side still gets only half the attacks, and results are far
@@ -42,7 +42,7 @@ const (
 // contest that starts each attack, because it is the number on a player's
 // card: managers buy on it, and it must stay the best single guide to who
 // wins. It also knows nothing about formations, so it cannot favour one.
-const StepsPossessionExponent = 12.0
+const StepsPossessionExponent = 12.8
 
 // StepsScoreEffect: per goal of lead, the leader's share of the ball drops by
 // this much and the trailer's rises by it, capped at StepsScoreEffectCap.
@@ -88,7 +88,7 @@ const (
 // some reach each one in the final third, so at full strength a man over in
 // midfield is worth a little more than a man over anywhere else. Tuned with
 // the formations gate so the two-midfielder shape is level with the rest.
-const StepsMidfieldNumbers = 0.9
+const StepsMidfieldNumbers = 1.0
 
 // A Ball Winner goes to the ball. Fielded in a stretched line he makes up
 // StepsBallWinnerCover of the ground it is short (0.5: half the stretch),
@@ -106,7 +106,66 @@ const (
 // depends on how quick its defenders are.
 const (
 	StepsPassVsHighLine = 0.90
-	StepsPassVsDeepLine = 1.10
+	StepsPassVsDeepLine = 1.03
+)
+
+// --- Tactics -----------------------------------------------------------------
+//
+// Each setting is a trade, sized so that it is worth about nothing on average
+// across the squads a season deals, and its worth to any one of them depends
+// on who it has and who it is playing. The checks are in cmd/calibrate: the
+// tactics report (invented squads: does a side that can run gain from a
+// press, and so on) and the last table of the formations report (the real
+// ones: is the average about nothing). A setting that pays for every kind
+// of squad is not a choice.
+
+// Legs. A player's work rate against StepsTypicalWorkRate (the median of the
+// players a season deals), to StepsLegsExponent, kept between StepsLegsLeast
+// and StepsLegsMost. At 2, an 87 has 1.31 and a 65 has 0.73.
+const (
+	StepsTypicalWorkRate = 76.0
+	StepsLegsExponent    = 2.0
+	StepsLegsLeast       = 0.5
+	StepsLegsMost        = 1.6
+)
+
+// A high press. It takes time away from the man on the ball: his odds with a
+// pass, a cross or a shot from distance are divided by
+// 1 + StepsPressSqueeze x the legs of the man closing him down. It takes
+// StepsPressBall x the side's legs off the opponent's share of the ball.
+// What it gives up is the room behind it: StepsPressSpace on the odds of a
+// take-on or a run in behind. And it tires the side that does it: its own
+// attacks lose StepsPressFade from the hour and StepsPressFadeLate from the
+// 75th minute, divided by its legs, so a side that can run all day barely
+// notices and one that can't is finished.
+const (
+	StepsPressSqueeze  = 0.25
+	StepsPressBall     = 0.06
+	StepsPressSpace    = 1.17
+	StepsPressFade     = 0.13
+	StepsPressFadeLate = 0.22
+)
+
+// Sitting off (a low press) is the reverse: the man on the ball has time
+// (StepsSitOffTime on his odds), the opponent has more of the ball
+// (StepsSitOffBall), and there is no room to run into (StepsSitOffSpace).
+const (
+	StepsSitOffTime  = 1.09
+	StepsSitOffBall  = 0.04
+	StepsSitOffSpace = 0.89
+)
+
+// Tempo. Playing fast catches the defence before it is set (StepsFastBreak on
+// the odds of a take-on or a run in behind) and costs care on the ball
+// (StepsFastCare on a pass, on the header a cross is aimed at and on a shot
+// from distance: the ball in is the one that was on, not the one waited
+// for). Playing slow is the
+// reverse. Tempo also sets how many attacks the match has, for both sides.
+const (
+	StepsFastBreak = 1.07
+	StepsFastCare  = 0.92
+	StepsSlowBreak = 0.93
+	StepsSlowCare  = 1.08
 )
 
 // StepsCoverScale is a second defender's weight when he covers for a
@@ -115,6 +174,14 @@ const (
 // Below 1 because the covering man arrives late. This is what a second
 // defender is for: a one-man defence, once beaten, is beaten.
 const StepsCoverScale = 0.62
+
+// StepsScreenScale is the same for a midfielder sitting in front of a lone
+// defender, which a side with two or more midfielders has. It is what the
+// shape with one defender and two midfielders has instead of a second
+// defender. His tackle is weighted about as a covering defender's is, but he
+// is a midfielder: most can't tackle, and one who can is worth picking for
+// it.
+const StepsScreenScale = 0.60
 
 // StepsOutOfPosition multiplies the odds of a player fielded where he can't
 // play.
@@ -128,7 +195,7 @@ const StepsInterceptScale = 0.78
 
 // StepsLongBall multiplies the passer's odds when the ball goes from the
 // defence straight to the forwards. A side with no midfield builds this way.
-const StepsLongBall = 0.98
+const StepsLongBall = 0.95
 
 // StepsPlaymakerPassWeight is how much more often a Playmaker is the one who
 // plays the pass; StepsTargetManWeight how much more often a Target Man is
@@ -183,7 +250,7 @@ const (
 // flick-on, for a side with one defender. Higher than StepsCoverScale: he
 // had the time the ball was in the air, where a second defender covering a
 // dribble or a run arrives late.
-const StepsTrackBackScale = 0.75
+const StepsTrackBackScale = 0.85
 
 // StepsKnockDown is how often a forward who wins a long ball knocks it down
 // for a midfielder to shoot, when he has one near, rather than flicking it on
@@ -227,8 +294,8 @@ const (
 const (
 	StepsRunVsHighLine     = 1.35
 	StepsRunVsDeepLine     = 0.75
-	StepsRunOddsVsHighLine = 1.18
-	StepsRunOddsVsDeepLine = 0.86
+	StepsRunOddsVsHighLine = 1.31
+	StepsRunOddsVsDeepLine = 0.80
 )
 
 // StepsCutBack is how often a forward who has beaten his man squares it to a

@@ -55,7 +55,10 @@ type stepSide struct {
 	teamMod    float64 // captain, items and home advantage: every player's odds
 	posBoosts  positionMultipliers
 	injuryRisk float64
-	totals     *TeamTotals
+	// legs is how much running the side has in it, against a typical side's
+	// 1: what a high press asks for (see the tactics below).
+	legs   float64
+	totals *TeamTotals
 }
 
 func newStepSide(r *rand.Rand, team TeamType, lineup GameLineup, totals *TeamTotals) (*stepSide, []BoostRoll) {
@@ -97,6 +100,14 @@ func newStepSide(r *rand.Rand, team TeamType, lineup GameLineup, totals *TeamTot
 		s.outfield = append(s.outfield, sp)
 		s.lines[sp.line] = append(s.lines[sp.line], sp)
 	}
+	var workRate float64
+	for _, p := range s.outfield {
+		workRate += float64(p.Attributes.EffectiveWorkRate())
+	}
+	s.legs = 1
+	if len(s.outfield) > 0 {
+		s.legs = legs(workRate / float64(len(s.outfield)))
+	}
 	// Spread each line across the pitch in line-up order: one player holds
 	// the centre, two take a side each, three a side each and the centre.
 	for _, line := range s.lines {
@@ -126,10 +137,10 @@ func simulateStepsMatch(r *rand.Rand, home, away GameLineup) MatchOutcome {
 
 	m := &stepMatch{r: r}
 	// The better side sees more of the ball (see StepsPossessionExponent),
-	// the opponent's press and line take some of it away as they do in the
-	// classic model, and the home side has a little more.
-	homeBall := h.quality() * pressControlFactor(a.tactics.Press) * lineHeightControlFactor(a.tactics.LineHeight) * tuning.StepsHomePossession
-	awayBall := a.quality() * pressControlFactor(h.tactics.Press) * lineHeightControlFactor(h.tactics.LineHeight)
+	// the opponent's press and line take some of it away, and the home side
+	// has a little more.
+	homeBall := h.quality() * pressBall(a) * lineHeightControlFactor(a.tactics.LineHeight) * tuning.StepsHomePossession
+	awayBall := a.quality() * pressBall(h) * lineHeightControlFactor(h.tactics.LineHeight)
 	for _, minute := range minutes {
 		hw := homeBall * stepsScoreEffect(m.homeGoals-m.awayGoals)
 		aw := awayBall * stepsScoreEffect(m.awayGoals-m.homeGoals)
@@ -162,18 +173,16 @@ func (s *stepSide) passers() []*stepPlayer {
 // defence straight to the forwards.
 func passOdds(passer *stepPlayer, att, def *stepSide, long bool, attackMod float64) (odds float64, opp *stepPlayer) {
 	intercept := interceptScore
-	if def.tactics.Press == PressLevelHigh {
-		intercept = pressingInterceptScore
-	}
-	// The opponent's press squeezes the passer, as it squeezes a side's
-	// control in the classic model, and so does a high line.
-	mult := attackMod * pressControlFactor(def.tactics.Press) * passLineOdds(def.tactics.LineHeight)
-	if long {
-		mult *= tuning.StepsLongBall
-	}
 	opp, cover := facing(passer, att, def, PlayerPositionMidfield, intercept)
 	if opp == nil {
 		return math.Inf(1), nil
+	}
+	// A pass needs time: the man closing the passer down takes it away if his
+	// side presses, and a high line leaves less room to play into. A side
+	// playing fast gives the ball away more.
+	mult := attackMod * squeeze(def, opp) * care(att) * passLineOdds(def.tactics.LineHeight)
+	if long {
+		mult *= tuning.StepsLongBall
 	}
 	if cover == tuning.StepsSupport || cover == tuning.StepsStretched {
 		cover = 1 + (cover-1)*tuning.StepsMidfieldNumbers
@@ -289,11 +298,104 @@ func interceptScore(a PlayerAttributes) float64 {
 	return mix(a.EffectiveInterceptions()*2+a.EffectiveMarking(), 3)
 }
 
-// pressingInterceptScore is interceptScore for a side pressing high: closing
-// a passer down is running as much as reading the game, so work rate counts.
-// It is what makes a stamina midfielder the one to press with.
-func pressingInterceptScore(a PlayerAttributes) float64 {
-	return mix(a.EffectiveInterceptions()*2+a.EffectiveMarking()+a.EffectiveWorkRate()*2, 5)
+// --- Tactics -----------------------------------------------------------------
+//
+// The press trades time for space. A side pressing high gives the man on the
+// ball no time (his pass, his cross, his shot from distance) and leaves room
+// behind for anyone who gets through (a take-on, a run in behind, a
+// flick-on). A side sitting off does the reverse. Neither is better: it
+// depends on what the opponent is good at, and on whether the pressing side
+// can run (legs), because a press is only as good as the running in it and
+// costs the side its own attack late in the match.
+//
+// Tempo is the attacking side's half of the same trade. Playing fast catches
+// the defence before it is set, which is room to run into, and costs care on
+// the ball; playing slow keeps the ball and picks the moment, against a
+// defence that is waiting.
+
+// legs turns a work rate into how much running there is in it, against the
+// typical player's 1.
+func legs(workRate float64) float64 {
+	l := math.Pow(workRate/tuning.StepsTypicalWorkRate, tuning.StepsLegsExponent)
+	return math.Max(tuning.StepsLegsLeast, math.Min(tuning.StepsLegsMost, l))
+}
+
+// squeeze is what the defending side's press does to the odds of an attacker
+// who needs time on the ball. presser is the man closing him down.
+func squeeze(def *stepSide, presser *stepPlayer) float64 {
+	switch def.tactics.Press {
+	case PressLevelHigh:
+		l := def.legs
+		if presser != nil {
+			l = legs(float64(presser.Attributes.EffectiveWorkRate()))
+		}
+		return 1 / (1 + tuning.StepsPressSqueeze*l)
+	case PressLevelLow:
+		return tuning.StepsSitOffTime
+	}
+	return 1
+}
+
+// space is what the defending side's press does to the odds of an attacker
+// who needs room to run into.
+func space(def *stepSide) float64 {
+	switch def.tactics.Press {
+	case PressLevelHigh:
+		return tuning.StepsPressSpace
+	case PressLevelLow:
+		return tuning.StepsSitOffSpace
+	}
+	return 1
+}
+
+// pressBall is what a side's press does to how much of the ball its opponent
+// sees.
+func pressBall(def *stepSide) float64 {
+	switch def.tactics.Press {
+	case PressLevelHigh:
+		return 1 - tuning.StepsPressBall*def.legs
+	case PressLevelLow:
+		return 1 + tuning.StepsSitOffBall
+	}
+	return 1
+}
+
+// fade is what its own press has taken out of a side's attack by this minute.
+func (s *stepSide) fade(minute int) float64 {
+	if s.tactics.Press != PressLevelHigh {
+		return 1
+	}
+	switch {
+	case minute >= 75:
+		return 1 - tuning.StepsPressFadeLate/s.legs
+	case minute >= 60:
+		return 1 - tuning.StepsPressFade/s.legs
+	}
+	return 1
+}
+
+// onTheBreak is what a side's tempo does to its odds where it needs room: a
+// take-on, a run in behind.
+func onTheBreak(att *stepSide) float64 {
+	switch att.tactics.Tempo {
+	case TempoLevelFast:
+		return tuning.StepsFastBreak
+	case TempoLevelSlow:
+		return tuning.StepsSlowBreak
+	}
+	return 1
+}
+
+// care is what a side's tempo does to its odds where it needs care on the
+// ball: a pass, the cross a header is won from, a shot from distance.
+func care(att *stepSide) float64 {
+	switch att.tactics.Tempo {
+	case TempoLevelFast:
+		return tuning.StepsFastCare
+	case TempoLevelSlow:
+		return tuning.StepsSlowCare
+	}
+	return 1
 }
 
 // Pace is in four of these blends, on both sides of the ball, and it tracks a
@@ -467,6 +569,30 @@ func coverFor(def *stepSide, beaten *stepPlayer) *stepPlayer {
 	return cover
 }
 
+// behind is who an attacker still has to beat once he is past the defender
+// who met him, and how much that man's tackle counts: the other defender of
+// a two-man line, arriving late (StepsCoverScale), or, for a side with one
+// defender and two or more midfielders, the midfielder who sits in front of
+// him (StepsScreenScale). The one who sits is its best tackler. nil when
+// there is nobody: a lone defender with one midfielder ahead of him, once
+// beaten, is beaten.
+func behind(def *stepSide, beaten *stepPlayer) (*stepPlayer, float64) {
+	if cover := coverFor(def, beaten); cover != nil {
+		return cover, tuning.StepsCoverScale
+	}
+	midfield := def.lines[PlayerPositionMidfield]
+	if beaten == nil || beaten.line != PlayerPositionDefense || len(midfield) < 2 {
+		return nil, 0
+	}
+	sitter := midfield[0]
+	for _, p := range midfield[1:] {
+		if tackleScore(p.Attributes) > tackleScore(sitter.Attributes) {
+			sitter = p
+		}
+	}
+	return sitter, tuning.StepsScreenScale
+}
+
 // pick chooses one player in proportion to weight, in slice order.
 func (m *stepMatch) pick(players []*stepPlayer, weight func(*stepPlayer) float64) *stepPlayer {
 	var total float64
@@ -616,7 +742,9 @@ func (m *stepMatch) routes(att, def *stepSide) []stepRoute {
 	if len(attack) > 0 && len(midfield) > 0 {
 		attackShare, midfieldShare = 1-tuning.StepsMidfieldAttackShare, tuning.StepsMidfieldAttackShare
 	}
-	against := func(p *stepPlayer, line PlayerPosition, mine float64, theirs func(PlayerAttributes) float64, scale, mult float64) float64 {
+	// timed is for a contest where the attacker needs time on the ball, and
+	// the man he meets is the one closing him down.
+	against := func(p *stepPlayer, line PlayerPosition, mine float64, theirs func(PlayerAttributes) float64, scale, mult float64, timed bool) float64 {
 		opp, cover := facing(p, att, def, line, theirs)
 		if opp == nil {
 			return 1
@@ -624,8 +752,13 @@ func (m *stepMatch) routes(att, def *stepSide) []stepRoute {
 		if line == PlayerPositionMidfield && (cover == tuning.StepsSupport || cover == tuning.StepsStretched) {
 			cover = 1 + (cover-1)*tuning.StepsMidfieldNumbers
 		}
+		if timed {
+			mult *= squeeze(def, opp)
+		}
 		return oddsToP(stepOdds(mine, scale*theirs(opp.Attributes), mult/cover))
 	}
+	// What the two sides' tactics do to an attack that needs room.
+	room := space(def) * onTheBreak(att)
 	options := func(players []*stepPlayer, option func(*stepPlayer) stepOption) []stepOption {
 		out := make([]stepOption, 0, len(players))
 		for _, p := range players {
@@ -637,7 +770,7 @@ func (m *stepMatch) routes(att, def *stepSide) []stepRoute {
 	takeOn := func(p *stepPlayer) stepOption {
 		s := takeOnScore(p.Attributes)
 		return stepOption{actor: p, suits: s, bias: 1,
-			works: against(p, PlayerPositionDefense, s, tackleScore, tuning.StepsTackleScale, 1)}
+			works: against(p, PlayerPositionDefense, s, tackleScore, tuning.StepsTackleScale, room, false)}
 	}
 	runWeight := 1.0
 	switch def.tactics.LineHeight {
@@ -649,14 +782,14 @@ func (m *stepMatch) routes(att, def *stepSide) []stepRoute {
 	run := func(p *stepPlayer) stepOption {
 		s := runScore(p.Attributes)
 		return stepOption{actor: p, suits: s, bias: 1,
-			works: against(p, PlayerPositionDefense, s, chaseScore, tuning.StepsChaseScale, runLineOdds(def.tactics.LineHeight))}
+			works: against(p, PlayerPositionDefense, s, chaseScore, tuning.StepsChaseScale, runLineOdds(def.tactics.LineHeight)*room, false)}
 	}
 	// A run from deep has a midfielder to get past before the defence.
 	solo := func(p *stepPlayer) stepOption {
 		s := soloScore(p.Attributes)
 		return stepOption{actor: p, suits: s, bias: 1,
-			works: against(p, PlayerPositionMidfield, s, tackleScore, tuning.StepsTackleScale, 1) *
-				against(p, PlayerPositionDefense, s, tackleScore, tuning.StepsTackleScale, 1)}
+			works: against(p, PlayerPositionMidfield, s, tackleScore, tuning.StepsTackleScale, onTheBreak(att), true) *
+				against(p, PlayerPositionDefense, s, tackleScore, tuning.StepsTackleScale, room, false)}
 	}
 
 	var out []stepRoute
@@ -687,8 +820,8 @@ func (m *stepMatch) routes(att, def *stepSide) []stepRoute {
 			cross, header := crossScore(crosser.Attributes), aerialScore(target.Attributes)
 			crosses = append(crosses, stepOption{actor: crosser, target: target, bias: bias,
 				suits: math.Sqrt(cross * header),
-				works: against(crosser, PlayerPositionDefense, cross, markScore, tuning.StepsCloseDownScale, 1) *
-					against(target, PlayerPositionDefense, header, aerialScore, tuning.StepsMarkerScale, 1)})
+				works: against(crosser, PlayerPositionDefense, cross, markScore, tuning.StepsCloseDownScale, 1, true) *
+					against(target, PlayerPositionDefense, header, aerialScore, tuning.StepsMarkerScale, care(att), false)})
 		}
 	}
 	out = spread(out, "cross", 1, crosses)
@@ -713,14 +846,14 @@ func (m *stepMatch) routes(att, def *stepSide) []stepRoute {
 			bias = tuning.StepsTargetManWeight
 		}
 		return stepOption{actor: p, suits: s, bias: bias,
-			works: against(p, PlayerPositionDefense, s, holdUpScore, tuning.StepsHighBallScale, 1)}
+			works: against(p, PlayerPositionDefense, s, holdUpScore, tuning.StepsHighBallScale, 1, false)}
 	}))
 
 	shooters := firstNonEmpty(midfield, attack, att.outfield)
 	cfg := tuning.StepsShots[string(ChanceTypeLongRange)]
 	out = spread(out, "long_shot", 1, options(shooters, func(p *stepPlayer) stepOption {
 		s := shotScore(p.Attributes, ChanceTypeLongRange)
-		return stepOption{actor: p, suits: s, bias: 1, works: oddsToP(stepOdds(s, cfg.OnTarget, 1))}
+		return stepOption{actor: p, suits: s, bias: 1, works: oddsToP(stepOdds(s, cfg.OnTarget, squeeze(def, nil)*care(att)))}
 	}))
 
 	if m.routeCache == nil {
@@ -830,7 +963,8 @@ func (m *stepMatch) attack(att, def *stepSide, route stepRoute, minute int) {
 				cover = 1 + (cover-1)*tuning.StepsMidfieldNumbers
 			}
 			step.OpponentID = opp.ID
-			mult := m.attackMod(att, actor) / (defendMod(def, opp, cover) * pressStopFactor(def.tactics.Press))
+			// In midfield he is the one being pressed.
+			mult := m.attackMod(att, actor) * onTheBreak(att) * squeeze(def, opp) / defendMod(def, opp, cover)
 			step.Won = m.wins(stepOdds(soloScore(actor.Attributes), tuning.StepsTackleScale*tackleScore(opp.Attributes), mult))
 		}
 		att.totals.TakeOns++
@@ -847,16 +981,16 @@ func (m *stepMatch) attack(att, def *stepSide, route stepRoute, minute int) {
 		opp, cover := facing(actor, att, def, PlayerPositionDefense, chaseScore)
 		if opp != nil {
 			step.OpponentID = opp.ID
-			mult := m.attackMod(att, actor) * momentum * runLineOdds(def.tactics.LineHeight) / (def.mod(opp) * cover)
+			mult := m.attackMod(att, actor) * momentum * runLineOdds(def.tactics.LineHeight) * space(def) * onTheBreak(att) / (def.mod(opp) * cover)
 			step.Won = m.wins(stepOdds(runScore(actor.Attributes), tuning.StepsChaseScale*chaseScore(opp.Attributes), mult))
 		}
 		chain = append(chain, step)
-		// In behind the last man, unless the other defender gets across. He
-		// isn't racing him any more: he has to make the tackle.
-		if cover := coverFor(def, opp); step.Won && cover != nil {
-			mult := m.attackMod(att, actor) * runLineOdds(def.tactics.LineHeight) / def.mod(cover)
+		// In behind the last man, unless someone gets across. He isn't
+		// racing him any more: he has to make the tackle.
+		if cover, scale := behind(def, opp); step.Won && cover != nil {
+			mult := m.attackMod(att, actor) * runLineOdds(def.tactics.LineHeight) * space(def) * onTheBreak(att) / def.mod(cover)
 			second := Step{Kind: StepKindRun, ActorID: actor.ID, OpponentID: cover.ID,
-				Won: m.wins(stepOdds(runScore(actor.Attributes), tuning.StepsCoverScale*tackleScore(cover.Attributes), mult))}
+				Won: m.wins(stepOdds(runScore(actor.Attributes), scale*tackleScore(cover.Attributes), mult))}
 			chain = append(chain, second)
 			step, opp = second, cover
 		}
@@ -871,7 +1005,7 @@ func (m *stepMatch) attack(att, def *stepSide, route stepRoute, minute int) {
 		step := Step{Kind: StepKindCross, ActorID: actor.ID, Won: true}
 		if opp, cover := facing(actor, att, def, PlayerPositionDefense, markScore); opp != nil {
 			step.OpponentID = opp.ID
-			mult := m.attackMod(att, actor) * momentum / defendMod(def, opp, cover)
+			mult := m.attackMod(att, actor) * momentum * squeeze(def, opp) / defendMod(def, opp, cover)
 			step.Won = m.wins(stepOdds(crossScore(actor.Attributes), tuning.StepsCloseDownScale*markScore(opp.Attributes), mult))
 		}
 		att.totals.Crosses++
@@ -883,8 +1017,8 @@ func (m *stepMatch) attack(att, def *stepSide, route stepRoute, minute int) {
 		att.totals.CrossesCompleted++
 		marker, cover := facing(route.target, att, def, PlayerPositionDefense, aerialScore)
 		// The delivery counts, as it does from a corner: a good cross is
-		// harder to defend.
-		cover /= tuning.CornerDeliveryFactor(actor.Attributes.EffectiveCrossing())
+		// harder to defend, and so is one a patient side waited for.
+		cover /= tuning.CornerDeliveryFactor(actor.Attributes.EffectiveCrossing()) * care(att)
 		m.aerial(att, def, route.target, marker, cover, ChanceTypeCross, chain, actor.ID, minute, 0)
 
 	case "long_shot":
@@ -904,17 +1038,17 @@ func (m *stepMatch) dribble(att, def *stepSide, actor *stepPlayer, chain []Step,
 	opp, cover := facing(actor, att, def, PlayerPositionDefense, tackleScore)
 	if opp != nil {
 		step.OpponentID = opp.ID
-		mult := m.attackMod(att, actor) * momentum / (defendMod(def, opp, cover) * pressStopFactor(def.tactics.Press))
+		mult := m.attackMod(att, actor) * momentum * space(def) * onTheBreak(att) / defendMod(def, opp, cover)
 		step.Won = m.wins(stepOdds(score, tuning.StepsTackleScale*tackleScore(opp.Attributes), mult))
 	}
 	att.totals.TakeOns++
 	chain = append(chain, step)
 	// Past his man, he still has to get past the one covering.
-	if cover := coverFor(def, opp); step.Won && cover != nil {
+	if cover, scale := behind(def, opp); step.Won && cover != nil {
 		att.totals.TakeOnsWon++
-		mult := m.attackMod(att, actor) / (defendMod(def, cover, 1) * pressStopFactor(def.tactics.Press))
+		mult := m.attackMod(att, actor) * space(def) * onTheBreak(att) / defendMod(def, cover, 1)
 		second := Step{Kind: StepKindTakeOn, ActorID: actor.ID, OpponentID: cover.ID, Detail: detail,
-			Won: m.wins(stepOdds(score, tuning.StepsCoverScale*tackleScore(cover.Attributes), mult))}
+			Won: m.wins(stepOdds(score, scale*tackleScore(cover.Attributes), mult))}
 		att.totals.TakeOns++
 		chain = append(chain, second)
 		step, opp = second, cover
@@ -1012,7 +1146,8 @@ func (m *stepMatch) longBall(att, def *stepSide, target *stepPlayer, minute int)
 			scale = tuning.StepsTrackBackScale
 		}
 		if second != nil {
-			mult := m.attackMod(att, runner) * runLineOdds(def.tactics.LineHeight) / def.mod(second)
+			// It went over the press: whatever room that left is his.
+			mult := m.attackMod(att, runner) * runLineOdds(def.tactics.LineHeight) * space(def) / def.mod(second)
 			run.OpponentID = second.ID
 			run.Won = m.wins(stepOdds(runScore(runner.Attributes), scale*tackleScore(second.Attributes), mult))
 		}
@@ -1160,8 +1295,11 @@ func (m *stepMatch) shot(att, def *stepSide, shooter *stepPlayer, ct ChanceType,
 		// A keeper up for a corner is a big man nobody has planned for.
 		s = math.Max(s, tuning.StepsKeeperUpHeader)
 	}
-	mult := m.attackMod(att, shooter) * momentum *
-		tempoQualityFactor(att.tactics.Tempo) * pressFatigueFactor(att.tactics.Press, minute)
+	mult := m.attackMod(att, shooter) * momentum * att.fade(minute)
+	if ct == ChanceTypeLongRange {
+		// A shot from distance needs a moment to set himself.
+		mult *= squeeze(def, nil) * care(att)
+	}
 	att.totals.Shots++
 	if assist == shooter.ID {
 		assist = ""

@@ -650,3 +650,132 @@ func TestSteps_TheCoveringDefenderHasToTackle(t *testing.T) {
 	}
 	assert.Greater(t, caught(95), caught(60)+0.05)
 }
+
+// tacticOdds is what a pair of tactics does to a typical Y attacking a typical
+// Pyramid: how often its pass forward arrives, and how its attacks are shared
+// between the ways to goal.
+func tacticOdds(t *testing.T, attack, defend Tactics) (pass float64, share map[string]float64) {
+	t.Helper()
+	home, away := typicalStepLineup(FormationTypeY, "h"), typicalStepLineup(FormationTypePyramid, "a")
+	home.Team.Tactics, away.Team.Tactics = attack, defend
+	h, a := stepSidesOf(t, home, away)
+	passer := h.lines[PlayerPositionMidfield][0]
+	odds, opp := passOdds(passer, h, a, false, 1)
+	require.NotNil(t, opp)
+	routes := (&stepMatch{}).routes(h, a)
+	share = map[string]float64{}
+	for _, kind := range []string{"take_on", "run", "cross", "long_shot", "long_ball", "solo"} {
+		share[kind] = routeShare(routes, kind)
+	}
+	return oddsToP(odds), share
+}
+
+func TestSteps_APressTradesTimeForSpace(t *testing.T) {
+	pass, share := tacticOdds(t, Tactics{}, Tactics{})
+	highPass, high := tacticOdds(t, Tactics{}, Tactics{Press: PressLevelHigh})
+	lowPass, low := tacticOdds(t, Tactics{}, Tactics{Press: PressLevelLow})
+
+	// Pressed, the man on the ball has no time: fewer passes arrive, and the
+	// side stops trying what needs time for what needs room.
+	assert.Less(t, highPass, pass-0.02)
+	assert.Greater(t, high["take_on"]+high["run"], share["take_on"]+share["run"]+0.02)
+	assert.Less(t, high["cross"]+high["long_shot"], share["cross"]+share["long_shot"]-0.02)
+	// Sat off, it is the other way round.
+	assert.Greater(t, lowPass, pass+0.005)
+	assert.Less(t, low["take_on"]+low["run"], share["take_on"]+share["run"]-0.01)
+	assert.Greater(t, low["cross"]+low["long_shot"], share["cross"]+share["long_shot"]+0.01)
+}
+
+func TestSteps_APressIsOnlyAsGoodAsTheLegsInIt(t *testing.T) {
+	arrives := func(workRate int, press PressLevel) float64 {
+		home, away := typicalStepLineup(FormationTypeY, "h"), typicalStepLineup(FormationTypePyramid, "a")
+		away.Team.Tactics.Press = press
+		for i := range away.Players {
+			away.Players[i].Attributes.WorkRate = workRate
+		}
+		h, a := stepSidesOf(t, home, away)
+		odds, _ := passOdds(h.lines[PlayerPositionMidfield][0], h, a, false, 1)
+		return oddsToP(odds)
+	}
+	// Work rate is nothing to a side that doesn't press.
+	assert.Equal(t, arrives(60, PressLevelNone), arrives(92, PressLevelNone))
+	// Pressing, runners get to the ball and plodders don't.
+	assert.Less(t, arrives(92, PressLevelHigh), arrives(60, PressLevelHigh)-0.01)
+	assert.Less(t, arrives(60, PressLevelHigh), arrives(60, PressLevelNone))
+
+	// And it costs the side its own attack late on, the less the more it
+	// can run. Nothing before the hour, nothing without a press.
+	fade := func(workRate int, press PressLevel, minute int) float64 {
+		home := typicalStepLineup(FormationTypeY, "h")
+		home.Team.Tactics.Press = press
+		for i := range home.Players {
+			home.Players[i].Attributes.WorkRate = workRate
+		}
+		h, _ := stepSidesOf(t, home, typicalStepLineup(FormationTypePyramid, "a"))
+		return h.fade(minute)
+	}
+	assert.Equal(t, 1.0, fade(60, PressLevelHigh, 45))
+	assert.Equal(t, 1.0, fade(60, PressLevelNone, 85))
+	assert.Equal(t, 1.0, fade(60, PressLevelLow, 85))
+	assert.Less(t, fade(76, PressLevelHigh, 65), 1.0)
+	assert.Less(t, fade(76, PressLevelHigh, 85), fade(76, PressLevelHigh, 65))
+	assert.Less(t, fade(60, PressLevelHigh, 85), fade(76, PressLevelHigh, 85)-0.05)
+	assert.Greater(t, fade(92, PressLevelHigh, 85), fade(76, PressLevelHigh, 85)+0.04)
+}
+
+func TestSteps_TempoTradesRoomForCare(t *testing.T) {
+	pass, share := tacticOdds(t, Tactics{}, Tactics{})
+	fastPass, fast := tacticOdds(t, Tactics{Tempo: TempoLevelFast}, Tactics{})
+	slowPass, slow := tacticOdds(t, Tactics{Tempo: TempoLevelSlow}, Tactics{})
+
+	// Fast: at them before they are set, and loose with the ball.
+	assert.Less(t, fastPass, pass-0.005)
+	assert.Greater(t, fast["take_on"]+fast["run"], share["take_on"]+share["run"]+0.02)
+	assert.Less(t, fast["cross"]+fast["long_shot"], share["cross"]+share["long_shot"]-0.02)
+	// Slow: the ball is kept and the cross is the one waited for, against a
+	// defence that has had time to get set.
+	assert.Greater(t, slowPass, pass+0.005)
+	assert.Less(t, slow["take_on"]+slow["run"], share["take_on"]+share["run"]-0.02)
+	assert.Greater(t, slow["cross"]+slow["long_shot"], share["cross"]+share["long_shot"]+0.02)
+}
+
+func TestSteps_WhoIsBehindABeatenDefender(t *testing.T) {
+	lone := func(shape FormationType, tune func(l *GameLineup)) (*stepSide, *stepPlayer) {
+		away := typicalStepLineup(shape, "a")
+		if tune != nil {
+			tune(&away)
+		}
+		_, a := stepSidesOf(t, typicalStepLineup(FormationTypeY, "h"), away)
+		return a, a.lines[PlayerPositionDefense][0]
+	}
+	// Two defenders: the other one, arriving late.
+	pyramid, first := lone(FormationTypePyramid, nil)
+	cover, scale := behind(pyramid, first)
+	require.NotNil(t, cover)
+	assert.Equal(t, PlayerPositionDefense, cover.line)
+	assert.NotEqual(t, first.ID, cover.ID)
+	assert.Equal(t, tuning.StepsCoverScale, scale)
+
+	// One defender and two midfielders: the midfielder who can tackle sits.
+	diamond, only := lone(FormationTypeDiamond, func(l *GameLineup) {
+		n := 0
+		for i := range l.Players {
+			if l.Players[i].SelectedPosition == PlayerPositionMidfield {
+				if n == 1 {
+					l.Players[i].Attributes.Tackling = 85
+				}
+				n++
+			}
+		}
+	})
+	sitter, scale := behind(diamond, only)
+	require.NotNil(t, sitter)
+	assert.Equal(t, PlayerPositionMidfield, sitter.line)
+	assert.Equal(t, 85, sitter.Attributes.Tackling)
+	assert.Equal(t, tuning.StepsScreenScale, scale)
+
+	// One defender and one midfielder: nobody. Once beaten, he is beaten.
+	y, alone := lone(FormationTypeY, nil)
+	nobody, _ := behind(y, alone)
+	assert.Nil(t, nobody)
+}
