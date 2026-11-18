@@ -26,6 +26,20 @@ import (
 	soccer "github.com/stein-f/oink-soccer-common/v2"
 )
 
+// gapBuckets are the lower bounds of the strength-gap bands the favourite's
+// results are reported in (points of mean overall rating).
+var gapBuckets = [...]float64{0, 1, 3, 5, 8}
+
+func gapBucket(gap float64) int {
+	b := 0
+	for i, lo := range gapBuckets {
+		if gap >= lo {
+			b = i
+		}
+	}
+	return b
+}
+
 type fixture struct {
 	Name string
 	Home soccer.GameLineup `json:"home_team_lineup"`
@@ -41,6 +55,19 @@ type tally struct {
 	goalsByPosition               map[soccer.PlayerPosition]int
 	strongerWins, strongerMatches int
 
+	// How the stronger side (by mean overall) did, by how much stronger.
+	favourite [len(gapBuckets)]struct{ matches, wins, draws int }
+
+	// likelier is, summed over fixtures, how often the result each fixture
+	// most often produced came up: a direct measure of how much of a match
+	// is decided before kick-off. 100% means the same fixture always ends
+	// the same way; a coin flip between three results is 33%.
+	likelierWins, likelierMatches int
+	// For the correlation between a fixture's rating gap (home minus away,
+	// mean overall) and its average points difference: how much of who wins
+	// the ratings on a player's card explain.
+	gapN, gapX, gapY, gapXX, gapYY, gapXY float64
+
 	// Step model only.
 	stops, assisted, headed int
 	missDetail              map[string]int
@@ -53,7 +80,42 @@ func main() {
 	seeds := flag.Int("seeds", 20, "replays per fixture")
 	model := flag.String("model", "", `engine model: "" (classic), "contest" or "steps"`)
 	limit := flag.Int("limit", 0, "use at most this many fixtures (0 = all)")
+	dataset := flag.String("enrich", "", "player dataset CSV to fill in what archived players lack (see enrich.go)")
+	enrichMode := flag.String("enrich-mode", "steps", `"steps": add the player-on-player attributes; "all": replace every attribute`)
+	attributes := flag.Int("attributes", 0, "instead of replaying fixtures, report what each attribute is worth, over this many seeds")
+	formationsDir := flag.String("formations", "", "instead of replaying fixtures, run the formations gate on this directory of team files (see formations.go)")
+	dealAssets := flag.String("deal", "", "formations report: eligible assets CSV; deal every squad afresh from -deal-dataset (see deal.go)")
+	dealData := flag.String("deal-dataset", "", "formations report: the dataset to deal from")
+	dealSeed := flag.Int64("deal-seed", 1, "formations report: seed for the deal")
+	lineupsPath := flag.String("lineups", "", "formations report: cache file for every team's best line-up per formation (written if missing, read if present)")
+	seasons := flag.Int("seasons", 1000, "formations report: seasons to play for the strongest team's title odds (0 to skip)")
+	levers := flag.Int("levers", 0, "instead of replaying fixtures, report what boosts, tactics and roles are worth, over this many seeds")
 	flag.Parse()
+	if *attributes > 0 {
+		attributeReport(*attributes, soccer.Model(*model))
+		return
+	}
+	if *levers > 0 {
+		leversReport(*levers, soccer.Model(*model))
+		return
+	}
+	if *formationsDir != "" {
+		var e *enricher
+		if *dataset != "" {
+			var err error
+			if e, err = newEnricher(*dataset, *enrichMode); err != nil {
+				log.Fatal(err)
+			}
+		}
+		if err := formationsReport(formationsOptions{
+			dir: *formationsDir, model: soccer.Model(*model), enrich: e,
+			dealAssets: *dealAssets, dealData: *dealData, dealSeed: *dealSeed,
+			finalSeeds: *seeds * 10, seasons: *seasons, lineupsPath: *lineupsPath,
+		}); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 	if *dir == "" {
 		log.Fatal("-archives is required")
 	}
@@ -61,6 +123,17 @@ func main() {
 	fixtures, err := loadFixtures(*dir, *limit)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if *dataset != "" {
+		e, err := newEnricher(*dataset, *enrichMode)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for i := range fixtures {
+			fixtures[i].Home = e.lineup(fixtures[i].Home)
+			fixtures[i].Away = e.lineup(fixtures[i].Away)
+		}
+		fmt.Printf("enriched from %s (%s): %d players matched, %d left as archived\n", filepath.Base(*dataset), *enrichMode, e.matched, e.unmatched)
 	}
 
 	newTally := func() *tally {
@@ -94,15 +167,36 @@ func main() {
 			}
 		}
 		strongerHome := lineupStrength(f.Home) > lineupStrength(f.Away)
+		bucket := gapBucket(gap)
+		var homeWins, awayWins int
 		for s := 0; s < *seeds; s++ {
 			src := rand.New(rand.NewSource(seedFor(f.Name, s)))
 			outcome, err := soccer.RunGameWithModel(src, f.Home, f.Away, soccer.Model(*model))
 			if err != nil {
 				log.Fatalf("%s: %v", f.Name, err)
 			}
-			for _, t := range buckets {
-				t.add(outcome, positions, strongerHome)
+			stats := soccer.CreateGameStats(outcome.Events)
+			switch {
+			case stats.HomeTeamStats.Goals > stats.AwayTeamStats.Goals:
+				homeWins++
+			case stats.HomeTeamStats.Goals < stats.AwayTeamStats.Goals:
+				awayWins++
 			}
+			for _, t := range buckets {
+				t.add(outcome, positions, strongerHome, bucket)
+			}
+		}
+		signedGap := lineupStrength(f.Home) - lineupStrength(f.Away)
+		pointsDiff := 3 * float64(homeWins-awayWins) / float64(*seeds)
+		for _, t := range buckets {
+			t.likelierWins += max(homeWins, awayWins)
+			t.likelierMatches += *seeds
+			t.gapN++
+			t.gapX += signedGap
+			t.gapY += pointsDiff
+			t.gapXX += signedGap * signedGap
+			t.gapYY += pointsDiff * pointsDiff
+			t.gapXY += signedGap * pointsDiff
 		}
 	}
 	report(*all, len(fixtures), *seeds, *model, "all fixtures")
@@ -110,7 +204,7 @@ func main() {
 	report(*mismatch, mismatchFixtures, *seeds, *model, "mismatches (mean overall 8+ apart)")
 }
 
-func (t *tally) add(outcome soccer.MatchOutcome, positions map[string]soccer.PlayerPosition, strongerHome bool) {
+func (t *tally) add(outcome soccer.MatchOutcome, positions map[string]soccer.PlayerPosition, strongerHome bool, bucket int) {
 	events := outcome.Events
 	if tt := outcome.Totals; tt != nil {
 		t.withTotals++
@@ -186,6 +280,13 @@ func (t *tally) add(outcome soccer.MatchOutcome, positions map[string]soccer.Pla
 			if abs(home-away) >= 5 {
 				t.blowouts++
 			}
+			t.favourite[bucket].matches++
+			switch {
+			case home == away:
+				t.favourite[bucket].draws++
+			case (home > away) == strongerHome:
+				t.favourite[bucket].wins++
+			}
 			if home != away {
 				t.strongerMatches++
 				if (home > away) == strongerHome {
@@ -194,6 +295,22 @@ func (t *tally) add(outcome soccer.MatchOutcome, positions map[string]soccer.Pla
 			}
 		}
 	}
+}
+
+// gapCorrelation is Pearson's r between fixtures' rating gaps and their
+// average points difference.
+func (t tally) gapCorrelation() float64 {
+	n := t.gapN
+	if n == 0 {
+		return 0
+	}
+	cov := t.gapXY/n - (t.gapX/n)*(t.gapY/n)
+	vx := t.gapXX/n - (t.gapX/n)*(t.gapX/n)
+	vy := t.gapYY/n - (t.gapY/n)*(t.gapY/n)
+	if vx <= 0 || vy <= 0 {
+		return 0
+	}
+	return cov / math.Sqrt(vx*vy)
 }
 
 func loadFixtures(dir string, limit int) ([]fixture, error) {
@@ -263,11 +380,32 @@ func report(t tally, fixtures, seeds int, model, label string) {
 		{"Wins by 5+", pct(t.blowouts), "< 3%"},
 		{"Penalties / match", fmt.Sprintf("%.2f", float64(t.penalties)/m), "0.2-0.3"},
 		{"Stronger side wins (decided games)", fmt.Sprintf("%.1f%%", 100*float64(t.strongerWins)/float64(max(t.strongerMatches, 1))), "clearly > 50%"},
+		{"Likelier winner wins", fmt.Sprintf("%.1f%%", 100*float64(t.likelierWins)/float64(max(t.likelierMatches, 1))), "not below the live model"},
+		{"Rating gap v result (correlation)", fmt.Sprintf("%.3f", t.gapCorrelation()), "not below the live model"},
 	}
 	fmt.Printf("%-36s %10s   %s\n", "metric", "value", "target")
 	for _, r := range rows {
 		fmt.Printf("%-36s %10s   %s\n", r[0], r[1], r[2])
 	}
+
+	fmt.Printf("\nthe stronger side, by how much stronger (mean overall):\n%-12s %8s %8s %8s %8s %10s\n", "gap", "matches", "wins", "draws", "loses", "points/g")
+	var fm, fw, fd int
+	for i, lo := range gapBuckets {
+		b := t.favourite[i]
+		if b.matches == 0 {
+			continue
+		}
+		name := fmt.Sprintf("%.0f+", lo)
+		if i+1 < len(gapBuckets) {
+			name = fmt.Sprintf("%.0f to %.0f", lo, gapBuckets[i+1])
+		}
+		n := float64(b.matches)
+		fmt.Printf("%-12s %8d %7.1f%% %7.1f%% %7.1f%% %10.2f\n", name, b.matches, 100*float64(b.wins)/n, 100*float64(b.draws)/n,
+			100*float64(b.matches-b.wins-b.draws)/n, float64(3*b.wins+b.draws)/n)
+		fm, fw, fd = fm+b.matches, fw+b.wins, fd+b.draws
+	}
+	fmt.Printf("%-12s %8d %7.1f%% %7.1f%% %7.1f%% %10.2f\n", "all", fm, 100*float64(fw)/float64(fm), 100*float64(fd)/float64(fm),
+		100*float64(fm-fw-fd)/float64(fm), float64(3*fw+fd)/float64(fm))
 
 	fmt.Printf("\n%-16s %8s %8s\n", "chance type", "share", "conv")
 	types := make([]soccer.ChanceType, 0, len(t.shotsByType))

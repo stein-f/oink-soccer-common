@@ -13,21 +13,45 @@ package tuning
 
 // StepsPossessions is how many attacks a match has (before tempo). Every
 // formation gets the same number: shape is expressed by who meets whom, not
-// by volume. More than the contest model's because an attack here has more
-// places to break down before it becomes a shot.
-var StepsPossessions = ChanceRange{Min: 24, Max: 32}
+// by volume. Set for about 3.6 goals and 13 shots a match on real line-ups.
+var StepsPossessions = ChanceRange{Min: 21, Max: 28}
 
 // StepsDuelExponent sets how much a rating edge is worth in one contest.
-// At 3.0 a player rated 90 beats one rated 70 about 68% of the time, and a
-// 60 against a 75 about 34%: clearly favoured, never a foregone conclusion.
+// At 3.5 a player rated 90 beats one rated 70 about 71% of the time, and a
+// 60 against a 75 about 31%: clearly favoured, never a foregone conclusion.
 // A possession is three or four contests, so edges compound across it.
-const StepsDuelExponent = 3.0
+const StepsDuelExponent = 3.5
 
-// Home advantage: the home side has a little more of the ball and its
-// players' odds are a little better in every contest.
+// Home advantage: the home side has a little more of the ball. Its players
+// get no edge of their own in a contest (StepsHomeDuel 1.0): lost-pigs
+// already gives the home line-up a team boost, which reaches every contest.
 const (
-	StepsHomePossession = 1.14
+	StepsHomePossession = 1.22
 	StepsHomeDuel       = 1.00
+)
+
+// StepsPossessionExponent sets how much of the ball the better side sees. A
+// side's possession weight is the mean overall rating of the players it
+// fields, raised to this power. At 12, a side three points better on average
+// has about 61% of the attacks and one eight points better about 77%.
+//
+// This is what makes the stronger side win. With the ball shared evenly a
+// much better side still gets only half the attacks, and results are far
+// more of a coin flip than the classic model's, where a dominant side had
+// nearly all of the ball. Overall rating is used, rather than the passing
+// contest that starts each attack, because it is the number on a player's
+// card: managers buy on it, and it must stay the best single guide to who
+// wins. It also knows nothing about formations, so it cannot favour one.
+const StepsPossessionExponent = 12.0
+
+// StepsScoreEffect: per goal of lead, the leader's share of the ball drops by
+// this much and the trailer's rises by it, capped at StepsScoreEffectCap.
+// Kept small. The contest model used 0.10, which hands a beaten side the ball
+// until it draws level: realistic, but it turns wins for the better side into
+// draws, and the better side winning is what this game wants most.
+const (
+	StepsScoreEffect    = 0.0
+	StepsScoreEffectCap = 0.0
 )
 
 // StepsBoostExponent softens the team-wide multipliers (captain, items, the
@@ -36,7 +60,7 @@ const (
 // and a shot once. Here the same multiplier is in every contest of an attack
 // and every contest defending one, so at full strength a +5% item would be
 // worth several times what it is sold as.
-const StepsBoostExponent = 0.5
+const StepsBoostExponent = 0.62
 
 // StepsMomentum multiplies the attacker's odds in the contest after one he
 // won: the defender is beaten, the shot is from a better place.
@@ -54,10 +78,43 @@ const StepsMomentum = 1.12
 // formations level. Tune these on real squads (see the formations report in
 // cmd/calibrate), not on one invented squad.
 const (
-	StepsSupport   = 1.18
-	StepsStretched = 0.85
-	StepsLineCover = 0.36
+	StepsSupport   = 1.15
+	StepsStretched = 0.80
+	StepsLineCover = 0.42
 )
+
+// StepsMidfieldNumbers scales the spare-man and stretched effects where the
+// pass forward is contested. Every attack goes through that contest and only
+// some reach each one in the final third, so at full strength a man over in
+// midfield is worth a little more than a man over anywhere else. Tuned with
+// the formations gate so the two-midfielder shape is level with the rest.
+const StepsMidfieldNumbers = 0.9
+
+// A Ball Winner goes to the ball. Fielded in a stretched line he makes up
+// StepsBallWinnerCover of the ground it is short (0.5: half the stretch),
+// and he gives away fouls StepsBallWinnerFoul times as often. Worth it for a
+// good tackler in a one-man defence; a liability for a clumsy one.
+const (
+	StepsBallWinnerCover = 0.5
+	StepsBallWinnerFoul  = 1.35
+)
+
+// The defending line's height, where the pass forward is contested: a high
+// line squeezes the space the passer has, a deep one gives it up. The price
+// of a high line is paid at the other end, when a forward runs in behind it
+// (StepsRunVsHighLine and the odds beside it), so which line suits a side
+// depends on how quick its defenders are.
+const (
+	StepsPassVsHighLine = 0.90
+	StepsPassVsDeepLine = 1.10
+)
+
+// StepsCoverScale is a second defender's weight when he covers for a
+// team-mate who has just been beaten: a forward who gets past his man, or in
+// behind him, still has the other defender to deal with if there is one.
+// Below 1 because the covering man arrives late. This is what a second
+// defender is for: a one-man defence, once beaten, is beaten.
+const StepsCoverScale = 0.55
 
 // StepsOutOfPosition multiplies the odds of a player fielded where he can't
 // play.
@@ -71,7 +128,7 @@ const StepsInterceptScale = 0.78
 
 // StepsLongBall multiplies the passer's odds when the ball goes from the
 // defence straight to the forwards. A side with no midfield builds this way.
-const StepsLongBall = 0.90
+const StepsLongBall = 0.95
 
 // StepsPlaymakerPassWeight is how much more often a Playmaker is the one who
 // plays the pass; StepsTargetManWeight how much more often a Target Man is
@@ -97,25 +154,35 @@ var StepsRouteWeights = map[string]float64{
 // The defending line's height changes how often a side looks to run in
 // behind it, and how the race goes.
 const (
-	StepsRunVsHighLine     = 1.6
-	StepsRunVsDeepLine     = 0.6
-	StepsRunOddsVsHighLine = 1.15
-	StepsRunOddsVsDeepLine = 0.88
+	StepsRunVsHighLine     = 1.35
+	StepsRunVsDeepLine     = 0.75
+	StepsRunOddsVsHighLine = 1.10
+	StepsRunOddsVsDeepLine = 0.92
 )
 
 // StepsCutBack is how often a forward who has beaten his man squares it to a
 // team-mate instead of shooting himself.
 const StepsCutBack = 0.40
 
-// StepsMidfielderForward is how much less often than a forward a midfielder
-// is the one who takes a man on or runs in behind.
-const StepsMidfielderForward = 0.4
+// StepsForwardChoice sets how strongly a side gives the ball to its best man
+// for a take-on or a run: each forward's weight is his score to this power.
+// The attack always gets to choose and the defence never does, so the more
+// forwards a side fields the more that choice is worth. Kept low, or the
+// shapes with two forwards are simply better than the ones with one.
+const StepsForwardChoice = 1.0
+
+// StepsMidfieldAttackShare is the share of a side's take-ons and runs that
+// its midfielders make; the forwards make the rest between them. It is a
+// share of the side's attacks, not a weight per player, so a lone striker
+// carries as much of his side's attack as two strikers carry of theirs, and
+// a shape with one forward doesn't end up attacking mostly with midfielders.
+const StepsMidfieldAttackShare = 0.25
 
 // Of a defender's fouls on a player taking him on: the share inside the box
 // (a penalty) and the share close enough to shoot from (a direct free
 // kick). The rest restart play without a shot.
 const (
-	StepsPenaltyShareOfFouls  = 0.20
+	StepsPenaltyShareOfFouls  = 0.26
 	StepsFreeKickShareOfFouls = 0.35
 )
 
@@ -148,7 +215,7 @@ var StepsShots = map[string]StepsShot{
 	"Long Range":      {Block: 0.45, OnTarget: 90, Keeper: 1.55},
 	"Free Kick":       {Block: 0.30, OnTarget: 84, Keeper: 1.45},
 	"Penalty":         {Block: 0, OnTarget: 32, Keeper: 0.60},
-	"Goalkeeper Shot": {Block: 0, OnTarget: 52, Keeper: 1.02},
+	"Goalkeeper Shot": {Block: 0, OnTarget: 52, Keeper: 1.15},
 }
 
 // StepsFallbackKeeper is the keeper score when a line-up has no goalkeeper.

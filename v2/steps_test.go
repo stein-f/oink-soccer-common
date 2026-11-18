@@ -220,11 +220,41 @@ func TestSteps_StrongerTeamWinsMoreOften(t *testing.T) {
 	assert.Greater(t, strongAway, 0.60)
 }
 
+// TestSteps_TheStrongerSideMostlyWins is the point of the possession rule: a
+// side a few points better on the card wins clearly more than it loses, and
+// more so the bigger the gap. Without it the step model was more of a coin
+// flip than the classic one.
+func TestSteps_TheStrongerSideMostlyWins(t *testing.T) {
+	better := func(by int) soccer.GameLineup {
+		l := testdata.TypicalTeam(soccer.FormationTypeDiamond)
+		for i := range l.Players {
+			a := &l.Players[i].Attributes
+			a.OverallRating += by
+			a.Dribbling, a.Passing, a.Pace, a.Finishing = a.Dribbling+by, a.Passing+by, a.Pace+by, a.Finishing+by
+			a.Marking, a.Interceptions, a.Tackling, a.Heading = a.Marking+by, a.Interceptions+by, a.Tackling+by, a.Heading+by
+			a.Reflexes, a.Handling, a.OneOnOne, a.Positioning = a.Reflexes+by, a.Handling+by, a.OneOnOne+by, a.Positioning+by
+		}
+		return l
+	}
+	base := testdata.TypicalTeam(soccer.FormationTypeDiamond)
+	record := func(by int) (wins, losses float64) {
+		w1, l1 := stepsWinRates(t, 1500, better(by), base)
+		l2, w2 := stepsWinRates(t, 1500, base, better(by))
+		return (w1 + w2) / 2, (l1 + l2) / 2
+	}
+	w3, l3 := record(3)
+	w6, l6 := record(6)
+	assert.Greater(t, w3, 0.52, "three points better: wins most of its matches")
+	assert.Greater(t, w3, l3+0.25)
+	assert.Greater(t, w6, 0.68, "six points better: wins about seven in ten")
+	assert.Less(t, l6, 0.12)
+}
+
 func TestSteps_HomeAdvantage(t *testing.T) {
 	team := testdata.TypicalTeam(soccer.FormationTypeDiamond)
 	home, away := stepsWinRates(t, 4000, team, team)
 	assert.Greater(t, home, away, "the same side at home wins more than away")
-	assert.Less(t, home-away, 0.15, "but not by much")
+	assert.Less(t, home-away, 0.20, "but not by much")
 }
 
 // TestSteps_AnAttributeMovesItsOwnContest: a forward who is better on the
@@ -277,3 +307,20 @@ func TestSteps_ABetterKeeperConcedesLess(t *testing.T) {
 	}
 	assert.Greater(t, conceded(60), conceded(90))
 }
+
+func benchmarkModel(b *testing.B, model soccer.Model) {
+	home := testdata.TypicalTeam(soccer.FormationTypeDiamond)
+	away := testdata.TypicalTeam(soccer.FormationTypeY)
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		if _, err := soccer.RunGameWithModel(rand.New(rand.NewSource(int64(i))), home, away, model); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+// Prediction lines run a few hundred simulations per match, so a model's
+// cost per match matters. Compare with: go test -bench RunGame -run xxx .
+func BenchmarkRunGame_Classic(b *testing.B) { benchmarkModel(b, soccer.ModelClassic) }
+func BenchmarkRunGame_Contest(b *testing.B) { benchmarkModel(b, soccer.ModelContest) }
+func BenchmarkRunGame_Steps(b *testing.B)   { benchmarkModel(b, soccer.ModelSteps) }

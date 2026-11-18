@@ -27,16 +27,16 @@ func stepLineup(formation FormationType, prefix string) GameLineup {
 	return GameLineup{Team: Team{ID: prefix, Formation: formation}, Players: players}
 }
 
-func stepSides(t *testing.T, home, away FormationType) (*stepMatch, *stepSide, *stepSide) {
+func stepSides(t *testing.T, home, away FormationType) (*stepSide, *stepSide) {
 	t.Helper()
 	r := rand.New(rand.NewSource(1))
 	h, _ := newStepSide(r, TeamTypeHome, stepLineup(home, "h"), &TeamTotals{})
 	a, _ := newStepSide(r, TeamTypeAway, stepLineup(away, "a"), &TeamTotals{})
-	return &stepMatch{r: r}, h, a
+	return h, a
 }
 
 func TestSteps_LanesFollowLineupOrder(t *testing.T) {
-	_, box, diamond := stepSides(t, FormationTypeBox, FormationTypeDiamond)
+	box, diamond := stepSides(t, FormationTypeBox, FormationTypeDiamond)
 
 	// Two in a line take a side each, in line-up order; one holds the centre.
 	require.Len(t, box.lines[PlayerPositionDefense], 2)
@@ -51,14 +51,14 @@ func TestSteps_LanesFollowLineupOrder(t *testing.T) {
 }
 
 func TestSteps_AWingerFacesTheDefenderOnHisSide(t *testing.T) {
-	m, box, other := stepSides(t, FormationTypeBox, FormationTypeBox)
+	box, other := stepSides(t, FormationTypeBox, FormationTypeBox)
 	left, right := box.lines[PlayerPositionAttack][0], box.lines[PlayerPositionAttack][1]
 
 	// The attacking left wing is the defending side's right.
-	opp, cover := m.facing(left, box, other, PlayerPositionDefense, tackleScore)
+	opp, cover := facing(left, box, other, PlayerPositionDefense, tackleScore)
 	assert.Equal(t, other.lines[PlayerPositionDefense][1].ID, opp.ID)
 	assert.Equal(t, 1.0, cover, "two against two: nobody spare, nobody stretched")
-	opp, _ = m.facing(right, box, other, PlayerPositionDefense, tackleScore)
+	opp, _ = facing(right, box, other, PlayerPositionDefense, tackleScore)
 	assert.Equal(t, other.lines[PlayerPositionDefense][0].ID, opp.ID)
 }
 
@@ -82,11 +82,11 @@ func TestSteps_NumbersDecideCover(t *testing.T) {
 	formations := []FormationType{FormationTypePyramid, FormationTypeDiamond, FormationTypeY, FormationTypeBox}
 	for _, af := range formations {
 		for _, df := range formations {
-			m, att, def := stepSides(t, af, df)
+			att, def := stepSides(t, af, df)
 
 			// The forwards against the defence.
 			for _, fwd := range att.lines[PlayerPositionAttack] {
-				opp, cover := m.facing(fwd, att, def, PlayerPositionDefense, tackleScore)
+				opp, cover := facing(fwd, att, def, PlayerPositionDefense, tackleScore)
 				require.NotNil(t, opp, "%s v %s", af, df)
 				assert.Equal(t, PlayerPositionDefense, opp.line)
 				assert.Equal(t, want(defence[df], attack[af]), cover, "%s forwards v %s defence", af, df)
@@ -100,7 +100,7 @@ func TestSteps_NumbersDecideCover(t *testing.T) {
 				passers = att.lines[PlayerPositionDefense]
 			}
 			for _, passer := range passers {
-				opp, cover := m.facing(passer, att, def, PlayerPositionMidfield, interceptScore)
+				opp, cover := facing(passer, att, def, PlayerPositionMidfield, interceptScore)
 				require.NotNil(t, opp, "%s v %s", af, df)
 				assert.Equal(t, want(midfield[df], len(passers)), cover, "%s passers v %s midfield", af, df)
 				if midfield[df] == 0 {
@@ -111,15 +111,15 @@ func TestSteps_NumbersDecideCover(t *testing.T) {
 	}
 }
 
-func TestSteps_ABallWinnerIsNotStretched(t *testing.T) {
-	m, y, diamond := stepSides(t, FormationTypeY, FormationTypeDiamond)
+func TestSteps_ABallWinnerIsLessStretched(t *testing.T) {
+	y, diamond := stepSides(t, FormationTypeY, FormationTypeDiamond)
 	fwd := y.lines[PlayerPositionAttack][0]
-	_, cover := m.facing(fwd, y, diamond, PlayerPositionDefense, tackleScore)
+	_, cover := facing(fwd, y, diamond, PlayerPositionDefense, tackleScore)
 	assert.Equal(t, tuning.StepsStretched, cover, "one defender against two forwards")
 
 	diamond.lines[PlayerPositionDefense][0].Role = PlayerRoleBallWinner
-	_, cover = m.facing(fwd, y, diamond, PlayerPositionDefense, tackleScore)
-	assert.Equal(t, 1.0, cover)
+	_, cover = facing(fwd, y, diamond, PlayerPositionDefense, tackleScore)
+	assert.InDelta(t, (1+tuning.StepsStretched)/2, cover, 1e-9, "he makes up half the ground")
 }
 
 func TestSteps_ARatingEdgeIsWorthSomethingButNotEverything(t *testing.T) {
@@ -141,4 +141,39 @@ func TestSteps_TeamBoostsAreSoftened(t *testing.T) {
 	mod := side.mod(side.outfield[0])
 	assert.Greater(t, mod, 1.0)
 	assert.Less(t, mod, 1.05)
+}
+
+func TestSteps_TheBetterSideSeesMoreOfTheBall(t *testing.T) {
+	h, a := stepSides(t, FormationTypeDiamond, FormationTypeBox)
+	assert.InDelta(t, 1.0, h.quality()/a.quality(), 1e-9, "equal players, whatever the shapes: an equal share")
+
+	for _, p := range h.outfield {
+		p.Attributes.OverallRating = 83
+	}
+	h.keeper.Attributes.OverallRating = 83
+	for _, p := range a.outfield {
+		p.Attributes.OverallRating = 80
+	}
+	a.keeper.Attributes.OverallRating = 80
+	share := h.quality() / (h.quality() + a.quality())
+	assert.InDelta(t, 0.61, share, 0.03, "three points better on average: about 61% of the attacks")
+
+	// A player out of position counts for less.
+	before := h.quality()
+	h.outfield[0].state *= tuning.StepsOutOfPosition
+	assert.Less(t, h.quality(), before)
+}
+
+func TestSteps_ASecondDefenderCovers(t *testing.T) {
+	// A two-man defence has someone to cover when one of them is beaten; a
+	// lone defender, once beaten, is beaten.
+	box, diamond := stepSides(t, FormationTypeBox, FormationTypeDiamond)
+	left, right := box.lines[PlayerPositionDefense][0], box.lines[PlayerPositionDefense][1]
+	assert.Equal(t, right, coverFor(box, left))
+	assert.Equal(t, left, coverFor(box, right))
+	assert.Nil(t, coverFor(diamond, diamond.lines[PlayerPositionDefense][0]))
+	assert.Nil(t, coverFor(box, nil))
+	// A forward who dropped back to cover an empty midfield has nobody
+	// behind him in that line to cover in turn.
+	assert.Nil(t, coverFor(box, box.lines[PlayerPositionAttack][0]))
 }

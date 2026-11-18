@@ -229,18 +229,29 @@ Same determinism contract: same `(seed, candidates, rules, assets)` ⇒ same out
 
 ```
 possessions = uniform(StepsPossessions) × tempo          (same for every formation)
-who attacks = home advantage and the score only           (quality shows in the steps, not in the split)
+who attacks = each side's quality, home advantage         (see "the stronger side" below)
 route       = take-on | run in behind | cross | long shot, weighted by how likely each is to work
 1. pass     passer (midfield, or defence if there is none) v the opponent's midfield
-2. route    forward v the defender facing him; a cross is then a header v the marker
+2. route    forward v the defender facing him, then v the defender covering if there is one;
+            a cross is then a header v the marker
 3. shot     shooter v a blocker, then on target or not
 4. save     shot v the keeper: goal, held or parried (which can give a corner or a rebound)
 ```
 
-- **Odds.** Every contest is `(a / b)^StepsDuelExponent × modifiers`, on plain 0-100 blends of the player-on-player attributes (`passScore`, `takeOnScore`, `aerialScore`, ...). No skill curve: the sharpening happens once. A 20-point edge is worth about 18 points over a coin toss.
+- **Odds.** Every contest is `(a / b)^StepsDuelExponent × modifiers`, on plain 0-100 blends of the player-on-player attributes (`passScore`, `takeOnScore`, `aerialScore`, ...). No skill curve: the sharpening happens once. A 20-point edge is worth about 20 points over a coin toss.
+- **The stronger side mostly wins.** A side's share of the attacks is the mean overall rating of the players it fields, raised to `StepsPossessionExponent` (three points better ≈ 61% of the ball), times the opponent's press and line as in the classic model. Overall is used because it is the number managers buy on and it knows nothing about formations. Without this the ball was shared evenly and results were more of a coin flip than the classic model's; with it the favourite wins more and loses less than on the classic model at every rating gap. There is no catch-up for a side that is behind (`StepsScoreEffect` 0).
 - **Who meets whom.** Each line is spread across the pitch in line-up order (one player: centre; two: left and right). A contest is met by the nearest player of the defending line that faces it; the attacking left faces the defending right.
-- **Formations are numbers, not multipliers.** A defending line that outnumbers the attackers in front of it has a spare man (`StepsSupport`), one that is outnumbered is stretched (`StepsStretched`), and an empty line is covered from the best other line, out of place (`StepsLineCover`). A side with no midfield builds with a long ball from the back (`StepsLongBall`). `FormationProfile` is read only for injury risk. Every shape has four outfielders to be an extra man somewhere and a man short somewhere else.
-- **Team-wide multipliers** (captain, items, position boosts, the home boost) reach the odds through `StepsBoostExponent`, because here they touch every contest of an attack and of defending one.
-- **Tactics.** Tempo sets volume and shot quality; the opponent's press and line squeeze the pass and the tackle, raise fouls, and change how often a side runs in behind; high press tires late. Roles: a Playmaker plays more of the passes, a Target Man is aimed at more, a Ball Winner is never stretched.
+- **Formations are numbers, not multipliers.** A defending line that outnumbers the attackers in front of it has a spare man (`StepsSupport`), one that is outnumbered is stretched (`StepsStretched`), an empty line is covered from the best other line, out of place (`StepsLineCover`), and a side with no midfield builds with a long ball (`StepsLongBall`). A forward who beats his man still has to beat the other defender of a two-man line (`StepsCoverScale`); a lone defender has no cover. The forwards make a fixed share of a side's take-ons and runs between them (`StepsMidfieldAttackShare`), so a lone striker carries as much of the attack as two do. `FormationProfile` is read only for injury risk.
+- **Team-wide multipliers** (captain, items, position boosts, the home boost) reach the odds and the possession weight through `StepsBoostExponent`, set so an item is worth what it is on the classic model.
+- **Tactics.** Tempo sets volume and shot quality. The opponent's press squeezes the pass and the tackle and raises fouls; a pressing side intercepts on work rate and tires late. A high line squeezes the pass and is run in behind more; a deep one is the reverse, so the right line depends on how quick the defenders are. Roles: a Playmaker plays more of the passes, a Target Man is aimed at more, a Ball Winner makes up half the ground a stretched line is short and fouls more.
 
-Constants live in `internal/tuning/steps.go`. `cmd/calibrate -model steps` replays real line-ups and reports the realism targets plus per-match totals, assists and miss kinds. Formation balance is judged on real squads (best line-up per formation for every Premier League team), not on one identical squad: the classic and contest models both passed the identical-squad test while one formation was unusable. `testdata.TypicalTeam` / `ModestTeam` are median FC 27 players by position, for tests that need real squad shapes.
+Constants live in `internal/tuning/steps.go`. `cmd/calibrate` is how they are tuned and checked:
+
+| Report | Question |
+|---|---|
+| `-archives <dir>` | realism (goals, shots, draws...), and how often the stronger side wins by rating gap, on real fixtures |
+| `-attributes N` | what +5 of each attribute is worth, to catch a dominant one |
+| `-levers N` | what an item boost, each tactic and each role is worth |
+| `-formations <dir>` | the formations gate: every team's best line-up per shape against a mixed field |
+
+Formation balance is judged by the formations gate on real squads, and on squads dealt afresh from the season's dataset (`-deal`), not on one identical squad. The classic and contest models both passed the identical-squad test while one formation was the worst choice for every real team; and identical squads flatter a shape that needs two good players in two lines, because real squads rarely have them. A shape's worth also depends on what the rest of the league plays, so the gate measures against a mixed field and prints the head-to-head table. `testdata.TypicalTeam` / `ModestTeam` are median FC 27 players by position, for tests that need real squad shapes.

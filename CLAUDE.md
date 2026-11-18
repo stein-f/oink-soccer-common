@@ -23,7 +23,18 @@ cd v2 && make snapshot-v1            # regenerate v1-baseline snapshots (informa
 cd v2 && go run ./cmd/snapshot       # regenerate v2 golden snapshots (load-bearing)
 cd v2 && go test -v -run TestFormationBalance ./...   # balance harness (logs win-rate spread)
 cd v2 && RUN_BALANCE_STRICT=1 go test ./...           # fail if balance spread > 3%
+
+# calibrating a model against real line-ups (see v2/cmd/calibrate)
+cd v2 && go run ./cmd/calibrate -archives <dir of match archives> -model steps [-enrich ../cmd/allocation/fifa_players_22.csv]
+cd v2 && go run ./cmd/calibrate -model steps -attributes 4000     # what +5 of each attribute is worth
+cd v2 && go run ./cmd/calibrate -model steps -levers 12000        # what boosts, tactics and roles are worth
+cd v2 && go run ./cmd/calibrate -model steps -formations <dir of team files> \
+    [-enrich <dataset.csv>] [-deal ../cmd/allocation/s18/eligible_assets.csv -deal-dataset ../cmd/allocation/fifa_players_fc27.csv] \
+    [-lineups cache.json]   # cache the slow line-up search while tuning constants
+cd v2 && go test -bench RunGame -run xxx .            # cost per match, by model
 ```
+
+Formation balance is judged with `-formations` on real squads (and on squads dealt afresh with `-deal`), not with `TestFormationBalance`: the identical-squad test passed on the classic and contest models while the Box was the worst choice for every real team.
 
 ## Where to start
 
