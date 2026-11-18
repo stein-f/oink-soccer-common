@@ -58,6 +58,36 @@ type stepSide struct {
 	// 1: what a high press asks for (see the tactics below).
 	legs   float64
 	totals *TeamTotals
+	// players is each player's own share of totals, by player ID.
+	players map[string]*PlayerTotals
+}
+
+// of is a player's own count of what he did. A contest nobody was there for
+// (a nil player) is counted for the side only.
+func (s *stepSide) of(p *stepPlayer) *PlayerTotals {
+	if p == nil {
+		return &PlayerTotals{}
+	}
+	return s.byID(p.ID)
+}
+
+func (s *stepSide) byID(id string) *PlayerTotals {
+	t, ok := s.players[id]
+	if !ok {
+		t = &PlayerTotals{}
+		s.players[id] = t
+	}
+	return t
+}
+
+// playerTotals is every player who started, with what he did: all zeroes for
+// one the match passed by.
+func (s *stepSide) playerTotals() map[string]PlayerTotals {
+	out := make(map[string]PlayerTotals, len(s.players))
+	for id, t := range s.players {
+		out[id] = *t
+	}
+	return out
 }
 
 func newStepSide(r *rand.Rand, team TeamType, lineup GameLineup, totals *TeamTotals) (*stepSide, []BoostRoll) {
@@ -67,6 +97,10 @@ func newStepSide(r *rand.Rand, team TeamType, lineup GameLineup, totals *TeamTot
 		tactics: lineup.Team.Tactics,
 		lines:   map[PlayerPosition][]*stepPlayer{},
 		totals:  totals,
+		players: map[string]*PlayerTotals{},
+	}
+	for _, p := range lineup.Players {
+		s.byID(p.ID)
 	}
 	itemBoost, rolls := teamBoost(r, lineup)
 	var posRolls []BoostRoll
@@ -159,6 +193,7 @@ func simulateStepsMatch(r *rand.Rand, home, away GameLineup) MatchOutcome {
 		}
 	}
 	m.capStops()
+	totals.HomePlayers, totals.AwayPlayers = h.playerTotals(), a.playerTotals()
 
 	homeInjuries := rollInjuries(r, home, teamAverageAggression(away), h.injuryFactor(), home.Team.ID)
 	awayInjuries := rollInjuries(r, away, teamAverageAggression(home), a.injuryFactor(), away.Team.ID)
@@ -946,11 +981,14 @@ func (m *stepMatch) attack(att, def *stepSide, route stepRoute, minute int) {
 			step.Won = m.wins(odds)
 		}
 		att.totals.Passes++
+		att.of(passer).Passes++
 		if !step.Won {
 			def.totals.Interceptions++
+			def.byID(step.OpponentID).Interceptions++
 			return
 		}
 		att.totals.PassesCompleted++
+		att.of(passer).PassesCompleted++
 		chain = append(chain, step)
 		momentum = tuning.StepsMomentum
 		assist = passer.ID
@@ -976,12 +1014,15 @@ func (m *stepMatch) attack(att, def *stepSide, route stepRoute, minute int) {
 			step.Won = m.wins(stepOdds(soloScore(actor.Attributes), tuning.StepsTackleScale*tackleScore(opp.Attributes), mult))
 		}
 		att.totals.TakeOns++
+		att.of(actor).TakeOns++
 		if !step.Won {
 			// Dispossessed in midfield: nothing to show for it.
 			def.totals.Tackles++
+			def.byID(step.OpponentID).Tackles++
 			return
 		}
 		att.totals.TakeOnsWon++
+		att.of(actor).TakeOnsWon++
 		m.dribble(att, def, actor, []Step{step}, tuning.StepsMomentum, true, minute)
 
 	case "run":
@@ -1007,22 +1048,27 @@ func (m *stepMatch) attack(att, def *stepSide, route stepRoute, minute int) {
 			return
 		}
 		def.totals.Tackles++
+		def.of(opp).Tackles++
 		m.stop(def, opp, actor, "caught", chain, minute)
 
 	case "cross":
 		step := Step{Kind: StepKindCross, ActorID: actor.ID, Won: true}
+		var closer *stepPlayer
 		if opp, cover := facing(actor, att, def, PlayerPositionDefense, markScore); opp != nil {
+			closer = opp
 			step.OpponentID = opp.ID
 			mult := m.attackMod(att, actor) * momentum * squeeze(def, opp) / defendMod(def, opp, cover)
 			step.Won = m.wins(stepOdds(crossScore(actor.Attributes), tuning.StepsCloseDownScale*markScore(opp.Attributes), mult))
 		}
 		att.totals.Crosses++
+		att.of(actor).Crosses++
 		chain = append(chain, step)
 		if !step.Won {
-			m.cleared(att, def, minute, 0)
+			m.cleared(att, def, closer, minute, 0)
 			return
 		}
 		att.totals.CrossesCompleted++
+		att.of(actor).CrossesCompleted++
 		marker, cover := facing(route.target, att, def, PlayerPositionDefense, aerialScore)
 		// The delivery counts, as it does from a corner: a good cross is
 		// harder to defend, and so is one a patient side waited for.
@@ -1050,14 +1096,17 @@ func (m *stepMatch) dribble(att, def *stepSide, actor *stepPlayer, chain []Step,
 		step.Won = m.wins(stepOdds(score, tuning.StepsTackleScale*tackleScore(opp.Attributes), mult))
 	}
 	att.totals.TakeOns++
+	att.of(actor).TakeOns++
 	chain = append(chain, step)
 	// Past his man, he still has to get past the one covering.
 	if cover, scale := behind(def, opp); step.Won && cover != nil {
 		att.totals.TakeOnsWon++
+		att.of(actor).TakeOnsWon++
 		mult := m.attackMod(att, actor) * space(def) * onTheBreak(att) / defendMod(def, cover, 1)
 		second := Step{Kind: StepKindTakeOn, ActorID: actor.ID, OpponentID: cover.ID, Detail: detail,
 			Won: m.wins(stepOdds(score, scale*tackleScore(cover.Attributes), mult))}
 		att.totals.TakeOns++
+		att.of(actor).TakeOns++
 		chain = append(chain, second)
 		step, opp = second, cover
 	}
@@ -1066,6 +1115,7 @@ func (m *stepMatch) dribble(att, def *stepSide, actor *stepPlayer, chain []Step,
 		return
 	}
 	att.totals.TakeOnsWon++
+	att.of(actor).TakeOnsWon++
 	if !solo {
 		// Through, he squares it or goes alone. How often depends on who is
 		// waiting: a poor finisher looks for a better one, a good one
@@ -1113,6 +1163,7 @@ func (m *stepMatch) longBall(att, def *stepSide, target *stepPlayer, minute int)
 	}
 	chain := []Step{{Kind: StepKindPass, ActorID: passer.ID, Won: true, Detail: "high"}}
 	att.totals.Passes++
+	att.of(passer).Passes++
 
 	step := Step{Kind: StepKindAerial, ActorID: target.ID, Won: true}
 	marker, cover := facing(target, att, def, PlayerPositionDefense, holdUpScore)
@@ -1126,11 +1177,15 @@ func (m *stepMatch) longBall(att, def *stepSide, target *stepPlayer, minute int)
 	if !step.Won {
 		def.totals.AerialsWon++
 		def.totals.Clearances++
+		def.of(marker).AerialsWon++
+		def.of(marker).Clearances++
 		m.stop(def, marker, target, "header", append(chain, step), minute)
 		return
 	}
 	att.totals.PassesCompleted++
 	att.totals.AerialsWon++
+	att.of(passer).PassesCompleted++
+	att.of(target).AerialsWon++
 
 	// Knocked down for a midfielder coming on to it.
 	arriving := without(att.lines[PlayerPositionMidfield], target)
@@ -1162,6 +1217,7 @@ func (m *stepMatch) longBall(att, def *stepSide, target *stepPlayer, minute int)
 		chain = append(chain, step, run)
 		if !run.Won {
 			def.totals.Tackles++
+			def.of(second).Tackles++
 			m.stop(def, second, runner, "caught", chain, minute)
 			return
 		}
@@ -1184,10 +1240,12 @@ func (m *stepMatch) tackled(att, def *stepSide, actor, opp *stepPlayer, chain []
 	fouls = math.Min(fouls, tuning.ContestFoulCap)
 	if m.r.Float64() >= fouls {
 		def.totals.Tackles++
+		def.of(opp).Tackles++
 		m.stop(def, opp, actor, "tackle", chain, minute)
 		return
 	}
 	def.totals.Fouls++
+	def.of(opp).Fouls++
 	roll := m.r.Float64()
 	switch {
 	case roll < tuning.StepsPenaltyShareOfFouls:
@@ -1229,17 +1287,20 @@ func (m *stepMatch) aerial(att, def *stepSide, target, marker *stepPlayer, cover
 	chain = append(chain, step)
 	if !step.Won {
 		def.totals.AerialsWon++
-		m.cleared(att, def, minute, depth)
+		def.of(marker).AerialsWon++
+		m.cleared(att, def, marker, minute, depth)
 		return
 	}
 	att.totals.AerialsWon++
+	att.of(target).AerialsWon++
 	m.shot(att, def, target, ct, chain, tuning.StepsMomentum, assist, minute, depth, "")
 }
 
 // cleared is the defending side getting the ball away from its box, which
-// sometimes means behind for a corner.
-func (m *stepMatch) cleared(att, def *stepSide, minute, depth int) {
+// sometimes means behind for a corner. by is the defender who got it away.
+func (m *stepMatch) cleared(att, def *stepSide, by *stepPlayer, minute, depth int) {
 	def.totals.Clearances++
+	def.of(by).Clearances++
 	m.maybeCorner(att, def, tuning.StepsCornerAfterClearance, minute, depth)
 }
 
@@ -1309,6 +1370,7 @@ func (m *stepMatch) shot(att, def *stepSide, shooter *stepPlayer, ct ChanceType,
 		mult *= squeeze(def, nil) * care(att)
 	}
 	att.totals.Shots++
+	att.of(shooter).Shots++
 	if assist == shooter.ID {
 		assist = ""
 	}
@@ -1331,6 +1393,7 @@ func (m *stepMatch) shot(att, def *stepSide, shooter *stepPlayer, ct ChanceType,
 			beaten := oddsToP(stepOdds(s, blockScore(blocker.Attributes), mult/defendMod(def, blocker, cover)))
 			if r.Float64() < cfg.Block*(1-beaten) {
 				def.totals.Blocks++
+				def.of(blocker).Blocks++
 				chain = append(chain, Step{Kind: StepKindShot, ActorID: shooter.ID, OpponentID: blocker.ID, Detail: "blocked"})
 				miss("blocked", blocker.ID)
 				m.maybeCorner(att, def, tuning.StepsCornerAfterBlock, minute, depth)
@@ -1351,6 +1414,7 @@ func (m *stepMatch) shot(att, def *stepSide, shooter *stepPlayer, ct ChanceType,
 		}
 		if detail == "post" || detail == "bar" {
 			att.totals.Woodwork++
+			att.of(shooter).Woodwork++
 		}
 		chain = append(chain, Step{Kind: StepKindShot, ActorID: shooter.ID, Detail: detail})
 		miss(detail, "")
@@ -1362,6 +1426,7 @@ func (m *stepMatch) shot(att, def *stepSide, shooter *stepPlayer, ct ChanceType,
 		return
 	}
 	att.totals.ShotsOnTarget++
+	att.of(shooter).ShotsOnTarget++
 	chain = append(chain, Step{Kind: StepKindShot, ActorID: shooter.ID, Won: true, Detail: "on_target"})
 
 	keeper, keeperID, keeperMod := tuning.StepsFallbackKeeper, "", 1.0
@@ -1384,6 +1449,10 @@ func (m *stepMatch) shot(att, def *stepSide, shooter *stepPlayer, ct ChanceType,
 			Type: GameEventTypeGoal, Minute: minute, ChanceType: ct, Steps: chain,
 			Event: GoalEvent{PlayerID: shooter.ID, TeamType: att.team, AssistID: assist, Detail: how},
 		})
+		att.of(shooter).Goals++
+		if assist != "" {
+			att.byID(assist).Assists++
+		}
 		if att.team == TeamTypeHome {
 			m.homeGoals++
 		} else {
@@ -1393,6 +1462,7 @@ func (m *stepMatch) shot(att, def *stepSide, shooter *stepPlayer, ct ChanceType,
 	}
 
 	def.totals.Saves++
+	def.of(def.keeper).Saves++
 	// Held, or pushed away. A penalty saved is always pushed away.
 	if ct != ChanceTypePenalty && m.wins(stepOdds(handling, tuning.StepsHeldScale*s, keeperMod)) {
 		chain = append(chain, Step{Kind: StepKindSave, ActorID: shooter.ID, OpponentID: keeperID, Detail: "held"})

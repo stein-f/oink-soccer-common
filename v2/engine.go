@@ -37,6 +37,36 @@ type MatchOutcome struct {
 type MatchTotals struct {
 	Home TeamTotals `json:"home"`
 	Away TeamTotals `json:"away"`
+	// HomePlayers and AwayPlayers are the same counts for each player who
+	// started, by player ID, with his goals and assists. They add up to the
+	// side's totals, except for what no player did: a possession is the
+	// side's, and so is a save made with nobody in goal.
+	HomePlayers map[string]PlayerTotals `json:"home_players,omitempty"`
+	AwayPlayers map[string]PlayerTotals `json:"away_players,omitempty"`
+}
+
+// PlayerTotals counts one player's part in a match, attacks that never
+// became an event included. A tackle is an attack he ended himself: a take-on
+// stopped or a runner caught. An aerial won is a header won at either end.
+type PlayerTotals struct {
+	Goals            int `json:"goals,omitempty"`
+	Assists          int `json:"assists,omitempty"`
+	Shots            int `json:"shots,omitempty"`
+	ShotsOnTarget    int `json:"shots_on_target,omitempty"`
+	Woodwork         int `json:"woodwork,omitempty"`
+	Passes           int `json:"passes,omitempty"`
+	PassesCompleted  int `json:"passes_completed,omitempty"`
+	TakeOns          int `json:"take_ons,omitempty"`
+	TakeOnsWon       int `json:"take_ons_won,omitempty"`
+	Crosses          int `json:"crosses,omitempty"`
+	CrossesCompleted int `json:"crosses_completed,omitempty"`
+	AerialsWon       int `json:"aerials_won,omitempty"`
+	Tackles          int `json:"tackles,omitempty"`
+	Interceptions    int `json:"interceptions,omitempty"`
+	Clearances       int `json:"clearances,omitempty"`
+	Blocks           int `json:"blocks,omitempty"`
+	Saves            int `json:"saves,omitempty"`
+	Fouls            int `json:"fouls,omitempty"`
 }
 
 // TeamTotals counts one side's contests. The attacking counts (passes,

@@ -48,7 +48,7 @@ Each match runs in five phases: **tempo** (how many chances), **schedule** (when
 
 The paragraph above is the **classic** engine, which seasons 1 to 18 were played on: `RunGameWithSeed`, `RunGameWithSeedDetailed` and `RunGameWithModel(..., ModelClassic)` all run it, and it replays those seasons exactly as they were played.
 
-From **season 19** matches are played on the **step** engine, `RunGameWithModel(r, home, away, ModelSteps)` (v2.1.0 and later). There every attack is a chain of contests between named players (a pass, then a take-on, a run in behind, a cross, a long ball or a shot from distance, then the shot and the save), formations are only how many players stand in each line, and tactics change the odds of particular contests. Each event carries the steps that led to it, and the outcome carries per-team totals. See [architecture](docs/architecture.md#step-model-season-19) and the [manager guide](docs/manager-guide.md).
+From **season 19** matches are played on the **step** engine, `RunGameWithModel(r, home, away, ModelSteps)` (v2.1.0 and later). There every attack is a chain of contests between named players (a pass, then a take-on, a run in behind, a cross, a long ball or a shot from distance, then the shot and the save), formations are only how many players stand in each line, and tactics change the odds of particular contests. Each event carries the steps that led to it, and the outcome carries totals for each team and, from v2.1.1, for each player (goals, assists, tackles, saves and the rest). See [architecture](docs/architecture.md#step-model-season-19) and the [manager guide](docs/manager-guide.md).
 
 Both are pure functions of `(seed, lineups)`. To re-verify a match, replay it with the model its season was played on:
 

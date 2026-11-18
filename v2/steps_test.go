@@ -403,3 +403,114 @@ func benchmarkModel(b *testing.B, model soccer.Model) {
 func BenchmarkRunGame_Classic(b *testing.B) { benchmarkModel(b, soccer.ModelClassic) }
 func BenchmarkRunGame_Contest(b *testing.B) { benchmarkModel(b, soccer.ModelContest) }
 func BenchmarkRunGame_Steps(b *testing.B)   { benchmarkModel(b, soccer.ModelSteps) }
+
+// TestSteps_PlayerTotalsAddUpToTheSides checks what each player is counted
+// with is what the side is counted with, and what the events say.
+func TestSteps_PlayerTotalsAddUpToTheSides(t *testing.T) {
+	var assists, tackles, saves int
+	for _, hf := range allFormations {
+		for _, af := range allFormations {
+			home, away := testdata.StrongTeam(hf), testdata.WeakTeam(af)
+			for seed := int64(0); seed < 60; seed++ {
+				out := runSteps(t, seed, home, away)
+				for _, side := range []struct {
+					lineup  soccer.GameLineup
+					team    soccer.TeamType
+					totals  soccer.TeamTotals
+					players map[string]soccer.PlayerTotals
+				}{
+					{home, soccer.TeamTypeHome, out.Totals.Home, out.Totals.HomePlayers},
+					{away, soccer.TeamTypeAway, out.Totals.Away, out.Totals.AwayPlayers},
+				} {
+					// Everyone who started is there, and nobody else.
+					require.Len(t, side.players, len(side.lineup.Players))
+					for id := range playerIDs(side.lineup) {
+						require.Contains(t, side.players, id)
+					}
+
+					var sum soccer.PlayerTotals
+					for id, p := range side.players {
+						sum.Goals += p.Goals
+						sum.Assists += p.Assists
+						sum.Shots += p.Shots
+						sum.ShotsOnTarget += p.ShotsOnTarget
+						sum.Woodwork += p.Woodwork
+						sum.Passes += p.Passes
+						sum.PassesCompleted += p.PassesCompleted
+						sum.TakeOns += p.TakeOns
+						sum.TakeOnsWon += p.TakeOnsWon
+						sum.Crosses += p.Crosses
+						sum.CrossesCompleted += p.CrossesCompleted
+						sum.AerialsWon += p.AerialsWon
+						sum.Tackles += p.Tackles
+						sum.Interceptions += p.Interceptions
+						sum.Clearances += p.Clearances
+						sum.Blocks += p.Blocks
+						sum.Saves += p.Saves
+						sum.Fouls += p.Fouls
+
+						// What the events say he did.
+						var goals, made, saved, blocked int
+						for _, e := range out.Events {
+							switch ev := e.Event.(type) {
+							case soccer.GoalEvent:
+								if ev.TeamType != side.team {
+									continue
+								}
+								if ev.PlayerID == id {
+									goals++
+								}
+								if ev.AssistID == id {
+									made++
+								}
+							case soccer.MissEvent:
+								if ev.TeamType == side.team || ev.StopperID != id {
+									continue
+								}
+								switch ev.Detail {
+								case "held", "parried":
+									saved++
+								case "blocked":
+									blocked++
+								}
+							}
+						}
+						require.Equal(t, goals, p.Goals, "goals of %s", id)
+						require.Equal(t, made, p.Assists, "assists of %s", id)
+						require.Equal(t, saved, p.Saves, "saves of %s", id)
+						require.Equal(t, blocked, p.Blocks, "blocks of %s", id)
+						require.LessOrEqual(t, p.ShotsOnTarget, p.Shots)
+						require.LessOrEqual(t, p.PassesCompleted, p.Passes)
+						require.LessOrEqual(t, p.TakeOnsWon, p.TakeOns)
+					}
+					require.Equal(t, soccer.PlayerTotals{
+						Goals:            sum.Goals,
+						Assists:          sum.Assists,
+						Shots:            side.totals.Shots,
+						ShotsOnTarget:    side.totals.ShotsOnTarget,
+						Woodwork:         side.totals.Woodwork,
+						Passes:           side.totals.Passes,
+						PassesCompleted:  side.totals.PassesCompleted,
+						TakeOns:          side.totals.TakeOns,
+						TakeOnsWon:       side.totals.TakeOnsWon,
+						Crosses:          side.totals.Crosses,
+						CrossesCompleted: side.totals.CrossesCompleted,
+						AerialsWon:       side.totals.AerialsWon,
+						Tackles:          side.totals.Tackles,
+						Interceptions:    side.totals.Interceptions,
+						Clearances:       side.totals.Clearances,
+						Blocks:           side.totals.Blocks,
+						Saves:            side.totals.Saves,
+						Fouls:            side.totals.Fouls,
+					}, sum)
+					assists += sum.Assists
+					tackles += sum.Tackles
+					saves += sum.Saves
+				}
+			}
+		}
+	}
+	assert.Greater(t, assists, 0)
+	assert.Greater(t, tackles, 0)
+	assert.Greater(t, saves, 0)
+}
