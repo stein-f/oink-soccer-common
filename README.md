@@ -44,6 +44,22 @@ events, injuries, err := soccer.RunGameWithSeed(bs.Source, home, away)
 
 Each match runs in five phases: **tempo** (how many chances), **schedule** (when), **possession** (which team gets each chance), **resolve** (chance type + attacker + goal/miss), **injuries**. Every formation has a 5-axis trade-off profile (Possession / ChanceCreation / ChanceQuality / DefSolidity / InjuryRisk) — none strictly dominates another. Player attributes use a single `SpeedRating` for sprint + defensive chase, plus an optional `WorkRate` for midfield engine, plus specialist attributes (Heading / Composure / Technique / Finishing / Tackling) that drive specific chance types — a target man with high Heading owns corners, a clutch finisher with high Composure owns penalties. Each `ChanceType` runs its own scoring formula referencing the right attributes. Optional `Tactics` (press, tempo, line height, set-piece taker) and `PlayerRole` (captain, target man, playmaker, ball winner) let managers shape outcomes; press and line height also shift which player attributes are most valuable. A skill curve `(rating/100)^6` amplifies player-quality differentials. The whole thing is a pure function of `(seed, lineups)`.
 
+### Two engines, chosen by season
+
+The paragraph above is the **classic** engine, which seasons 1 to 18 were played on: `RunGameWithSeed`, `RunGameWithSeedDetailed` and `RunGameWithModel(..., ModelClassic)` all run it, and it replays those seasons exactly as they were played.
+
+From **season 19** matches are played on the **step** engine, `RunGameWithModel(r, home, away, ModelSteps)` (v2.1.0 and later). There every attack is a chain of contests between named players (a pass, then a take-on, a run in behind, a cross, a long ball or a shot from distance, then the shot and the save), formations are only how many players stand in each line, and tactics change the odds of particular contests. Each event carries the steps that led to it, and the outcome carries per-team totals. See [architecture](docs/architecture.md#step-model-season-19) and the [manager guide](docs/manager-guide.md).
+
+Both are pure functions of `(seed, lineups)`. To re-verify a match, replay it with the model its season was played on:
+
+```go
+model := soccer.ModelClassic
+if season >= 19 {
+	model = soccer.ModelSteps
+}
+outcome, err := soccer.RunGameWithModel(rand.New(rand.NewSource(seed)), home, away, model)
+```
+
 ## Allocation
 
 Season-start NFT allocation is a deterministic function of `(seed, candidates, assets)` — the same Algorand block hash always produces the same allocation, so anyone can re-verify the result on-chain. The pure core lives in `v2/allocation`:
